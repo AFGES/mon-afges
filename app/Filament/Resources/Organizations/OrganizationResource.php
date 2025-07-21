@@ -55,4 +55,9 @@ class OrganizationResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    public static function getModelLabel(): string
+    {
+        return __('organization.label');
+    }
 }

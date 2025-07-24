@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types = 1);
 namespace App\Filament\Resources\Delegates\Pages;
 
 use App\Filament\Resources\Delegates\DelegateResource;
@@ -8,7 +7,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditDelegate extends EditRecord
+final class EditDelegate extends EditRecord
 {
     protected static string $resource = DelegateResource::class;
 

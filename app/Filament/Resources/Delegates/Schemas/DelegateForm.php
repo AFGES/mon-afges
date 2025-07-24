@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace App\Filament\Resources\Delegates\Schemas;
 
@@ -6,7 +6,7 @@ use Filament\Forms\Components\{DatePicker, Select};
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
-class DelegateForm
+final class DelegateForm
 {
     public static function configure(Schema $schema): Schema
     {

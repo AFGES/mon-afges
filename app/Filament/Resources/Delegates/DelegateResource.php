@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace App\Filament\Resources\Delegates;
 
@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class DelegateResource extends Resource
+final class DelegateResource extends Resource
 {
     protected static ?string $model = Delegate::class;
 

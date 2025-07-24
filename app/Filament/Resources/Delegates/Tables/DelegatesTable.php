@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace App\Filament\Resources\Delegates\Tables;
 
@@ -10,7 +10,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-class DelegatesTable
+final class DelegatesTable
 {
     public static function configure(Table $table): Table
     {

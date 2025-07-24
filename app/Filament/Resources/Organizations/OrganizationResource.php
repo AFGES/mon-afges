@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace App\Filament\Resources\Organizations;
 
@@ -16,7 +16,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class OrganizationResource extends Resource
+final class OrganizationResource extends Resource
 {
     protected static ?string $model = Organization::class;
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Delegates\Tables;
 
+use App\Models\Delegate;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -9,7 +10,9 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class DelegatesTable
 {
@@ -27,7 +30,7 @@ final class DelegatesTable
                     ->date(),
             ])
             ->filters([
-                TrashedFilter::make(),
+                //TrashedFilter::make(),
             ])
             ->recordActions([
                 EditAction::make(),

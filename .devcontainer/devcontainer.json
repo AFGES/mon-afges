@@ -1,6 +1,6 @@
 // https://aka.ms/devcontainer.json
 {
-	"name": "Existing Docker Compose (Extend)",
+	"name": "Mon AFGES",
 	"dockerComposeFile": [
 		"../compose.yml"
 	],
@@ -20,8 +20,8 @@
 		}
 	},
 	"remoteUser": "sail",
-	"postCreateCommand": "chown -R 1000:1000 /var/www/html 2>/dev/null || true"
-	// "forwardPorts": [],
+	"postCreateCommand": "chown -R 1000:1000 /var/www/html; composer run setup",
+	"forwardPorts": [80, 5173]
 	// "runServices": [],
 	// "shutdownAction": "none",
 }

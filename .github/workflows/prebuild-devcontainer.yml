@@ -28,6 +28,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Copy Environment File
+        run: cp .env.example .env
+
       - name: Prebuild Dev Container
         uses: devcontainers/ci@v0.3
         with:

@@ -25,13 +25,16 @@ jobs:
         with:
           php-version: '8.4'
 
+#      - name: Setup Bun
+#        uses: oven-sh/setup-bun@v2
+
       - name: Add Flux Credentials Loaded From ENV
         run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
       - name: Install Dependencies
         run: |
           composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          npm install
+#          bun install
 
       - name: Run Pint
         run: vendor/bin/pint

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Colleges\Tables;
 
+use App\Models\College;
+use App\Models\Delegate;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,8 +27,13 @@ class CollegesTable
                     ->sortable(),
                 TextColumn::make('delegates_count')
                     ->label(__('college.fields.delegates_count'))
-                    ->counts('delegates')
-                    ->sortable(),
+                    ->state(function (College $record): int {
+                        return Delegate::query()
+                            ->join('seats', 'delegates.seat_id', '=', 'seats.id')
+                            ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
+                            ->where('college_organization.college_id', $record->id)
+                            ->count();
+                    }),
                 TextColumn::make('created_at')
                     ->label(__('college.fields.created_at'))
                     ->dateTime()

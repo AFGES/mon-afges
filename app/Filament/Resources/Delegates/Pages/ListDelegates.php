@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\Delegates\Pages;
 
@@ -19,7 +21,6 @@ final class ListDelegates extends ListRecords
             CreateAction::make(),
         ];
     }
-
 
     public function getTabs(): array
     {

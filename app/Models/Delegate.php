@@ -1,9 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
 use App\Models\Scopes\CurrentlyScope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,6 +14,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ScopedBy(CurrentlyScope::class)]
 final class Delegate extends Model
 {
+    /** @use HasFactory<\Database\Factories\DelegateFactory> */
+    use HasFactory;
+
     use SoftDeletes;
 
     public $fillable = [
@@ -18,7 +24,7 @@ final class Delegate extends Model
         'ended_at',
         'user_id',
         'organization_id',
-        'college_id',
+        'seat_id',
     ];
 
     public function user(): BelongsTo
@@ -31,9 +37,14 @@ final class Delegate extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    public function seat(): BelongsTo
+    {
+        return $this->belongsTo(Seat::class);
+    }
+
     public function college(): BelongsTo
     {
-        return $this->belongsTo(College::class);
+        return $this->seat->collegeOrganization->college();
     }
 
     protected function casts(): array

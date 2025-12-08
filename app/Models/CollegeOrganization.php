@@ -1,15 +1,26 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 final class CollegeOrganization extends Pivot
 {
+    /** @use HasFactory<\Database\Factories\CollegeOrganizationFactory> */
+    use HasFactory;
+
     protected $table = 'college_organization';
 
+    public $incrementing = true;
+
     protected $fillable = [
+        'college_id',
+        'organization_id',
         'seats',
         'delegates_per_seat',
     ];
@@ -30,6 +41,11 @@ final class CollegeOrganization extends Pivot
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function seatRecords(): HasMany
+    {
+        return $this->hasMany(Seat::class, 'college_organization_id', 'id');
     }
 
     /**

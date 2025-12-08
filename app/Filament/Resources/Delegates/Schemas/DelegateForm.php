@@ -1,8 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\Delegates\Schemas;
 
-use Filament\Forms\Components\{DatePicker, Select};
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -30,6 +33,17 @@ final class DelegateForm
                     ->label(Str::ucfirst(__('organization.label')))
                     ->relationship(name: 'organization', titleAttribute: 'short_name')
                     ->required(),
+                Select::make('seat_id')
+                    ->label(__('Seat'))
+                    ->relationship('seat')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->collegeOrganization->college->name.' - '.
+                        $record->collegeOrganization->organization->short_name.
+                        ' - Seat #'.$record->seat_number
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->helperText('Select the seat for this delegate'),
             ]);
     }
 }

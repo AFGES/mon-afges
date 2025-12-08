@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\College;
 use App\Models\Scopes\CurrentlyScope;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,7 +18,7 @@ final class Delegate extends Model
         'ended_at',
         'user_id',
         'organization_id',
-        'college',
+        'college_id',
     ];
 
     public function user(): BelongsTo
@@ -33,12 +31,16 @@ final class Delegate extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    public function college(): BelongsTo
+    {
+        return $this->belongsTo(College::class);
+    }
+
     protected function casts(): array
     {
         return [
             'started_at' => 'date',
             'ended_at' => 'date',
-            'college' => College::class,
         ];
     }
 }

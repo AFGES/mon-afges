@@ -42,11 +42,6 @@ final class Delegate extends Model
         return $this->belongsTo(Seat::class);
     }
 
-    public function college(): BelongsTo
-    {
-        return $this->seat->collegeOrganization->college();
-    }
-
     protected function casts(): array
     {
         return [

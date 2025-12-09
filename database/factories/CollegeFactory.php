@@ -17,7 +17,7 @@ class CollegeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->randomElement(['General', 'Federal', 'Advisory']),
+            'name' => fake()->unique()->randomElement(['General', 'Federal', 'Advisory', 'Provincial', 'Regional', 'Municipal', 'National', 'State', 'District', 'Local']),
             'can_vote' => fake()->boolean(75),
             'max_seats_per_organization' => fake()->optional(0.8)->numberBetween(1, 10),
             'max_delegates_per_seat' => fake()->optional(0.8)->numberBetween(1, 5),

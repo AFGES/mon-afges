@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -15,6 +17,7 @@ final class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
     use HasRoles;
 
     /**
@@ -26,6 +29,8 @@ final class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'magic_link_token',
+        'magic_link_token_expires_at',
     ];
 
     /**
@@ -48,13 +53,12 @@ final class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'magic_link_token_expires_at' => 'datetime',
         ];
     }
 
     /**
      * Permission for access to the panel
-     * @param Panel $panel
-     * @return bool
      */
     final public function canAccessPanel(Panel $panel): bool
     {

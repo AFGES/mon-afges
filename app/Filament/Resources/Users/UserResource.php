@@ -46,7 +46,7 @@ class UserResource extends Resource
         ];
     }
 
-    public static function getModelLabel() : string
+    public static function getModelLabel(): string
     {
         return __('user.label');
     }

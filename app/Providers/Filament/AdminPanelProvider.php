@@ -1,9 +1,11 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
-use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -30,7 +32,7 @@ final class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -66,7 +68,7 @@ final class AdminPanelProvider extends PanelProvider
                     ->providers([
                         Provider::make('google')
                             ->label('Google')
-                            ->icon('fab-google')
+                            ->icon('fab-google'),
                     ])
                     ->registration(true)
             );

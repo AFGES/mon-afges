@@ -17,12 +17,16 @@ final class College extends Model
     protected $fillable = [
         'name',
         'can_vote',
+        'max_seats_per_organization',
+        'max_delegates_per_seat',
     ];
 
     protected function casts(): array
     {
         return [
             'can_vote' => 'boolean',
+            'max_seats_per_organization' => 'integer',
+            'max_delegates_per_seat' => 'integer',
         ];
     }
 

@@ -25,6 +25,18 @@ class CollegesTable
                     ->label(__('college.fields.can_vote'))
                     ->boolean()
                     ->sortable(),
+                TextColumn::make('max_seats_per_organization')
+                    ->label(__('college.fields.max_seats_per_organization'))
+                    ->badge()
+                    ->color('info')
+                    ->default('-')
+                    ->sortable(),
+                TextColumn::make('max_delegates_per_seat')
+                    ->label(__('college.fields.max_delegates_per_seat'))
+                    ->badge()
+                    ->color('success')
+                    ->default('-')
+                    ->sortable(),
                 TextColumn::make('delegates_count')
                     ->label(__('college.fields.delegates_count'))
                     ->state(function (College $record): int {

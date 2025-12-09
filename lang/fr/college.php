@@ -7,12 +7,19 @@ return [
     'fields' => [
         'name' => 'Nom',
         'can_vote' => 'Peut voter',
+        'max_seats_per_organization' => 'Sièges max par association',
+        'max_delegates_per_seat' => 'Délégués max par siège',
         'delegates_count' => 'Nombre de délégués',
         'seats' => 'Sièges',
         'delegates_per_seat' => 'Délégués par siège',
         'total_positions' => 'Postes totaux',
         'created_at' => 'Créé le',
         'updated_at' => 'Mis à jour le',
+    ],
+
+    'helpers' => [
+        'max_seats_per_organization' => 'Nombre maximum de sièges qu\'une association peut avoir dans ce collège',
+        'max_delegates_per_seat' => 'Nombre maximum de délégués pouvant occuper chaque siège dans ce collège',
     ],
 
     'colleges' => [

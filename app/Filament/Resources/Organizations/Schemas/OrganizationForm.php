@@ -43,6 +43,18 @@ final class OrganizationForm
                                     ->searchable()
                                     ->preload()
                                     ->live()
+                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                        if ($state) {
+                                            $college = College::find($state);
+                                            // Auto-set seats and delegates_per_seat to 1 if max is 1
+                                            if ($college && $college->max_seats_per_organization === 1) {
+                                                $set('seats', 1);
+                                            }
+                                            if ($college && $college->max_delegates_per_seat === 1) {
+                                                $set('delegates_per_seat', 1);
+                                            }
+                                        }
+                                    })
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                                 TextInput::make('seats')
                                     ->label(__('college.fields.seats'))
@@ -50,14 +62,74 @@ final class OrganizationForm
                                     ->required()
                                     ->minValue(0)
                                     ->default(1)
-                                    ->helperText(__('organization.helpers.seats')),
+                                    ->helperText(__('organization.helpers.seats'))
+                                    ->live()
+                                    ->hidden(function ($get) {
+                                        $collegeId = $get('college_id');
+                                        if ($collegeId) {
+                                            $college = College::find($collegeId);
+
+                                            return $college && $college->max_seats_per_organization === 1;
+                                        }
+
+                                        return false;
+                                    })
+                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                        $collegeId = $get('college_id');
+                                        if ($collegeId && $state) {
+                                            $college = College::find($collegeId);
+                                            if ($college && $college->max_seats_per_organization && $state > $college->max_seats_per_organization) {
+                                                $set('seats', $college->max_seats_per_organization);
+                                            }
+                                        }
+                                    })
+                                    ->maxValue(function ($get) {
+                                        $collegeId = $get('college_id');
+                                        if ($collegeId) {
+                                            $college = College::find($collegeId);
+
+                                            return $college?->max_seats_per_organization;
+                                        }
+
+                                        return null;
+                                    }),
                                 TextInput::make('delegates_per_seat')
                                     ->label(__('college.fields.delegates_per_seat'))
                                     ->numeric()
                                     ->required()
                                     ->minValue(1)
                                     ->default(1)
-                                    ->helperText(__('organization.helpers.delegates_per_seat')),
+                                    ->helperText(__('organization.helpers.delegates_per_seat'))
+                                    ->live()
+                                    ->hidden(function ($get) {
+                                        $collegeId = $get('college_id');
+                                        if ($collegeId) {
+                                            $college = College::find($collegeId);
+
+                                            return $college && $college->max_delegates_per_seat === 1;
+                                        }
+
+                                        return false;
+                                    })
+                                    ->afterStateUpdated(function ($state, $set, $get) {
+                                        $collegeId = $get('college_id');
+                                        if ($collegeId && $state) {
+                                            $college = College::find($collegeId);
+                                            if ($college && $college->max_delegates_per_seat && $state > $college->max_delegates_per_seat) {
+                                                $set('delegates_per_seat', $college->max_delegates_per_seat);
+                                            }
+                                        }
+                                    })
+                                    ->maxValue(function ($get) {
+                                        $collegeId = $get('college_id');
+                                        if ($collegeId) {
+                                            $college = College::find($collegeId);
+
+                                            return $college?->max_delegates_per_seat;
+                                        }
+
+                                        return null;
+                                    }),
                             ])
                             ->columns(3)
                             ->addActionLabel(__('organization.repeater.add_action'))

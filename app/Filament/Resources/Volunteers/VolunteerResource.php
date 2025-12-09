@@ -24,6 +24,11 @@ class VolunteerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBriefcase;
 
+    public static function getModelLabel(): string
+    {
+        return __('volunteer.label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return VolunteerForm::configure($schema);
@@ -62,10 +67,5 @@ class VolunteerResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('volunteer.label');
     }
 }

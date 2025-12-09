@@ -24,6 +24,21 @@ final class DelegateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHandRaised;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.democratic_moments');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('delegate.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('delegate.plural');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return DelegateForm::configure($schema);
@@ -56,10 +71,5 @@ final class DelegateResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('delegate.label');
     }
 }

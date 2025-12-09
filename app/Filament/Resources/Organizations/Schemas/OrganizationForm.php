@@ -17,52 +17,79 @@ final class OrganizationForm
     {
         return $schema
             ->components([
-                Section::make('Organization Details')
+                Section::make(__('organization.sections.details'))
                     ->schema([
                         TextInput::make('short_name')
-                            ->label('Short Name')
+                            ->label(__('organization.fields.short_name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('legal_name')
-                            ->label('Legal Name')
+                            ->label(__('organization.fields.legal_name'))
                             ->required()
                             ->maxLength(255),
                     ])
                     ->columns(2),
 
-                Section::make('College Associations')
+                Section::make(__('organization.sections.college_associations'))
+                    ->description(__('organization.sections.college_associations_description'))
                     ->schema([
-                        Repeater::make('colleges')
-                            ->relationship('colleges')
+                        Repeater::make('collegeAllocations')
+                            ->label(__('organization.repeater.label'))
                             ->schema([
-                                Select::make('id')
-                                    ->label('College')
+                                Select::make('college_id')
+                                    ->label(__('college.label'))
                                     ->options(College::pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
                                     ->preload()
+                                    ->live()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                                 TextInput::make('seats')
-                                    ->label('Number of Seats')
+                                    ->label(__('college.fields.seats'))
                                     ->numeric()
                                     ->required()
                                     ->minValue(0)
                                     ->default(1)
-                                    ->helperText('Total number of seats allocated to this organization in this college'),
+                                    ->helperText(__('organization.helpers.seats')),
                                 TextInput::make('delegates_per_seat')
-                                    ->label('Delegates per Seat')
+                                    ->label(__('college.fields.delegates_per_seat'))
                                     ->numeric()
                                     ->required()
                                     ->minValue(1)
                                     ->default(1)
-                                    ->helperText('Number of delegates that can occupy each seat'),
+                                    ->helperText(__('organization.helpers.delegates_per_seat')),
                             ])
                             ->columns(3)
-                            ->addActionLabel('Add College Association')
+                            ->addActionLabel(__('organization.repeater.add_action'))
                             ->reorderable(false)
                             ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => College::find($state['id'])?->name)
-                            ->defaultItems(0),
+                            ->itemLabel(fn (array $state): ?string => College::find($state['college_id'])?->name ?? __('organization.repeater.new_allocation')
+                            )
+                            ->defaultItems(0)
+                            ->afterStateHydrated(function (Repeater $component, $record) {
+                                if (! $record) {
+                                    return;
+                                }
+
+                                $data = $record->colleges->map(fn ($college) => [
+                                    'college_id' => $college->id,
+                                    'seats' => $college->pivot->seats,
+                                    'delegates_per_seat' => $college->pivot->delegates_per_seat,
+                                ])->toArray();
+
+                                $component->state($data);
+                            })
+                            ->saveRelationshipsUsing(function (Repeater $component, $record, $state) {
+                                $syncData = collect($state)->mapWithKeys(function ($item) {
+                                    return [$item['college_id'] => [
+                                        'seats' => $item['seats'],
+                                        'delegates_per_seat' => $item['delegates_per_seat'],
+                                    ]];
+                                })->toArray();
+
+                                $record->colleges()->sync($syncData);
+                            })
+                            ->dehydrated(false),
                     ])
                     ->collapsible(),
             ]);

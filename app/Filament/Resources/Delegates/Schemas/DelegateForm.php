@@ -34,16 +34,16 @@ final class DelegateForm
                     ->relationship(name: 'organization', titleAttribute: 'short_name')
                     ->required(),
                 Select::make('seat_id')
-                    ->label(__('Seat'))
+                    ->label(__('delegate.fields.seat'))
                     ->relationship('seat')
                     ->getOptionLabelFromRecordUsing(fn ($record) => $record->collegeOrganization->college->name.' - '.
                         $record->collegeOrganization->organization->short_name.
-                        ' - Seat #'.$record->seat_number
+                        ' - '.__('delegate.fields.seat_number').$record->seat_number
                     )
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->helperText('Select the seat for this delegate'),
+                    ->helperText(__('delegate.fields.seat_helper')),
             ]);
     }
 }

@@ -19,6 +19,7 @@ class OrganizationFactory extends Factory
         return [
             'short_name' => fake()->unique()->company(),
             'legal_name' => fake()->unique()->company().' - '.fake()->words(3, true),
+            'domain' => null,
         ];
     }
 }

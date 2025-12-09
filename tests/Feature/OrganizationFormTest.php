@@ -12,19 +12,19 @@ test('organization can be created with college associations', function () {
         'legal_name' => 'Test Organization Legal Name',
     ]);
 
-    $organization->colleges()->attach($college1->id, [
-        'seats' => 3,
-        'delegates_per_seat' => 2,
+    $organization->syncCollegesWithSeats([
+        $college1->id => ['delegates_per_seat' => 2, 'seats' => 3],
+        $college2->id => ['delegates_per_seat' => 1, 'seats' => 5],
     ]);
 
-    $organization->colleges()->attach($college2->id, [
-        'seats' => 5,
-        'delegates_per_seat' => 1,
-    ]);
+    expect($organization->colleges)->toHaveCount(2);
 
-    expect($organization->colleges)->toHaveCount(2)
-        ->and($organization->colleges->first()->pivot->seats)->toBe(3)
-        ->and($organization->colleges->first()->pivot->delegates_per_seat)->toBe(2);
+    $collegeOrg1 = \App\Models\CollegeOrganization::where('college_id', $college1->id)
+        ->where('organization_id', $organization->id)
+        ->first();
+
+    expect($collegeOrg1->seats)->toBe(3)
+        ->and($collegeOrg1->delegates_per_seat)->toBe(2);
 });
 
 test('organization respects college max seats per organization', function () {
@@ -36,15 +36,16 @@ test('organization respects college max seats per organization', function () {
     $organization = Organization::factory()->create();
 
     // Within limit
-    $organization->colleges()->attach($college->id, [
-        'seats' => 3,
-        'delegates_per_seat' => 1,
+    $organization->syncCollegesWithSeats([
+        $college->id => ['delegates_per_seat' => 1, 'seats' => 3],
     ]);
 
-    $pivot = $organization->colleges()->first()->pivot;
+    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+        ->where('organization_id', $organization->id)
+        ->first();
 
-    expect($pivot->seats)->toBe(3)
-        ->and($pivot->seats)->toBeLessThanOrEqual($college->max_seats_per_organization);
+    expect($collegeOrg->seats)->toBe(3)
+        ->and($collegeOrg->seats)->toBeLessThanOrEqual($college->max_seats_per_organization);
 });
 
 test('organization respects college max delegates per seat', function () {
@@ -56,15 +57,16 @@ test('organization respects college max delegates per seat', function () {
     $organization = Organization::factory()->create();
 
     // Within limit
-    $organization->colleges()->attach($college->id, [
-        'seats' => 2,
-        'delegates_per_seat' => 2,
+    $organization->syncCollegesWithSeats([
+        $college->id => ['delegates_per_seat' => 2, 'seats' => 2],
     ]);
 
-    $pivot = $organization->colleges()->first()->pivot;
+    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+        ->where('organization_id', $organization->id)
+        ->first();
 
-    expect($pivot->delegates_per_seat)->toBe(2)
-        ->and($pivot->delegates_per_seat)->toBeLessThanOrEqual($college->max_delegates_per_seat);
+    expect($collegeOrg->delegates_per_seat)->toBe(2)
+        ->and($collegeOrg->delegates_per_seat)->toBeLessThanOrEqual($college->max_delegates_per_seat);
 });
 
 test('organization can update college associations', function () {
@@ -72,21 +74,27 @@ test('organization can update college associations', function () {
     $organization = Organization::factory()->create();
 
     // Initial association
-    $organization->colleges()->attach($college->id, [
-        'seats' => 2,
-        'delegates_per_seat' => 1,
+    $organization->syncCollegesWithSeats([
+        $college->id => ['delegates_per_seat' => 1, 'seats' => 2],
     ]);
 
-    expect($organization->colleges()->first()->pivot->seats)->toBe(2);
+    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+        ->where('organization_id', $organization->id)
+        ->first();
 
-    // Update association
-    $organization->colleges()->updateExistingPivot($college->id, [
-        'seats' => 4,
-        'delegates_per_seat' => 2,
+    expect($collegeOrg->seats)->toBe(2);
+
+    // Update association - increase seats
+    $organization->syncCollegesWithSeats([
+        $college->id => ['delegates_per_seat' => 2, 'seats' => 4],
     ]);
 
-    expect($organization->fresh()->colleges()->first()->pivot->seats)->toBe(4)
-        ->and($organization->fresh()->colleges()->first()->pivot->delegates_per_seat)->toBe(2);
+    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+        ->where('organization_id', $organization->id)
+        ->first();
+
+    expect($collegeOrg->seats)->toBe(4)
+        ->and($collegeOrg->delegates_per_seat)->toBe(2);
 });
 
 test('organization can remove college associations', function () {

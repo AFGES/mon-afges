@@ -9,12 +9,13 @@ test('college organization pivot has correct relationships', function () {
     $college = College::factory()->create();
     $organization = Organization::factory()->create();
 
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $organization->id,
-        'seats' => 3,
-        'delegates_per_seat' => 2,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->for($college)
+        ->for($organization)
+        ->withSeats(3)
+        ->create([
+            'delegates_per_seat' => 2,
+        ]);
 
     expect($collegeOrg->college->id)->toBe($college->id)
         ->and($collegeOrg->organization->id)->toBe($organization->id)
@@ -23,10 +24,11 @@ test('college organization pivot has correct relationships', function () {
 });
 
 test('college organization calculates total delegate positions', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 4,
-        'delegates_per_seat' => 3,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->withSeats(4)
+        ->create([
+            'delegates_per_seat' => 3,
+        ]);
 
     expect($collegeOrg->total_delegate_positions)->toBe(12);
 });
@@ -111,15 +113,16 @@ test('college organization pivot data persists correctly', function () {
     $college = College::factory()->create();
     $organization = Organization::factory()->create();
 
-    $organization->colleges()->attach($college->id, [
-        'seats' => 7,
-        'delegates_per_seat' => 4,
+    $organization->syncCollegesWithSeats([
+        $college->id => ['delegates_per_seat' => 4, 'seats' => 7],
     ]);
 
-    $pivotData = $organization->colleges()->first()->pivot;
+    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+        ->where('organization_id', $organization->id)
+        ->first();
 
-    expect($pivotData->seats)->toBe(7)
-        ->and($pivotData->delegates_per_seat)->toBe(4)
-        ->and($pivotData->college_id)->toBe($college->id)
-        ->and($pivotData->organization_id)->toBe($organization->id);
+    expect($collegeOrg->seats)->toBe(7)
+        ->and($collegeOrg->delegates_per_seat)->toBe(4)
+        ->and($collegeOrg->college_id)->toBe($college->id)
+        ->and($collegeOrg->organization_id)->toBe($organization->id);
 });

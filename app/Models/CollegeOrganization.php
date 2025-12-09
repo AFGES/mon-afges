@@ -21,16 +21,22 @@ final class CollegeOrganization extends Pivot
     protected $fillable = [
         'college_id',
         'organization_id',
-        'seats',
         'delegates_per_seat',
     ];
 
     protected function casts(): array
     {
         return [
-            'seats' => 'integer',
             'delegates_per_seat' => 'integer',
         ];
+    }
+
+    /**
+     * Get the number of seats (count of seat records).
+     */
+    public function getSeatsAttribute(): int
+    {
+        return $this->seatRecords()->count();
     }
 
     public function college(): BelongsTo

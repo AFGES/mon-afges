@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Providers;
 
@@ -7,7 +9,6 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -33,7 +34,7 @@ final class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
         });
 
-        Gate::before(function (User $user, $ability) {;
+        Gate::before(function (User $user, $ability) {
             return $user->hasRole('super_admin') ?: null;
         });
     }

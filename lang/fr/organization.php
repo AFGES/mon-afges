@@ -32,4 +32,11 @@ return [
         'seats' => 'Nombre total de sièges alloués à cette association dans ce collège',
         'delegates_per_seat' => 'Nombre de délégués pouvant occuper chaque siège',
     ],
+
+    'notifications' => [
+        'cannot_remove_seats' => [
+            'title' => 'Impossible de supprimer les sièges',
+            'body' => 'Le collège :college a seulement :empty siège(s) vide(s), mais vous avez demandé d\'en supprimer :requested. Libérez d\'abord les sièges occupés.',
+        ],
+    ],
 ];

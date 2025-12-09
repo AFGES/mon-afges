@@ -7,24 +7,12 @@ use App\Models\Organization;
 use App\Models\Seat;
 
 test('seats can be created for college organization', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 3,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()->withSeats(3)->create();
 
-    $seat1 = Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 1,
-    ]);
-
-    $seat2 = Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 2,
-    ]);
-
-    $seat3 = Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 3,
-    ]);
+    $seats = $collegeOrg->seatRecords;
+    $seat1 = $seats->where('seat_number', 1)->first();
+    $seat2 = $seats->where('seat_number', 2)->first();
+    $seat3 = $seats->where('seat_number', 3)->first();
 
     expect($collegeOrg->seatRecords)->toHaveCount(3)
         ->and($seat1->collegeOrganization->id)->toBe($collegeOrg->id)
@@ -32,69 +20,14 @@ test('seats can be created for college organization', function () {
         ->and($seat3->seat_number)->toBe(3);
 });
 
-test('generate seats command creates missing seats', function () {
-    $college = College::factory()->create();
-    $org1 = Organization::factory()->create();
-    $org2 = Organization::factory()->create();
-    $org3 = Organization::factory()->create();
-
-    $collegeOrg1 = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $org1->id,
-        'seats' => 5,
-    ]);
-    $collegeOrg2 = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $org2->id,
-        'seats' => 3,
-    ]);
-    $collegeOrg3 = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $org3->id,
-        'seats' => 0, // No seats
-    ]);
-
-    $this->artisan('seats:generate')
-        ->assertSuccessful();
-
-    expect($collegeOrg1->fresh()->seatRecords)->toHaveCount(5)
-        ->and($collegeOrg2->fresh()->seatRecords)->toHaveCount(3)
-        ->and($collegeOrg3->fresh()->seatRecords)->toHaveCount(0);
-});
-
-test('generate seats command does not create duplicate seats', function () {
-    $collegeOrg = CollegeOrganization::factory()->create(['seats' => 4]);
-
-    // Create 2 seats manually
-    Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 1,
-    ]);
-    Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 2,
-    ]);
-
-    expect($collegeOrg->seatRecords)->toHaveCount(2);
-
-    // Run command - should create 2 more seats (3 and 4)
-    $this->artisan('seats:generate')
-        ->assertSuccessful();
-
-    expect($collegeOrg->fresh()->seatRecords)->toHaveCount(4)
-        ->and($collegeOrg->fresh()->seatRecords->pluck('seat_number')->toArray())->toBe([1, 2, 3, 4]);
-});
-
 test('seat can have multiple delegates when allowed', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 1,
-        'delegates_per_seat' => 3,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->withSeats(1)
+        ->create([
+            'delegates_per_seat' => 3,
+        ]);
 
-    $seat = Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 1,
-    ]);
+    $seat = $collegeOrg->seatRecords->first();
 
     $delegate1 = Delegate::factory()->create([
         'seat_id' => $seat->id,
@@ -135,26 +68,15 @@ test('seat belongs to correct college through college organization', function ()
 });
 
 test('seats are numbered sequentially per college organization', function () {
-    $collegeOrg = CollegeOrganization::factory()->create(['seats' => 10]);
+    $collegeOrg = CollegeOrganization::factory()->withSeats(10)->create();
 
-    for ($i = 1; $i <= 10; $i++) {
-        Seat::factory()->create([
-            'college_organization_id' => $collegeOrg->id,
-            'seat_number' => $i,
-        ]);
-    }
-
-    $seatNumbers = $collegeOrg->seatRecords->pluck('seat_number')->toArray();
+    $seatNumbers = $collegeOrg->seatRecords->pluck('seat_number')->sort()->values()->toArray();
 
     expect($seatNumbers)->toBe([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 });
 
 test('deleting college organization deletes associated seats', function () {
-    $collegeOrg = CollegeOrganization::factory()->create(['seats' => 3]);
-
-    $seat1 = Seat::factory()->create(['college_organization_id' => $collegeOrg->id, 'seat_number' => 1]);
-    $seat2 = Seat::factory()->create(['college_organization_id' => $collegeOrg->id, 'seat_number' => 2]);
-    $seat3 = Seat::factory()->create(['college_organization_id' => $collegeOrg->id, 'seat_number' => 3]);
+    $collegeOrg = CollegeOrganization::factory()->withSeats(3)->create();
 
     expect(Seat::count())->toBe(3);
 
@@ -174,12 +96,13 @@ test('college max constraints are validated', function () {
     $organization = Organization::factory()->create();
 
     // Valid within constraints
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $organization->id,
-        'seats' => 5,
-        'delegates_per_seat' => 3,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->for($college)
+        ->for($organization)
+        ->withSeats(5)
+        ->create([
+            'delegates_per_seat' => 3,
+        ]);
 
     expect($collegeOrg->seats)->toBeLessThanOrEqual($college->max_seats_per_organization)
         ->and($collegeOrg->delegates_per_seat)->toBeLessThanOrEqual($college->max_delegates_per_seat);

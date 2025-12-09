@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class Seat extends Model
 {
     /** @use HasFactory<\Database\Factories\SeatFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     protected $fillable = [
         'college_organization_id',
@@ -44,5 +47,33 @@ final class Seat extends Model
     public function organization(): BelongsTo
     {
         return $this->collegeOrganization->organization();
+    }
+
+    /**
+     * Check if the seat is empty (has no delegates).
+     */
+    public function isEmpty(): bool
+    {
+        return $this->delegates()->count() === 0;
+    }
+
+    /**
+     * Get the label for the seat.
+     * Format: "Short Name Org (College Name): Delegate1, Delegate2, ..."
+     */
+    public function getLabelAttribute(): string
+    {
+        $organization = $this->collegeOrganization->organization;
+        $college = $this->collegeOrganization->college;
+        $delegates = $this->delegates()->with('user')->get();
+
+        $delegateNames = $delegates->map(fn ($delegate) => $delegate->user->name)->join(', ');
+
+        return sprintf(
+            '%s (%s): %s',
+            $organization->short_name,
+            $college->name,
+            $delegateNames ?: 'Empty'
+        );
     }
 }

@@ -80,50 +80,26 @@ test('multiple delegates can be assigned to the same seat when delegates_per_sea
 });
 
 test('college organization can have multiple seats', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 5,
-    ]);
-
-    for ($i = 1; $i <= 5; $i++) {
-        Seat::factory()->create([
-            'college_organization_id' => $collegeOrg->id,
-            'seat_number' => $i,
-        ]);
-    }
+    $collegeOrg = CollegeOrganization::factory()->withSeats(5)->create();
 
     expect($collegeOrg->seatRecords()->count())->toBe(5);
-});
-
-test('seats generate command creates correct number of seats', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 3,
-    ]);
-
-    $this->artisan('seats:generate')
-        ->assertSuccessful();
-
-    expect($collegeOrg->fresh()->seatRecords()->count())->toBe(3);
 });
 
 test('college can access delegates through seats', function () {
     $college = College::factory()->create();
     $organization = Organization::factory()->create();
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $organization->id,
-        'seats' => 2,
-        'delegates_per_seat' => 1,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->for($college)
+        ->for($organization)
+        ->withSeats(2)
+        ->create([
+            'delegates_per_seat' => 1,
+        ]);
 
-    // Create seats
-    $seat1 = Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 1,
-    ]);
-    $seat2 = Seat::factory()->create([
-        'college_organization_id' => $collegeOrg->id,
-        'seat_number' => 2,
-    ]);
+    // Get the created seats
+    $seats = $collegeOrg->seatRecords;
+    $seat1 = $seats->first();
+    $seat2 = $seats->last();
 
     // Create delegates
     $delegate1 = Delegate::factory()->create([
@@ -160,23 +136,25 @@ test('college max seats per organization is enforced', function () {
     ]);
     $organization = Organization::factory()->create();
 
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $organization->id,
-        'seats' => 3, // Within limit
-        'delegates_per_seat' => 1,
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->for($college)
+        ->for($organization)
+        ->withSeats(3) // Within limit
+        ->create([
+            'delegates_per_seat' => 1,
+        ]);
 
     expect($collegeOrg->seats)->toBe(3)
         ->and($collegeOrg->seats)->toBeLessThanOrEqual($college->max_seats_per_organization);
 
     // Test that we can't exceed the limit
-    $collegeOrg2 = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => Organization::factory()->create()->id,
-        'seats' => 5, // At limit
-        'delegates_per_seat' => 1,
-    ]);
+    $collegeOrg2 = CollegeOrganization::factory()
+        ->for($college)
+        ->for(Organization::factory()->create())
+        ->withSeats(5) // At limit
+        ->create([
+            'delegates_per_seat' => 1,
+        ]);
 
     expect($collegeOrg2->seats)->toBe(5)
         ->and($collegeOrg2->seats)->toBeLessThanOrEqual($college->max_seats_per_organization);
@@ -189,23 +167,25 @@ test('college max delegates per seat is enforced', function () {
     ]);
     $organization = Organization::factory()->create();
 
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $organization->id,
-        'seats' => 2,
-        'delegates_per_seat' => 2, // Within limit
-    ]);
+    $collegeOrg = CollegeOrganization::factory()
+        ->for($college)
+        ->for($organization)
+        ->withSeats(2)
+        ->create([
+            'delegates_per_seat' => 2, // Within limit
+        ]);
 
     expect($collegeOrg->delegates_per_seat)->toBe(2)
         ->and($collegeOrg->delegates_per_seat)->toBeLessThanOrEqual($college->max_delegates_per_seat);
 
     // Test that we can use the maximum
-    $collegeOrg2 = CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => Organization::factory()->create()->id,
-        'seats' => 1,
-        'delegates_per_seat' => 3, // At limit
-    ]);
+    $collegeOrg2 = CollegeOrganization::factory()
+        ->for($college)
+        ->for(Organization::factory()->create())
+        ->withSeats(1)
+        ->create([
+            'delegates_per_seat' => 3, // At limit
+        ]);
 
     expect($collegeOrg2->delegates_per_seat)->toBe(3)
         ->and($collegeOrg2->delegates_per_seat)->toBeLessThanOrEqual($college->max_delegates_per_seat);

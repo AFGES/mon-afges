@@ -39,38 +39,54 @@ final class GenerateSeatsCommand extends Command
         $skippedCount = 0;
 
         foreach ($collegeOrganizations as $collegeOrg) {
-            // Delete existing seats if force is used
-            if ($force) {
-                $existingSeatsCount = $collegeOrg->seatRecords()->count();
-                if ($existingSeatsCount > 0) {
-                    $collegeOrg->seatRecords()->delete();
-                }
-            }
+            // Note: This command now only works with college organizations that already have seats
+            // It will fill in any missing seat numbers if some were soft deleted
+            $allSeats = $collegeOrg->seatRecords()->withTrashed()->get();
+            $activeSeats = $collegeOrg->seatRecords()->get();
+            $activeSeatNumbers = $activeSeats->pluck('seat_number')->toArray();
 
-            // Get existing seat numbers
-            $existingSeatNumbers = $collegeOrg->seatRecords()
-                ->pluck('seat_number')
-                ->toArray();
-
-            // Skip if all seats already exist and force is not used
-            if (count($existingSeatNumbers) >= $collegeOrg->seats && ! $force) {
+            if ($allSeats->isEmpty()) {
+                $this->warn("CollegeOrganization {$collegeOrg->id} has no seats. Create seats through the UI first.");
                 $skippedCount++;
 
                 continue;
             }
 
-            // Generate only missing seats
-            for ($i = 1; $i <= $collegeOrg->seats; $i++) {
-                // Skip if seat number already exists
-                if (in_array($i, $existingSeatNumbers) && ! $force) {
-                    continue;
-                }
+            // Get max seat number from all seats (including soft deleted)
+            $maxSeatNumber = $allSeats->max('seat_number');
 
-                Seat::create([
-                    'college_organization_id' => $collegeOrg->id,
-                    'seat_number' => $i,
-                ]);
-                $createdCount++;
+            // Delete existing seats if force is used
+            if ($force) {
+                $collegeOrg->seatRecords()->forceDelete();
+                $activeSeatNumbers = [];
+                $maxSeatNumber = 0;
+            }
+
+            // Fill in missing seat numbers (restore or create)
+            for ($i = 1; $i <= $maxSeatNumber; $i++) {
+                if (! in_array($i, $activeSeatNumbers)) {
+                    // Check if a soft-deleted seat exists with this number
+                    $softDeleted = $collegeOrg->seatRecords()
+                        ->onlyTrashed()
+                        ->where('seat_number', $i)
+                        ->first();
+
+                    if ($softDeleted) {
+                        // Restore the soft-deleted seat
+                        $softDeleted->restore();
+                    } else {
+                        // Create new seat
+                        Seat::create([
+                            'college_organization_id' => $collegeOrg->id,
+                            'seat_number' => $i,
+                        ]);
+                    }
+                    $createdCount++;
+                }
+            }
+
+            if ($createdCount == 0) {
+                $skippedCount++;
             }
         }
 

@@ -19,6 +19,8 @@ class CollegeFactory extends Factory
         return [
             'name' => fake()->randomElement(['General', 'Federal', 'Advisory']),
             'can_vote' => fake()->boolean(75),
+            'max_seats_per_organization' => fake()->optional(0.8)->numberBetween(1, 10),
+            'max_delegates_per_seat' => fake()->optional(0.8)->numberBetween(1, 5),
         ];
     }
 

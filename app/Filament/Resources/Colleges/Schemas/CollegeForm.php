@@ -21,6 +21,18 @@ class CollegeForm
                     ->label(__('college.fields.can_vote'))
                     ->default(true)
                     ->required(),
+                TextInput::make('max_seats_per_organization')
+                    ->label(__('college.fields.max_seats_per_organization'))
+                    ->numeric()
+                    ->minValue(0)
+                    ->helperText(__('college.helpers.max_seats_per_organization'))
+                    ->nullable(),
+                TextInput::make('max_delegates_per_seat')
+                    ->label(__('college.fields.max_delegates_per_seat'))
+                    ->numeric()
+                    ->minValue(1)
+                    ->helperText(__('college.helpers.max_delegates_per_seat'))
+                    ->nullable(),
             ]);
     }
 }

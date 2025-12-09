@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Filament\Resources\Organizations;
 
@@ -21,6 +23,16 @@ final class OrganizationResource extends Resource
     protected static ?string $model = Organization::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+
+    public static function getModelLabel(): string
+    {
+        return __('organization.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('organization.plural');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -54,10 +66,5 @@ final class OrganizationResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('organization.label');
     }
 }

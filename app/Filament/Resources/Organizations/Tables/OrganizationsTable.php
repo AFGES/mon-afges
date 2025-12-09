@@ -22,20 +22,20 @@ final class OrganizationsTable
         return $table
             ->columns([
                 TextColumn::make('short_name')
-                    ->label('Short Name')
+                    ->label(__('organization.fields.short_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('legal_name')
-                    ->label('Legal Name')
+                    ->label(__('organization.fields.legal_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('colleges_count')
-                    ->label('Colleges')
+                    ->label(__('college.plural'))
                     ->counts('colleges')
                     ->badge()
                     ->color('info'),
                 TextColumn::make('total_seats')
-                    ->label('Total Seats')
+                    ->label(__('organization.fields.total_seats'))
                     ->state(function ($record): int {
                         return Seat::query()
                             ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
@@ -45,7 +45,7 @@ final class OrganizationsTable
                     ->badge()
                     ->color('success'),
                 TextColumn::make('total_delegates')
-                    ->label('Total Delegates')
+                    ->label(__('organization.fields.total_delegates'))
                     ->state(function ($record): int {
                         return \App\Models\Delegate::query()
                             ->join('seats', 'delegates.seat_id', '=', 'seats.id')
@@ -56,24 +56,24 @@ final class OrganizationsTable
                     ->badge()
                     ->color('warning'),
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('organization.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('organization.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_at')
-                    ->label('Deleted')
+                    ->label(__('organization.fields.deleted_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('college')
-                    ->label('College')
+                    ->label(__('college.label'))
                     ->relationship('colleges', 'name')
                     ->searchable()
                     ->preload(),

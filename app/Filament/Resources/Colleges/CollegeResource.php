@@ -20,6 +20,11 @@ class CollegeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.democratic_moments');
+    }
+
     public static function getModelLabel(): string
     {
         return __('college.label');

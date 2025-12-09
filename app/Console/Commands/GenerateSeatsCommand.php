@@ -39,22 +39,33 @@ final class GenerateSeatsCommand extends Command
         $skippedCount = 0;
 
         foreach ($collegeOrganizations as $collegeOrg) {
-            $existingSeatsCount = $collegeOrg->seatRecords()->count();
+            // Delete existing seats if force is used
+            if ($force) {
+                $existingSeatsCount = $collegeOrg->seatRecords()->count();
+                if ($existingSeatsCount > 0) {
+                    $collegeOrg->seatRecords()->delete();
+                }
+            }
 
-            // Skip if seats already exist unless force is used
-            if ($existingSeatsCount > 0 && ! $force) {
+            // Get existing seat numbers
+            $existingSeatNumbers = $collegeOrg->seatRecords()
+                ->pluck('seat_number')
+                ->toArray();
+
+            // Skip if all seats already exist and force is not used
+            if (count($existingSeatNumbers) >= $collegeOrg->seats && ! $force) {
                 $skippedCount++;
 
                 continue;
             }
 
-            // Delete existing seats if force is used
-            if ($force && $existingSeatsCount > 0) {
-                $collegeOrg->seatRecords()->delete();
-            }
-
-            // Generate seats based on the allocated number
+            // Generate only missing seats
             for ($i = 1; $i <= $collegeOrg->seats; $i++) {
+                // Skip if seat number already exists
+                if (in_array($i, $existingSeatNumbers) && ! $force) {
+                    continue;
+                }
+
                 Seat::create([
                     'college_organization_id' => $collegeOrg->id,
                     'seat_number' => $i,

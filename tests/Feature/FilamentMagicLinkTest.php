@@ -6,7 +6,7 @@ use App\Models\User;
 use Livewire\Livewire;
 
 test('filament login page displays magic link toggle button', function () {
-    $response = $this->get('/admin/login');
+    $response = $this->get('/login');
 
     $response->assertStatus(200)
         ->assertSee('Se connecter avec un lien magique');

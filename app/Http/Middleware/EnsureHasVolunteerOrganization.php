@@ -27,7 +27,7 @@ final class EnsureHasVolunteerOrganization
         }
 
         // Skip if already on the select organization page
-        if ($request->routeIs('filament.admin.pages.select-organization')) {
+        if ($request->routeIs('filament.root.pages.select-organization')) {
             return $next($request);
         }
 
@@ -38,7 +38,7 @@ final class EnsureHasVolunteerOrganization
 
         // Check if user has at least one volunteer organization
         if ($user->volunteers()->doesntExist()) {
-            return redirect()->route('filament.admin.pages.select-organization');
+            return redirect()->route('filament.root.pages.select-organization');
         }
 
         return $next($request);

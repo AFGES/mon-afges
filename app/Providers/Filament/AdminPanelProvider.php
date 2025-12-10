@@ -31,8 +31,8 @@ final class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
-            ->path('admin')
+            ->id('root')
+            ->path('')
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->colors([
                 'primary' => Color::Amber,
@@ -73,6 +73,7 @@ final class AdminPanelProvider extends PanelProvider
                             ->icon('fab-google'),
                     ])
                     ->registration(true)
-            );
+            )
+            ->spa();
     }
 }

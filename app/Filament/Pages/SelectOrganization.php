@@ -11,6 +11,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
@@ -64,6 +65,11 @@ final class SelectOrganization extends Page
                                 ->validationMessages([
                                     'required' => __('select-organization.form.organization.required'),
                                 ]),
+                            TextInput::make('position_title')
+                                ->label(__('select-organization.form.position_title.label'))
+                                ->placeholder(__('select-organization.form.position_title.placeholder'))
+                                ->default('Membre')
+                                ->maxLength(255),
                             DatePicker::make('started_at')
                                 ->label(__('select-organization.form.started_at.label'))
                                 ->default(now())
@@ -75,7 +81,7 @@ final class SelectOrganization extends Page
                                     'required' => __('select-organization.form.started_at.required'),
                                 ]),
                         ])
-                        ->columns(2)
+                        ->columns(3)
                         ->required()
                         ->minItems(1)
                         ->addActionLabel(__('select-organization.form.organizations.add_action'))
@@ -111,7 +117,7 @@ final class SelectOrganization extends Page
             Volunteer::create([
                 'user_id' => $user->id,
                 'organization_id' => $item['organization_id'],
-                'position_title' => 'Membre',
+                'position_title' => $item['position_title'] ?? 'Membre',
                 'started_at' => $item['started_at'] ?? now(),
             ]);
         }

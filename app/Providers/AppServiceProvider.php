@@ -34,6 +34,22 @@ final class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
         });
 
+        // Mark email as verified when user logs in with Socialite
+        Event::listen(
+            \DutchCodingCompany\FilamentSocialite\Events\Login::class,
+            [\App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin::class, 'handleLogin']
+        );
+
+        Event::listen(
+            \DutchCodingCompany\FilamentSocialite\Events\Registered::class,
+            [\App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin::class, 'handleRegistered']
+        );
+
+        Event::listen(
+            \DutchCodingCompany\FilamentSocialite\Events\SocialiteUserConnected::class,
+            [\App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin::class, 'handleSocialiteUserConnected']
+        );
+
         Gate::before(function (User $user, $ability) {
             return $user->hasRole('super_admin') ?: null;
         });

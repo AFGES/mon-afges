@@ -26,11 +26,11 @@ test('user without volunteer organization is redirected to select organization p
     $response->assertRedirect(route('filament.root.pages.select-organization'));
 });
 
-test('user with volunteer organization can access dashboard', function () {
+test('user with approved volunteer organization can access dashboard', function () {
     $user = User::factory()->create(['email' => 'test@afges.org']);
     $organization = Organization::factory()->create();
 
-    Volunteer::factory()->create([
+    Volunteer::factory()->approved()->create([
         'user_id' => $user->id,
         'organization_id' => $organization->id,
     ]);
@@ -40,6 +40,25 @@ test('user with volunteer organization can access dashboard', function () {
     $response = get(route('filament.root.pages.dashboard'));
 
     $response->assertSuccessful();
+});
+
+test('user with pending volunteer organization is redirected to select organization page', function () {
+    $user = User::factory()->create(['email' => 'test@afges.org']);
+    $organization = Organization::factory()->create();
+
+    // Create pending volunteer (bypass global scope)
+    Volunteer::withoutGlobalScopes()->create(
+        Volunteer::factory()->make([
+            'user_id' => $user->id,
+            'organization_id' => $organization->id,
+        ])->toArray()
+    );
+
+    actingAs($user);
+
+    $response = get(route('filament.root.pages.dashboard'));
+
+    $response->assertRedirect(route('filament.root.pages.select-organization'));
 });
 
 test('user can select organizations on the select organization page', function () {
@@ -70,11 +89,14 @@ test('user can select organizations on the select organization page', function (
         ->assertHasNoFormErrors()
         ->assertRedirect(route('filament.root.pages.dashboard'));
 
-    $volunteer1 = \App\Models\Volunteer::where('user_id', $user->id)
+    // Need to bypass global scope to find pending volunteers
+    $volunteer1 = \App\Models\Volunteer::withoutGlobalScopes()
+        ->where('user_id', $user->id)
         ->where('organization_id', $organization1->id)
         ->first();
 
-    $volunteer2 = \App\Models\Volunteer::where('user_id', $user->id)
+    $volunteer2 = \App\Models\Volunteer::withoutGlobalScopes()
+        ->where('user_id', $user->id)
         ->where('organization_id', $organization2->id)
         ->first();
 
@@ -82,6 +104,8 @@ test('user can select organizations on the select organization page', function (
     expect($volunteer2)->not->toBeNull();
     expect($volunteer1->started_at->format('Y-m-d'))->toBe($startDate1->format('Y-m-d'));
     expect($volunteer2->started_at->format('Y-m-d'))->toBe($startDate2->format('Y-m-d'));
+    expect($volunteer1->isPending())->toBeTrue();
+    expect($volunteer2->isPending())->toBeTrue();
 });
 
 test('user must select at least one organization', function () {
@@ -103,6 +127,35 @@ test('user without volunteer organization can access dashboard when no organizat
 
     actingAs($user);
 
+    $response = get(route('filament.root.pages.dashboard'));
+
+    $response->assertSuccessful();
+});
+
+test('user without approved volunteer can access logout route', function () {
+    $user = User::factory()->create(['email' => 'test@afges.org']);
+    Organization::factory()->create(); // Create at least one organization
+
+    actingAs($user);
+
+    // User should be able to logout even without approved volunteers
+    $response = $this->post(route('filament.root.auth.logout'));
+
+    $response->assertRedirect();
+    $this->assertGuest();
+});
+
+test('super admin can bypass organization selection requirement', function () {
+    // Create the super_admin role
+    \Spatie\Permission\Models\Role::create(['name' => 'super_admin']);
+
+    $superAdmin = User::factory()->create(['email' => 'admin@afges.org']);
+    $superAdmin->assignRole('super_admin');
+    Organization::factory()->create(); // Create at least one organization
+
+    actingAs($superAdmin);
+
+    // Super admin should be able to access dashboard without any volunteer organizations
     $response = get(route('filament.root.pages.dashboard'));
 
     $response->assertSuccessful();

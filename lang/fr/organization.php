@@ -9,6 +9,7 @@ return [
     'fields' => [
         'short_name' => 'Nom court',
         'legal_name' => 'Raison sociale',
+        'domain' => 'Nom de domaine',
         'total_seats' => 'Total des sièges',
         'total_delegates' => 'Total des délégués',
         'created_at' => 'Créé le',
@@ -29,6 +30,7 @@ return [
     ],
 
     'helpers' => [
+        'domain' => 'Le nom de domaine de l\'association (utiliser pour l\'affectation automatique des bénévoles, par exemple: afges.org)',
         'seats' => 'Nombre total de sièges alloués à cette association dans ce collège',
         'delegates_per_seat' => 'Nombre de délégués pouvant occuper chaque siège',
     ],

@@ -26,8 +26,18 @@ final class EnsureHasVolunteerOrganization
             return $next($request);
         }
 
+        // Skip if user is a super admin
+        if ($user->hasRole('super_admin')) {
+            return $next($request);
+        }
+
         // Skip if already on the select organization page
         if ($request->routeIs('filament.root.pages.select-organization')) {
+            return $next($request);
+        }
+
+        // Skip if on logout route
+        if ($request->routeIs('filament.root.auth.logout')) {
             return $next($request);
         }
 
@@ -36,7 +46,8 @@ final class EnsureHasVolunteerOrganization
             return $next($request);
         }
 
-        // Check if user has at least one volunteer organization
+        // Check if user has at least one approved volunteer organization
+        // (The ApprovedScope automatically filters for approved volunteers)
         if ($user->volunteers()->doesntExist()) {
             return redirect()->route('filament.root.pages.select-organization');
         }

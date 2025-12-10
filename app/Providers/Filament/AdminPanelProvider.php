@@ -44,6 +44,7 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                \App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats::class,
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])

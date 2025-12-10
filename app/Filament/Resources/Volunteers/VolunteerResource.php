@@ -9,6 +9,7 @@ use App\Filament\Resources\Volunteers\Pages\ViewVolunteer;
 use App\Filament\Resources\Volunteers\Schemas\VolunteerForm;
 use App\Filament\Resources\Volunteers\Schemas\VolunteerInfolist;
 use App\Filament\Resources\Volunteers\Tables\VolunteersTable;
+use App\Models\Scopes\ApprovedScope;
 use App\Models\Volunteer;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -61,11 +62,20 @@ class VolunteerResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                ApprovedScope::class,
+            ]);
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
+                ApprovedScope::class,
             ]);
     }
 }

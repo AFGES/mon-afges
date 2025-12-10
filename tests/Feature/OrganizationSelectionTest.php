@@ -21,9 +21,9 @@ test('user without volunteer organization is redirected to select organization p
 
     actingAs($user);
 
-    $response = get(route('filament.admin.pages.dashboard'));
+    $response = get(route('filament.root.pages.dashboard'));
 
-    $response->assertRedirect(route('filament.admin.pages.select-organization'));
+    $response->assertRedirect(route('filament.root.pages.select-organization'));
 });
 
 test('user with volunteer organization can access dashboard', function () {
@@ -37,7 +37,7 @@ test('user with volunteer organization can access dashboard', function () {
 
     actingAs($user);
 
-    $response = get(route('filament.admin.pages.dashboard'));
+    $response = get(route('filament.root.pages.dashboard'));
 
     $response->assertSuccessful();
 });
@@ -68,7 +68,7 @@ test('user can select organizations on the select organization page', function (
         ->assertHasNoFormErrors()
         ->call('submit')
         ->assertHasNoFormErrors()
-        ->assertRedirect(route('filament.admin.pages.dashboard'));
+        ->assertRedirect(route('filament.root.pages.dashboard'));
 
     $volunteer1 = \App\Models\Volunteer::where('user_id', $user->id)
         ->where('organization_id', $organization1->id)
@@ -103,7 +103,7 @@ test('user without volunteer organization can access dashboard when no organizat
 
     actingAs($user);
 
-    $response = get(route('filament.admin.pages.dashboard'));
+    $response = get(route('filament.root.pages.dashboard'));
 
     $response->assertSuccessful();
 });

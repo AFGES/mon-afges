@@ -66,7 +66,7 @@ test('user can authenticate with valid magic link token', function () {
 
     $response = $this->get($url);
 
-    $response->assertRedirect('/admin');
+    $response->assertRedirect('/');
     $this->assertAuthenticatedAs($user);
 
     $user->refresh();

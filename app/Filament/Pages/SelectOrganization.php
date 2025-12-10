@@ -111,15 +111,15 @@ final class SelectOrganization extends Page
             Volunteer::create([
                 'user_id' => $user->id,
                 'organization_id' => $item['organization_id'],
-                'position_title' => 'Member',
+                'position_title' => 'Membre',
                 'started_at' => $item['started_at'] ?? now(),
             ]);
         }
 
         Notification::make()
-            ->title(__('select-organization.notifications.success.title'))
-            ->body(__('select-organization.notifications.success.body'))
-            ->success()
+            ->title(__('volunteer.notifications.pending_approval.title'))
+            ->body(__('volunteer.notifications.pending_approval.body'))
+            ->info()
             ->send();
 
         $this->redirect(Filament::getUrl());

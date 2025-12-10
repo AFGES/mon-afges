@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\VolunteerStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,6 +23,26 @@ class VolunteerFactory extends Factory
             'position_title' => fake()->jobTitle(),
             'started_at' => now(),
             'ended_at' => null,
+            'status' => VolunteerStatus::Pending,
         ];
+    }
+
+    public function approved(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => VolunteerStatus::Approved,
+            'approved_at' => now(),
+            'approved_by' => \App\Models\User::factory(),
+        ]);
+    }
+
+    public function rejected(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => VolunteerStatus::Rejected,
+            'approved_at' => now(),
+            'approved_by' => \App\Models\User::factory(),
+            'rejection_reason' => fake()->sentence(),
+        ]);
     }
 }

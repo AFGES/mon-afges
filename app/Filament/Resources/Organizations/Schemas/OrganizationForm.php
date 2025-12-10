@@ -27,6 +27,12 @@ final class OrganizationForm
                             ->label(__('organization.fields.legal_name'))
                             ->required()
                             ->maxLength(255),
+                        TextInput::make('domain')
+                            ->label(__('organization.fields.domain'))
+                            ->maxLength(255)
+                            ->placeholder('example.org')
+                            ->helperText(__('organization.helpers.domain'))
+                            ->suffixIcon('heroicon-o-globe-alt'),
                     ])
                     ->columns(2),
 

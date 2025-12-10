@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\VolunteerStatus;
 use App\Models\Email;
 use App\Models\Organization;
 use App\Models\Volunteer;
@@ -41,8 +42,10 @@ final class EmailVerificationVolunteerService
         return Volunteer::create([
             'user_id' => $email->user_id,
             'organization_id' => $organization->id,
-            'position_title' => 'Member',
+            'position_title' => 'Membre',
             'started_at' => now(),
+            'status' => VolunteerStatus::Approved,
+            'approved_at' => now(),
         ]);
     }
 

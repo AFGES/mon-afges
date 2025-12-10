@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\EnsureHasVolunteerOrganization;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
@@ -62,6 +63,7 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureHasVolunteerOrganization::class,
             ])
             ->plugin(
                 FilamentSocialitePlugin::make()

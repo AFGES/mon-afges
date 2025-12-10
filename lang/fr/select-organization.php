@@ -21,6 +21,10 @@ return [
             'label' => 'Date de début',
             'required' => 'La date de début est requise.',
         ],
+        'position_title' => [
+            'label' => 'Titre du poste',
+            'placeholder' => 'Membre',
+        ],
     ],
 
     'actions' => [

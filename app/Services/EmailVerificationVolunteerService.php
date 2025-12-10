@@ -29,7 +29,8 @@ final class EmailVerificationVolunteerService
         }
 
         // Check if volunteer relationship already exists
-        $existingVolunteer = Volunteer::where('user_id', $email->user_id)
+        $existingVolunteer = Volunteer::withoutGlobalScopes()
+            ->where('user_id', $email->user_id)
             ->where('organization_id', $organization->id)
             ->whereNull('ended_at')
             ->first();

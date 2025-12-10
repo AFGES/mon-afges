@@ -18,16 +18,16 @@ it('creates volunteer when email with matching domain is verified', function () 
         'email' => 'test@example.com',
     ]);
 
-    expect(Volunteer::count())->toBe(0);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
 
     $email->markAsVerified();
 
-    expect(Volunteer::count())->toBe(1);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(1);
 
-    $volunteer = Volunteer::first();
+    $volunteer = Volunteer::withoutGlobalScopes()->first();
     expect($volunteer->user_id)->toBe($user->id);
     expect($volunteer->organization_id)->toBe($organization->id);
-    expect($volunteer->position_title)->toBe('Member');
+    expect($volunteer->position_title)->toBe('Membre');
     expect($volunteer->started_at)->not->toBeNull();
     expect($volunteer->ended_at)->toBeNull();
 });
@@ -40,11 +40,11 @@ it('does not create volunteer when email domain does not match any organization'
         'email' => 'test@different.com',
     ]);
 
-    expect(Volunteer::count())->toBe(0);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
 
     $email->markAsVerified();
 
-    expect(Volunteer::count())->toBe(0);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
 });
 
 it('does not create duplicate volunteer if one already exists', function () {
@@ -63,11 +63,11 @@ it('does not create duplicate volunteer if one already exists', function () {
         'email' => 'test@example.com',
     ]);
 
-    expect(Volunteer::count())->toBe(1);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(1);
 
     $email->markAsVerified();
 
-    expect(Volunteer::count())->toBe(1);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(1);
 });
 
 it('extracts domain correctly from email', function () {
@@ -81,7 +81,7 @@ it('extracts domain correctly from email', function () {
 
     $email->markAsVerified();
 
-    expect(Volunteer::count())->toBe(1);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(1);
 });
 
 it('handles case insensitive domain matching', function () {
@@ -94,8 +94,8 @@ it('handles case insensitive domain matching', function () {
 
     $email->markAsVerified();
 
-    expect(Volunteer::count())->toBe(1);
-    expect(Volunteer::first()->organization_id)->toBe($organization->id);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(1);
+    expect(Volunteer::withoutGlobalScopes()->first()->organization_id)->toBe($organization->id);
 });
 
 it('does not create volunteer when email is verified but domain is null', function () {
@@ -108,7 +108,7 @@ it('does not create volunteer when email is verified but domain is null', functi
 
     $email->markAsVerified();
 
-    expect(Volunteer::count())->toBe(0);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
 });
 
 it('only creates volunteer when verified_at changes', function () {
@@ -119,13 +119,13 @@ it('only creates volunteer when verified_at changes', function () {
         'email' => 'test@example.com',
     ]);
 
-    expect(Volunteer::count())->toBe(0);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
 
     // Update something other than verified_at
     $email->is_primary = true;
     $email->save();
 
-    expect(Volunteer::count())->toBe(0);
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
 });
 
 it('service returns existing volunteer if already exists', function () {
@@ -174,7 +174,7 @@ it('creates volunteer in database with correct attributes', function () {
     assertDatabaseHas('volunteers', [
         'user_id' => $user->id,
         'organization_id' => $organization->id,
-        'position_title' => 'Member',
+        'position_title' => 'Membre',
     ]);
 });
 
@@ -186,11 +186,11 @@ it('user can have volunteers relationship', function () {
         'email' => 'worker@mycompany.com',
     ]);
 
-    expect($user->volunteers)->toHaveCount(0);
+    expect($user->volunteers()->withoutGlobalScopes()->count())->toBe(0);
 
     $email->markAsVerified();
 
     $user = $user->fresh();
-    expect($user->volunteers)->toHaveCount(1);
-    expect($user->volunteers->first()->organization_id)->toBe($organization->id);
+    expect($user->volunteers()->withoutGlobalScopes()->count())->toBe(1);
+    expect($user->volunteers()->withoutGlobalScopes()->first()->organization_id)->toBe($organization->id);
 });

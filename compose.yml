@@ -21,7 +21,6 @@ services:
         depends_on:
             - pgsql
             - valkey
-            - minio
             - mailpit
     pgsql:
         image: 'postgres:17'
@@ -43,9 +42,9 @@ services:
                 - pg_isready
                 - '-q'
                 - '-d'
-                - '${DB_DATABASE}'
+                - '${POSTGRES_DB}'
                 - '-U'
-                - '${DB_USERNAME}'
+                - '${POSTGRES_USER}'
             retries: 3
             timeout: 5s
     valkey:
@@ -63,27 +62,6 @@ services:
                 - ping
             retries: 3
             timeout: 5s
-    minio:
-        image: 'minio/minio:latest'
-#        ports:
-#            - '${FORWARD_MINIO_PORT:-9000}:9000'
-#            - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
-        environment:
-            MINIO_ROOT_USER: sail
-            MINIO_ROOT_PASSWORD: password
-        volumes:
-            - 'sail-minio:/data'
-        networks:
-            - sail
-        command: 'minio server /data --console-address ":8900"'
-        healthcheck:
-            test:
-                - CMD
-                - mc
-                - ready
-                - local
-            retries: 3
-            timeout: 5s
     mailpit:
         image: 'axllent/mailpit:latest'
 #        ports:
@@ -98,6 +76,4 @@ volumes:
     sail-pgsql:
         driver: local
     sail-valkey:
-        driver: local
-    sail-minio:
         driver: local

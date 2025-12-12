@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+
+// Schedule daily sync of delegates to Google Workspace
+Schedule::command('delegates:sync-google-workspace')
+    ->daily()
+    ->timezone('Europe/Paris');

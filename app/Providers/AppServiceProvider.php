@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Delegate;
 use App\Models\User;
+use App\Observers\DelegateObserver;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Pluralizer;
@@ -29,6 +31,9 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Pluralizer::useLanguage('french');
+
+        // Register model observers
+        Delegate::observe(DelegateObserver::class);
 
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);

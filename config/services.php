@@ -18,6 +18,11 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT'),
+        'workspace' => [
+            'service_account_json' => env('GOOGLE_WORKSPACE_SERVICE_ACCOUNT_JSON'),
+            'admin_email' => env('GOOGLE_WORKSPACE_ADMIN_EMAIL'),
+            'delegate_group' => env('GOOGLE_WORKSPACE_DELEGATE_GROUP', 'test-mon@afges.org'),
+        ],
     ],
 
     'postmark' => [

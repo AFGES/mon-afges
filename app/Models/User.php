@@ -115,6 +115,14 @@ final class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Get all delegate positions for the user.
+     */
+    public function delegates(): HasMany
+    {
+        return $this->hasMany(Delegate::class);
+    }
+
+    /**
      * Sync the email field with the primary email record.
      */
     public function syncPrimaryEmail(): void

@@ -1,8 +1,7 @@
 {
     "agents": [
         "copilot",
-        "gemini",
-        "phpstorm"
+        "gemini"
     ],
     "editors": [
         "gemini",

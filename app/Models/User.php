@@ -20,6 +20,7 @@ final class User extends Authenticatable implements FilamentUser
     use HasFactory, Notifiable;
 
     use HasRoles;
+    use Notifiable;
 
     protected static function booted(): void
     {

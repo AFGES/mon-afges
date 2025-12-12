@@ -26,22 +26,19 @@ final class MagicLinkController
 
         $user = User::where('email', $request->email)->first();
 
-        if (! $user) {
-            // Don't reveal whether the user exists or not for security
-            return back()->with('status', 'Si un compte existe avec cette adresse e-mail, un lien de connexion vous a été envoyé.');
+        if ($user) {
+            // Generate a random token
+            $token = Str::random(64);
+
+            // Store hashed token and expiration
+            $user->update([
+                'magic_link_token' => Hash::make($token),
+                'magic_link_token_expires_at' => now()->addMinutes(15),
+            ]);
+
+            // Send the notification
+            $user->notify(new MagicLinkNotification($token));
         }
-
-        // Generate a random token
-        $token = Str::random(64);
-
-        // Store hashed token and expiration
-        $user->update([
-            'magic_link_token' => Hash::make($token),
-            'magic_link_token_expires_at' => now()->addMinutes(15),
-        ]);
-
-        // Send the notification
-        $user->notify(new MagicLinkNotification($token));
 
         return back()->with('status', 'Si un compte existe avec cette adresse e-mail, un lien de connexion vous a été envoyé.');
     }

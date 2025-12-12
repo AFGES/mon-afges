@@ -7,6 +7,68 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## About Mon AFGES
+
+This is a Laravel application for managing AFGES delegates and organizations.
+
+## Installation
+
+1. Copy the environment file:
+```bash
+cp .env.example .env
+```
+
+2. Configure your `.env` file with the required values:
+
+### Required Configuration
+
+```dotenv
+APP_NAME="Mon AFGES"
+APP_URL=http://localhost:8000
+APP_KEY=  # Generate with: php artisan key:generate
+
+DB_CONNECTION=pgsql
+DB_HOST=pgsql
+DB_PORT=5432
+DB_DATABASE=laravel
+DB_USERNAME=sail
+DB_PASSWORD=secret
+```
+
+### Google OAuth (for social login)
+
+```dotenv
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT="${APP_URL}/oauth/callback/google/"
+```
+
+### Google Workspace Sync (optional - for delegate synchronization)
+
+```dotenv
+GOOGLE_WORKSPACE_SERVICE_ACCOUNT_JSON=/path/to/service-account.json
+GOOGLE_WORKSPACE_ADMIN_EMAIL=admin@afges.org
+GOOGLE_WORKSPACE_DELEGATE_GROUP=test-mon@afges.org
+```
+
+See [docs/GOOGLE_WORKSPACE_SYNC.md](docs/GOOGLE_WORKSPACE_SYNC.md) for detailed setup instructions.
+
+3. Install dependencies:
+```bash
+composer install
+bun install
+```
+
+4. Run migrations:
+```bash
+php artisan migrate
+```
+
+5. Build assets:
+```bash
+bun run build
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

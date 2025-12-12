@@ -22,7 +22,7 @@
 	},
 	"remoteUser": "sail",
 	"postCreateCommand": "composer setup",
-    "postStartCommand": "composer dev",
+    "postAttachCommand": "composer dev",
 	"forwardPorts": [8000, 5173, "mailpit:8025"],
 	// "runServices": [],
 	"shutdownAction": "stopCompose"

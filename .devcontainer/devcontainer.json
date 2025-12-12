@@ -21,8 +21,9 @@
 		}
 	},
 	"remoteUser": "sail",
-	"postCreateCommand": "chown -R 1000:1000 /var/www/html; composer run setup",
-	"forwardPorts": [80, 5173, "mailpit:8025"]
+	"postCreateCommand": "composer setup",
+    "postStartCommand": "composer start",
+	"forwardPorts": [8000, 5173, "mailpit:8025"],
 	// "runServices": [],
-	// "shutdownAction": "none",
+	"shutdownAction": "stopCompose"
 }

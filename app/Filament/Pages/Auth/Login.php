@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 final class Login extends BaseLogin
 {
-    public bool $showMagicLinkForm = false;
+    public bool $showMagicLinkForm = true;
 
     /**
      * Override the form schema to conditionally show/hide fields.

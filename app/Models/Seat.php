@@ -61,7 +61,7 @@ final class Seat extends Model
      * Get the label for the seat.
      * Format: "Short Name Org (College Name): Delegate1, Delegate2, ..."
      */
-    public function getLabelAttribute(): string
+    public function label(): string
     {
         $organization = $this->collegeOrganization->organization;
         $college = $this->collegeOrganization->college;
@@ -73,7 +73,7 @@ final class Seat extends Model
             '%s (%s): %s',
             $organization->short_name,
             $college->name,
-            $delegateNames ?: 'Empty'
+            $delegateNames ?: 'Vide'
         );
     }
 }

@@ -26,12 +26,12 @@ final class VolunteerForm
                                 Select::make('user_id')
                                     ->label(__('volunteer.fields.user'))
                                     ->relationship('user', 'name')
-                                    ->disabled()
+                                    ->disabled(fn ($record) => $record !== null)
                                     ->required(),
                                 Select::make('organization_id')
                                     ->label(__('volunteer.fields.organization'))
                                     ->relationship('organization', 'short_name')
-                                    ->disabled()
+                                    ->disabled(fn ($record) => $record !== null)
                                     ->required(),
                             ]),
                         TextInput::make('position_title')

@@ -21,6 +21,12 @@ This is a Laravel 12 + Filament v4 application for managing AFGES delegates, org
 - Email domain matching determines organization association during registration
 - French is the primary language (see `lang/fr/` and translation keys in Enums)
 
+**French Translation Guidelines:**
+- "delegate" → "délégué(e)" (with inclusive form when appropriate)
+- For volunteer positions/applications → use "mandat" (mandate)
+- Always use inclusive forms: "délégué-e", "sûr-e", "notifié-e" for user-facing text
+- Maintain consistency across all translation files in `lang/fr/`
+
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 

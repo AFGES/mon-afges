@@ -25,14 +25,10 @@ return [
             'label' => 'Titre du poste',
             'placeholder' => 'Membre',
         ],
-        'apply_as_delegate' => [
-            'label' => 'Postuler comme délégué',
-            'helper' => 'Cochez cette option si vous souhaitez également postuler pour devenir délégué pour cette association.',
-        ],
         'seat' => [
             'label' => 'Siège',
-            'helper' => 'Sélectionnez le siège pour lequel vous souhaitez postuler en tant que délégué.',
-            'required' => 'Le siège est requis lors de la candidature en tant que délégué.',
+            'helper' => 'Sélectionnez le siège pour lequel vous souhaitez devenir délégué-e.',
+            'required' => 'Le siège est requis lors de la demande pour devenir délégué-e.',
         ],
     ],
 
@@ -43,21 +39,13 @@ return [
     ],
 
     'notifications' => [
-        'success' => [
-            'title' => 'Associations sélectionnées',
-            'body' => 'Vous êtes maintenant membre des associations sélectionnées.',
-        ],
-        'no_organizations' => [
-            'title' => 'Aucune association disponible',
-            'body' => 'Il n\'y a actuellement aucune association disponible. Veuillez contacter un administrateur.',
-        ],
-        'volunteer_and_delegate_submitted' => [
-            'title' => 'Candidatures soumises',
-            'body' => 'Vos candidatures de bénévole et de délégué ont été soumises et sont en attente d\'approbation.',
+        'volunteer_submitted' => [
+            'title' => 'Mandats en attente d\'approbation',
+            'body' => 'Vos demandes de mandats ont été soumises et sont en attente d\'approbation.',
         ],
         'delegate_submitted' => [
-            'title' => 'Candidatures de délégué soumises',
-            'body' => 'Vos candidatures de délégué ont été soumises et sont en attente d\'approbation.',
+            'title' => 'Mandat de délégué-e en attente d\'approbation',
+            'body' => 'Votre mandat de délégué-e a été soumis et est en attente d\'approbation.',
         ],
     ],
 ];

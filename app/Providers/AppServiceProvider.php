@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +32,12 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register Livewire components explicitly
+        Livewire::component('profile.manage-volunteers', \App\Livewire\Profile\ManageVolunteers::class);
+        Livewire::component('profile.manage-delegates', \App\Livewire\Profile\ManageDelegates::class);
+        Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);
+        Livewire::component('manage_delegates', \App\Livewire\Profile\ManageDelegates::class);
+
         if (app()->runningInConsole()) {
             \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
                 'user' => User::class,

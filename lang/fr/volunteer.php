@@ -3,16 +3,16 @@
 declare(strict_types=1);
 
 return [
-    'label' => 'Bénévole',
-    'plural_label' => 'Bénévoles',
+    'label' => 'Mandat de bénévolat',
+    'plural_label' => 'Mandats de bénévolat',
 
     'fields' => [
         'user' => 'Utilisateur',
         'organization' => 'Association',
-        'position_title' => 'Poste',
+        'position_title' => 'Titre du poste',
         'status' => 'Statut',
-        'started_at' => 'Début',
-        'ended_at' => 'Fin',
+        'started_at' => 'Date de début',
+        'ended_at' => 'Date de fin',
         'approved_at' => 'Approuvé le',
         'approved_by' => 'Approuvé par',
         'rejection_reason' => 'Raison du refus',
@@ -38,20 +38,20 @@ return [
 
     'notifications' => [
         'approved' => [
-            'title' => 'Bénévole approuvé avec succès',
+            'title' => 'Mandat de bénévolat approuvé avec succès',
         ],
         'rejected' => [
-            'title' => 'Bénévole refusé avec succès',
+            'title' => 'Mandat de bénévolat refusé avec succès',
         ],
         'pending_approval' => [
-            'title' => 'Inscription en attente d\'approbation',
-            'body' => 'Votre inscription en tant que bénévole est en attente d\'approbation. Vous serez notifié une fois qu\'elle aura été examinée.',
+            'title' => 'Candidature en attente d\'approbation',
+            'body' => 'Votre candidature pour un mandat de bénévolat est en attente d\'approbation. Vous serez notifié(e) une fois qu\'elle aura été examinée.',
         ],
     ],
 
     'stats' => [
         'pending_approvals' => 'Approbations en attente',
-        'pending_description' => 'Bénévoles en attente d\'approbation',
+        'pending_description' => 'Mandats de bénévolat en attente d\'approbation',
     ],
 
     'sections' => [

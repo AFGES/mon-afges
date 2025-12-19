@@ -65,7 +65,8 @@ final class AdminPanelProvider extends PanelProvider
                 BreezyCore::make()
                     ->myProfile()
                     ->myProfileComponents([
-                        \App\Livewire\Profile\ManageOrganizations::class,
+                        \App\Livewire\Profile\ManageVolunteers::class,
+                        \App\Livewire\Profile\ManageDelegates::class,
                     ]),
             ])
             ->authMiddleware([

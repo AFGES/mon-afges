@@ -1,9 +1,25 @@
 <laravel-boost-guidelines>
 === foundation rules ===
 
-# Laravel Boost Guidelines
+# Mon AFGES - Delegate & Organization Management System
 
-The Laravel Boost guidelines are specifically curated by Laravel maintainers for this application. These guidelines should be followed closely to enhance the user's satisfaction building Laravel applications.
+This is a Laravel 12 + Filament v4 application for managing AFGES delegates, organizations, and volunteer applications.
+
+## Domain Context
+
+**Core Entities:**
+- **Delegates**: Representatives associated with organizations and seats, with approval workflow
+- **Organizations**: Educational institutions (identified by email domain) with college-based seat allocation
+- **Volunteers**: Users applying for volunteer positions with approval workflow
+- **Seats**: College-specific positions within organizations (many-to-many with delegates)
+- **Users**: Authenticated via Google OAuth, magic links, or Filament Breezy
+
+**Key Business Rules:**
+- Delegates MUST be approved before appearing in default queries (via `ApprovedScope`)
+- Delegates are scoped to "current" periods using `CurrentlyScope` (checks `started_at`)
+- Organizations sync with Google Workspace groups for delegate access
+- Email domain matching determines organization association during registration
+- French is the primary language (see `lang/fr/` and translation keys in Enums)
 
 ## Foundational Context
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
@@ -22,10 +38,37 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - phpunit/phpunit (PHPUNIT) - v11
 - tailwindcss (TAILWINDCSS) - v4
 
+## Architecture Patterns
+
+### Approval Workflow Pattern
+Models use `HasApprovalStatus` trait (see `app/Traits/HasApprovalStatus.php`):
+- Provides `approve()`, `reject()`, `isPending()`, `isApproved()`, `isRejected()` methods
+- Tracks approver via `approved_by` relationship
+- Status tracked via `ApprovalStatus` enum (Pending/Approved/Rejected)
+- Applied to: `Delegate`, `Volunteer` models
+
+### Global Scopes Architecture
+Critical: Understand default query behavior via global scopes:
+- `ApprovedScope`: Filters to approved-only records (applied to Delegate model)
+- `CurrentlyScope`: Filters to currently active records based on `started_at` date
+- Use `withoutGlobalScope()` or model attributes to bypass when needed
+
+### Service Layer for Complex Operations
+- `GoogleWorkspaceService`: Manages Google Workspace group membership for delegates
+- `OrganizationCollegeSyncService`: Syncs college relationships with seat creation (called via `syncCollegesWithSeats()` on Organization model)
+- `EmailVerificationVolunteerService`: Handles volunteer email verification logic
+
+### Enum Pattern with UI Helpers
+All enums (see `app/Enums/`) provide:
+- `label()`: Returns translated display text
+- `color()`: Returns Filament color for UI badges (success/warning/danger)
+Example: `ApprovalStatus::Approved->label()` → translated text from `lang/*/approval.php`
+
 ## Conventions
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, naming.
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
+- **French-first**: UI text and translation keys default to French (check `lang/fr/`)
 
 ## Verification Scripts
 - Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
@@ -33,6 +76,26 @@ This application is a Laravel application and its main Laravel ecosystems packag
 ## Application Structure & Architecture
 - Stick to existing directory structure - don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
+- Filament resources live in `app/Filament/Resources/{Entity}/` (plural names: Delegates/, Organizations/, etc.)
+- Policies use permission-based authorization via Filament Shield: `$authUser->can('ViewAny:Delegate')`
+
+## Authentication & Authorization
+- **Google OAuth** via Filament Socialite (config in `config/filament-socialite.php`)
+- **Magic Link** authentication via `MagicLinkController` (passwordless login, 15-min expiry)
+- **Filament Shield** for role/permission management (see `config/filament-shield.php`)
+- Policies check permissions like `Create:Delegate`, `Update:Organization` (not model-based gates)
+
+## Critical Integration Points
+
+### Google Workspace Sync
+When delegates are approved, they should be added to Google Workspace groups:
+- Configured via `GOOGLE_WORKSPACE_*` env vars (service account JSON, admin email, group email)
+- Service handles 409 conflicts (already a member) gracefully
+- See `GoogleWorkspaceService::addToGroup()` for implementation pattern
+
+### Event Listeners
+- `AssignsOrganizationRegistrationListener`: Attempts to match user to organization by email domain on registration (Filament `Registered` event)
+- `MarkEmailAsVerifiedOnSocialiteLogin`: Auto-verifies email for OAuth users
 
 ## Frontend Bundling
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `bun run build`, `bun run dev`, or `composer run dev`. Ask them.

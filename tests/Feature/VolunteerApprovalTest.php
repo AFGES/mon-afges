@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
@@ -66,7 +66,7 @@ test('rejected volunteer factory state creates rejected volunteer', function () 
 test('new volunteer is pending by default', function () {
     $volunteer = Volunteer::withoutGlobalScopes()->create(Volunteer::factory()->make()->toArray());
 
-    expect($volunteer->status)->toBe(VolunteerStatus::Pending);
+    expect($volunteer->status)->toBe(ApprovalStatus::Pending);
     expect($volunteer->isPending())->toBeTrue();
     expect($volunteer->isApproved())->toBeFalse();
     expect($volunteer->isRejected())->toBeFalse();

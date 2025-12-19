@@ -19,7 +19,7 @@ test('seat is empty returns false when has delegates', function () {
     $seat = $collegeOrg->seatRecords->first();
 
     $user = User::factory()->create();
-    Delegate::factory()->create([
+    Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'user_id' => $user->id,
         'organization_id' => $collegeOrg->organization_id,

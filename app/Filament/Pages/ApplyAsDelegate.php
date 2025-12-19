@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
 use App\Models\Seat;
 use App\Models\Volunteer;
@@ -134,6 +135,7 @@ final class ApplyAsDelegate extends Page
             'seat_id' => $data['seat_id'],
             'started_at' => now(),
             'ended_at' => null,
+            'status' => ApprovalStatus::Pending,
         ]);
 
         Notification::make()

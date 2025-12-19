@@ -148,7 +148,7 @@ test('delegate sync handles user without email gracefully', function () {
 test('user has delegates relationship', function () {
     $user = User::factory()->create();
 
-    Delegate::factory()->count(3)->create([
+    Delegate::factory()->approved()->count(3)->create([
         'user_id' => $user->id,
     ]);
 

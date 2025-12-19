@@ -69,7 +69,7 @@ test('widget counts only pending volunteers not approved ones', function () {
     actingAs($admin);
 
     $pendingCount = Volunteer::withoutGlobalScopes()
-        ->where('status', \App\Enums\VolunteerStatus::Pending)
+        ->where('status', \App\Enums\ApprovalStatus::Pending)
         ->count();
 
     expect($pendingCount)->toBe(2);

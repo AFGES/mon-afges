@@ -23,7 +23,7 @@ test('a delegate can be assigned to a seat', function () {
     ]);
     $user = User::factory()->create();
 
-    $delegate = Delegate::factory()->create([
+    $delegate = Delegate::factory()->approved()->create([
         'user_id' => $user->id,
         'organization_id' => $collegeOrg->organization_id,
         'seat_id' => $seat->id,
@@ -43,7 +43,7 @@ test('a delegate can access college through seat', function () {
     $seat = Seat::factory()->create([
         'college_organization_id' => $collegeOrg->id,
     ]);
-    $delegate = Delegate::factory()->create([
+    $delegate = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $organization->id,
     ]);
@@ -62,15 +62,15 @@ test('multiple delegates can be assigned to the same seat when delegates_per_sea
         'college_organization_id' => $collegeOrg->id,
     ]);
 
-    $delegate1 = Delegate::factory()->create([
+    $delegate1 = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrg->organization_id,
     ]);
-    $delegate2 = Delegate::factory()->create([
+    $delegate2 = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrg->organization_id,
     ]);
-    $delegate3 = Delegate::factory()->create([
+    $delegate3 = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrg->organization_id,
     ]);
@@ -102,11 +102,11 @@ test('college can access delegates through seats', function () {
     $seat2 = $seats->last();
 
     // Create delegates
-    $delegate1 = Delegate::factory()->create([
+    $delegate1 = Delegate::factory()->approved()->create([
         'seat_id' => $seat1->id,
         'organization_id' => $organization->id,
     ]);
-    $delegate2 = Delegate::factory()->create([
+    $delegate2 = Delegate::factory()->approved()->create([
         'seat_id' => $seat2->id,
         'organization_id' => $organization->id,
     ]);

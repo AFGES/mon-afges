@@ -32,6 +32,21 @@ final class AppServiceProvider extends ServiceProvider
     {
         Pluralizer::useLanguage('french');
 
+        // Register Blueprint macro for approval status columns
+        \Illuminate\Database\Schema\Blueprint::macro('approvalStatus', function (?string $after = null) {
+            /** @var \Illuminate\Database\Schema\Blueprint $this */
+            $this->string('status')->default('pending')->after($after);
+            $this->timestamp('approved_at')->nullable()->after('status');
+            $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
+            $this->text('rejection_reason')->nullable()->after('approved_by');
+        });
+
+        \Illuminate\Database\Schema\Blueprint::macro('dropApprovalStatus', function () {
+            /** @var \Illuminate\Database\Schema\Blueprint $this */
+            $this->dropForeign(['approved_by']);
+            $this->dropColumn(['status', 'approved_at', 'approved_by', 'rejection_reason']);
+        });
+
         // Register model observers
         Delegate::observe(DelegateObserver::class);
 

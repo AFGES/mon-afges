@@ -29,17 +29,17 @@ test('seat can have multiple delegates when allowed', function () {
 
     $seat = $collegeOrg->seatRecords->first();
 
-    $delegate1 = Delegate::factory()->create([
+    $delegate1 = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrg->organization_id,
     ]);
 
-    $delegate2 = Delegate::factory()->create([
+    $delegate2 = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrg->organization_id,
     ]);
 
-    $delegate3 = Delegate::factory()->create([
+    $delegate3 = Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrg->organization_id,
     ]);

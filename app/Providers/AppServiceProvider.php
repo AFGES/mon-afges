@@ -63,6 +63,23 @@ final class AppServiceProvider extends ServiceProvider
             $this->dropColumn(['status', 'approved_at', 'approved_by', 'rejection_reason']);
         });
 
+        // Register Blueprint macro for period (start/end date) columns
+        \Illuminate\Database\Schema\Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null) {
+            /** @var \Illuminate\Database\Schema\Blueprint $this */
+            if ($startType === 'datetime') {
+                $this->datetime('started_at')->useCurrent()->after($after);
+                $this->datetime('ended_at')->nullable()->after('started_at');
+            } else {
+                $this->date('started_at')->useCurrent()->after($after);
+                $this->date('ended_at')->nullable()->after('started_at');
+            }
+        });
+
+        \Illuminate\Database\Schema\Blueprint::macro('dropPeriod', function () {
+            /** @var \Illuminate\Database\Schema\Blueprint $this */
+            $this->dropColumn(['started_at', 'ended_at']);
+        });
+
         // Register model observers
         Delegate::observe(DelegateObserver::class);
 

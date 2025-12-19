@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Models\Delegate;
 use App\Models\Organization;
+use App\Models\Seat;
 use App\Models\Volunteer;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -62,6 +65,7 @@ final class SelectOrganization extends Page
                                 ->searchable()
                                 ->preload()
                                 ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                ->live()
                                 ->validationMessages([
                                     'required' => __('select-organization.form.organization.required'),
                                 ]),
@@ -79,6 +83,44 @@ final class SelectOrganization extends Page
                                 ->displayFormat('d/m/Y')
                                 ->validationMessages([
                                     'required' => __('select-organization.form.started_at.required'),
+                                ]),
+                            Checkbox::make('apply_as_delegate')
+                                ->label(__('select-organization.form.apply_as_delegate.label'))
+                                ->helperText(__('select-organization.form.apply_as_delegate.helper'))
+                                ->live()
+                                ->default(false),
+                            Select::make('seat_id')
+                                ->label(__('select-organization.form.seat.label'))
+                                ->helperText(__('select-organization.form.seat.helper'))
+                                ->options(function (callable $get) {
+                                    $organizationId = $get('organization_id');
+                                    if (! $organizationId) {
+                                        return [];
+                                    }
+
+                                    return Seat::query()
+                                        ->whereHas('collegeOrganization', function ($query) use ($organizationId) {
+                                            $query->where('organization_id', $organizationId);
+                                        })
+                                        ->with(['collegeOrganization.college', 'collegeOrganization.organization'])
+                                        ->get()
+                                        ->mapWithKeys(function ($seat) {
+                                            return [
+                                                $seat->id => sprintf(
+                                                    '%s - %s (Seat %d)',
+                                                    $seat->collegeOrganization->organization->short_name,
+                                                    $seat->collegeOrganization->college->name,
+                                                    $seat->seat_number
+                                                ),
+                                            ];
+                                        });
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->visible(fn (callable $get) => $get('apply_as_delegate') === true)
+                                ->required(fn (callable $get) => $get('apply_as_delegate') === true)
+                                ->validationMessages([
+                                    'required' => __('select-organization.form.seat.required'),
                                 ]),
                         ])
                         ->columns(3)
@@ -113,20 +155,51 @@ final class SelectOrganization extends Page
 
         $user = Auth::user();
 
+        $hasVolunteerApplications = false;
+        $hasDelegateApplications = false;
+
         foreach ($data['organizations'] as $item) {
+            // Create volunteer application
             Volunteer::create([
                 'user_id' => $user->id,
                 'organization_id' => $item['organization_id'],
                 'position_title' => $item['position_title'] ?? 'Membre',
                 'started_at' => $item['started_at'] ?? now(),
             ]);
+            $hasVolunteerApplications = true;
+
+            // Create delegate application if requested
+            if (($item['apply_as_delegate'] ?? false) && isset($item['seat_id'])) {
+                Delegate::create([
+                    'user_id' => $user->id,
+                    'organization_id' => $item['organization_id'],
+                    'seat_id' => $item['seat_id'],
+                    'started_at' => $item['started_at'] ?? now(),
+                ]);
+                $hasDelegateApplications = true;
+            }
         }
 
-        Notification::make()
-            ->title(__('volunteer.notifications.pending_approval.title'))
-            ->body(__('volunteer.notifications.pending_approval.body'))
-            ->info()
-            ->send();
+        // Show appropriate notification based on what was submitted
+        if ($hasDelegateApplications && $hasVolunteerApplications) {
+            Notification::make()
+                ->title(__('select-organization.notifications.volunteer_and_delegate_submitted.title'))
+                ->body(__('select-organization.notifications.volunteer_and_delegate_submitted.body'))
+                ->info()
+                ->send();
+        } elseif ($hasDelegateApplications) {
+            Notification::make()
+                ->title(__('select-organization.notifications.delegate_submitted.title'))
+                ->body(__('select-organization.notifications.delegate_submitted.body'))
+                ->info()
+                ->send();
+        } else {
+            Notification::make()
+                ->title(__('volunteer.notifications.pending_approval.title'))
+                ->body(__('volunteer.notifications.pending_approval.body'))
+                ->info()
+                ->send();
+        }
 
         $this->redirect(Filament::getUrl());
     }

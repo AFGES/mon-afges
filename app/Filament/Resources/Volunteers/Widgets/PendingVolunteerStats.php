@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Volunteers\Widgets;
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use App\Models\Volunteer;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
@@ -15,7 +15,7 @@ final class PendingVolunteerStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         $pendingCount = Volunteer::withoutGlobalScopes()
-            ->where('status', VolunteerStatus::Pending)
+            ->where('status', ApprovalStatus::Pending)
             ->count();
 
         return [
@@ -26,7 +26,7 @@ final class PendingVolunteerStats extends StatsOverviewWidget
                 ->url(route('filament.root.resources.volunteers.index', [
                     'tableFilters' => [
                         'status' => [
-                            'value' => VolunteerStatus::Pending->value,
+                            'value' => ApprovalStatus::Pending->value,
                         ],
                     ],
                 ])),

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Volunteers\Tables;
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -38,7 +38,7 @@ class VolunteersTable
                 TextColumn::make('status')
                     ->label(__('volunteer.fields.status'))
                     ->badge()
-                    ->color(fn (VolunteerStatus $state): string => $state->color())
+                    ->color(fn (ApprovalStatus $state): string => $state->color())
                     ->sortable(),
                 TextColumn::make('started_at')
                     ->label(__('volunteer.fields.started_at'))
@@ -73,11 +73,11 @@ class VolunteersTable
                 SelectFilter::make('status')
                     ->label(__('volunteer.filters.status'))
                     ->options([
-                        VolunteerStatus::Pending->value => __('volunteer.status.pending'),
-                        VolunteerStatus::Approved->value => __('volunteer.status.approved'),
-                        VolunteerStatus::Rejected->value => __('volunteer.status.rejected'),
+                        ApprovalStatus::Pending->value => __('volunteer.status.pending'),
+                        ApprovalStatus::Approved->value => __('volunteer.status.approved'),
+                        ApprovalStatus::Rejected->value => __('volunteer.status.rejected'),
                     ])
-                    ->default(VolunteerStatus::Pending->value),
+                    ->default(ApprovalStatus::Pending->value),
                 TrashedFilter::make(),
             ])
             ->recordActions([

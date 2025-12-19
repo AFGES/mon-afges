@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
+use App\Traits\HasApprovalStatus;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
 final class Volunteer extends Model
 {
+    use HasApprovalStatus;
+
     /** @use HasFactory<\Database\Factories\VolunteerFactory> */
     use HasFactory;
 
@@ -43,53 +46,13 @@ final class Volunteer extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function approver(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function isPending(): bool
-    {
-        return $this->status === VolunteerStatus::Pending;
-    }
-
-    public function isApproved(): bool
-    {
-        return $this->status === VolunteerStatus::Approved;
-    }
-
-    public function isRejected(): bool
-    {
-        return $this->status === VolunteerStatus::Rejected;
-    }
-
-    public function approve(?int $approvedBy = null): void
-    {
-        $this->update([
-            'status' => VolunteerStatus::Approved,
-            'approved_at' => now(),
-            'approved_by' => $approvedBy ?? auth()->id(),
-            'rejection_reason' => null,
-        ]);
-    }
-
-    public function reject(string $reason, ?int $rejectedBy = null): void
-    {
-        $this->update([
-            'status' => VolunteerStatus::Rejected,
-            'approved_at' => now(),
-            'approved_by' => $rejectedBy ?? auth()->id(),
-            'rejection_reason' => $reason,
-        ]);
-    }
-
     protected function casts(): array
     {
         return [
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
             'approved_at' => 'datetime',
-            'status' => VolunteerStatus::class,
+            'status' => ApprovalStatus::class,
         ];
     }
 }

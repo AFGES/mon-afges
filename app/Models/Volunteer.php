@@ -8,6 +8,7 @@ use App\Enums\ApprovalStatus;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
+use App\Traits\HasPeriod;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,18 +23,13 @@ final class Volunteer extends Model
     /** @use HasFactory<\Database\Factories\VolunteerFactory> */
     use HasFactory;
 
+    use HasPeriod;
     use SoftDeletes;
 
     public $fillable = [
         'position_title',
-        'started_at',
-        'ended_at',
         'user_id',
         'organization_id',
-        'status',
-        'approved_at',
-        'approved_by',
-        'rejection_reason',
     ];
 
     public function organization(): BelongsTo

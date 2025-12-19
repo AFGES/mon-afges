@@ -13,8 +13,7 @@ return new class extends Migration
         Schema::create('volunteers', function (Blueprint $table) {
             $table->id();
             $table->string('position_title');
-            $table->dateTime('started_at');
-            $table->dateTime('ended_at')->nullable();
+            $table->period();
             $table->foreignIdFor(Organization::class)->constrained('organizations');
             $table->foreignIdFor(User::class)->constrained('users');
             $table->timestamps();

@@ -14,8 +14,10 @@ class CurrentlyScope implements Scope
     public function apply(Builder $builder, Model $model): void
     {
         $builder
-            ->whereTodayOrBefore('started_at');
-        // ->whereTodayOrAfter('ended_at')
-        // ->orWhereNull('ended_at');
+            ->whereTodayOrBefore('started_at')
+            ->where(function (Builder $query) {
+                $query->whereTodayOrAfter('ended_at')
+                    ->orWhereNull('ended_at');
+            });
     }
 }

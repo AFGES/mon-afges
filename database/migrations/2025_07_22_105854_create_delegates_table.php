@@ -12,8 +12,7 @@ return new class extends Migration
     {
         Schema::create('delegates', function (Blueprint $table) {
             $table->id();
-            $table->date('started_at')->useCurrent();
-            $table->date('ended_at')->nullable();
+            $table->period('date');
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Organization::class)->constrained('organizations');
             $table->timestamps();

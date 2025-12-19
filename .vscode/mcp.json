@@ -6,6 +6,26 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/"
+        },
+        
+        "deepl": {
+            "command": "bunx",
+            "args": ["deepl-mcp-server"],
+            "env": {
+                "DEEPL_API_KEY": "${input:deeplApiKey}"
+            }
         }
-    }
+    },
+    "inputs": [
+        {
+            "id": "deeplApiKey",
+            "type": "promptString",
+            "description": "your DeepL API Key",
+            "password": true
+        }
+    ]
 }

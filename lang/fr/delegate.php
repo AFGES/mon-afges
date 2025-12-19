@@ -7,10 +7,6 @@ return [
     'plural' => 'délégués',
     'started_at' => 'À partir du',
     'ended_at' => 'Jusqu\'au',
-    'active' => 'actif',
-    'old' => 'ancien',
-    'future' => 'futur',
-    'all' => 'tout',
 
     'fields' => [
         'seat' => 'Siège',
@@ -26,5 +22,38 @@ return [
         'pending' => 'En attente d\'approbation',
         'approved' => 'Approuvé',
         'rejected' => 'Refusé',
+    ],
+
+    'tabs' => [
+        'current' => 'Actuel',
+        'pending' => 'En attente',
+        'rejected' => 'Refusés',
+        'old' => 'Ancien',
+        'future' => 'Futur',
+        'all' => 'Tout',
+    ],
+
+    'sections' => [
+        'general' => 'Informations générales',
+        'approval' => 'Statut d\'approbation',
+    ],
+
+    'filters' => [
+        'status' => 'Statut',
+        'period' => 'Période',
+    ],
+
+    'actions' => [
+        'approve' => 'Approuver',
+        'reject' => 'Refuser',
+    ],
+
+    'notifications' => [
+        'approved' => [
+            'title' => 'Délégué approuvé avec succès',
+        ],
+        'rejected' => [
+            'title' => 'Délégué refusé avec succès',
+        ],
     ],
 ];

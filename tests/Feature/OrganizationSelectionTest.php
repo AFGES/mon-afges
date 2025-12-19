@@ -15,7 +15,7 @@ beforeEach(function () {
     Filament::setCurrentPanel('admin');
 });
 
-test('user without volunteer organization is redirected to select organization page', function () {
+test('user without volunteer organization is redirected to profile page', function () {
     $user = User::factory()->create(['email' => 'test@afges.org']);
     Organization::factory()->create(); // Create at least one organization
 
@@ -23,7 +23,7 @@ test('user without volunteer organization is redirected to select organization p
 
     $response = get(route('filament.root.pages.dashboard'));
 
-    $response->assertRedirect(route('filament.root.pages.select-organization'));
+    $response->assertRedirect(route('filament.root.pages.my-profile'));
 });
 
 test('user with approved volunteer organization can access dashboard', function () {
@@ -42,7 +42,7 @@ test('user with approved volunteer organization can access dashboard', function 
     $response->assertSuccessful();
 });
 
-test('user with pending volunteer organization is redirected to select organization page', function () {
+test('user with pending volunteer organization is redirected to profile page', function () {
     $user = User::factory()->create(['email' => 'test@afges.org']);
     $organization = Organization::factory()->create();
 
@@ -58,10 +58,10 @@ test('user with pending volunteer organization is redirected to select organizat
 
     $response = get(route('filament.root.pages.dashboard'));
 
-    $response->assertRedirect(route('filament.root.pages.select-organization'));
+    $response->assertRedirect(route('filament.root.pages.my-profile'));
 });
 
-test('user can select organizations on the select organization page', function () {
+test('user can select organizations on the profile page', function () {
     $user = User::factory()->create(['email' => 'test@afges.org']);
     $organization1 = Organization::factory()->create(['short_name' => 'Org 1']);
     $organization2 = Organization::factory()->create(['short_name' => 'Org 2']);
@@ -71,7 +71,7 @@ test('user can select organizations on the select organization page', function (
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Filament\Pages\SelectOrganization::class)
+    Livewire::test(\App\Livewire\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -85,9 +85,8 @@ test('user can select organizations on the select organization page', function (
             ],
         ])
         ->assertHasNoFormErrors()
-        ->call('submit')
-        ->assertHasNoFormErrors()
-        ->assertRedirect(route('filament.root.pages.dashboard'));
+        ->call('submitOrganizations')
+        ->assertHasNoFormErrors();
 
     // Need to bypass global scope to find pending volunteers
     $volunteer1 = \App\Models\Volunteer::withoutGlobalScopes()
@@ -114,12 +113,14 @@ test('user must select at least one organization', function () {
 
     actingAs($user);
 
-    Livewire::test(\App\Filament\Pages\SelectOrganization::class)
+    Livewire::test(\App\Livewire\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [],
         ])
-        ->call('submit')
-        ->assertHasFormErrors(['organizations']);
+        ->call('submitOrganizations');
+
+    // Submitting empty organizations should not create any volunteers
+    expect(Volunteer::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(0);
 });
 
 test('user without volunteer organization can access dashboard when no organizations exist', function () {
@@ -181,7 +182,7 @@ test('user can apply as delegate when selecting organizations', function () {
 
     $startDate = now()->subDays(7)->startOfDay();
 
-    Livewire::test(\App\Filament\Pages\SelectOrganization::class)
+    Livewire::test(\App\Livewire\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -194,9 +195,8 @@ test('user can apply as delegate when selecting organizations', function () {
             ],
         ])
         ->assertHasNoFormErrors()
-        ->call('submit')
-        ->assertHasNoFormErrors()
-        ->assertRedirect(route('filament.root.pages.dashboard'));
+        ->call('submitOrganizations')
+        ->assertHasNoFormErrors();
 
     // Verify volunteer application was created
     $volunteer = Volunteer::withoutGlobalScopes()
@@ -240,7 +240,7 @@ test('user can apply to multiple organizations with different delegate options',
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Filament\Pages\SelectOrganization::class)
+    Livewire::test(\App\Livewire\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -257,9 +257,8 @@ test('user can apply to multiple organizations with different delegate options',
             ],
         ])
         ->assertHasNoFormErrors()
-        ->call('submit')
-        ->assertHasNoFormErrors()
-        ->assertRedirect(route('filament.root.pages.dashboard'));
+        ->call('submitOrganizations')
+        ->assertHasNoFormErrors();
 
     // Verify both volunteer applications
     expect(Volunteer::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(2);

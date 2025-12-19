@@ -88,7 +88,7 @@ test('middleware only allows users with approved volunteers', function () {
 
     // Should be redirected since volunteer is not approved
     $response = $this->get('/');
-    $response->assertRedirect(route('filament.root.pages.select-organization'));
+    $response->assertRedirect(route('filament.root.pages.my-profile'));
 
     // Approve the volunteer (need to bypass scope to find it)
     $user->volunteers()->withoutGlobalScopes()->first()->approve();

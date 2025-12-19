@@ -15,7 +15,8 @@
 				"ryannaddy.laravel-artisan",
 				"onecentlin.laravel5-snippets",
 				"onecentlin.laravel-blade",
-				"GitHub.copilot-chat"
+				"GitHub.copilot-chat",
+				"csstools.postcss"
 			],
 			"settings": {}
 		}

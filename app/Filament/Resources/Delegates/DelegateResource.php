@@ -10,6 +10,7 @@ use App\Filament\Resources\Delegates\Pages\ListDelegates;
 use App\Filament\Resources\Delegates\Schemas\DelegateForm;
 use App\Filament\Resources\Delegates\Tables\DelegatesTable;
 use App\Models\Delegate;
+use App\Models\Scopes\ApprovedScope;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -39,6 +40,11 @@ final class DelegateResource extends Resource
         return __('delegate.plural');
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return Delegate::getNavigationBadge();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return DelegateForm::configure($schema);
@@ -65,11 +71,20 @@ final class DelegateResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                ApprovedScope::class,
+            ]);
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
+                ApprovedScope::class,
             ]);
     }
 }

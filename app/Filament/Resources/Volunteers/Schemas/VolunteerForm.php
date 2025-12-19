@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Volunteers\Schemas;
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -58,11 +58,11 @@ final class VolunteerForm
                                 Select::make('status')
                                     ->label(__('volunteer.fields.status'))
                                     ->options([
-                                        VolunteerStatus::Pending->value => __('volunteer.status.pending'),
-                                        VolunteerStatus::Approved->value => __('volunteer.status.approved'),
-                                        VolunteerStatus::Rejected->value => __('volunteer.status.rejected'),
+                                        ApprovalStatus::Pending->value => __('volunteer.status.pending'),
+                                        ApprovalStatus::Approved->value => __('volunteer.status.approved'),
+                                        ApprovalStatus::Rejected->value => __('volunteer.status.rejected'),
                                     ])
-                                    ->default(VolunteerStatus::Pending->value)
+                                    ->default(ApprovalStatus::Pending->value)
                                     ->required(),
                                 Select::make('approved_by')
                                     ->label(__('volunteer.fields.approved_by'))
@@ -74,7 +74,7 @@ final class VolunteerForm
                             ->label(__('volunteer.fields.rejection_reason'))
                             ->rows(3)
                             ->maxLength(1000)
-                            ->visible(fn ($get) => $get('status') === VolunteerStatus::Rejected->value),
+                            ->visible(fn ($get) => $get('status') === ApprovalStatus::Rejected->value),
                     ])
                     ->collapsible(),
             ]);

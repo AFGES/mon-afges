@@ -103,7 +103,7 @@ test('organization college sync service throws exception when trying to remove o
     // Assign delegates to all 3 seats
     $user = User::factory()->create();
     foreach ($collegeOrg->seatRecords as $seat) {
-        Delegate::factory()->create([
+        Delegate::factory()->approved()->create([
             'seat_id' => $seat->id,
             'user_id' => $user->id,
             'organization_id' => $organization->id,

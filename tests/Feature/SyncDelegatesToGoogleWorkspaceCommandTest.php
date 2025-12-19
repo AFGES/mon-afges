@@ -23,7 +23,7 @@ test('sync command fails when configuration is incomplete', function () {
 
 test('sync command shows active delegates', function () {
     $user = User::factory()->create(['email' => 'delegate@afges.org']);
-    Delegate::factory()->create([
+    Delegate::factory()->approved()->create([
         'user_id' => $user->id,
         'started_at' => now(),
         'ended_at' => null,
@@ -42,7 +42,7 @@ test('sync command shows active delegates', function () {
 
 test('sync command works in dry run mode', function () {
     $user = User::factory()->create(['email' => 'delegate@afges.org']);
-    Delegate::factory()->create([
+    Delegate::factory()->approved()->create([
         'user_id' => $user->id,
         'started_at' => now(),
         'ended_at' => null,
@@ -100,7 +100,7 @@ test('sync command identifies users to remove from group', function () {
 
 test('sync command handles users already in group', function () {
     $user = User::factory()->create(['email' => 'existing@afges.org']);
-    Delegate::factory()->create([
+    Delegate::factory()->approved()->create([
         'user_id' => $user->id,
         'started_at' => now(),
         'ended_at' => null,
@@ -120,7 +120,7 @@ test('sync command handles users already in group', function () {
 
 test('sync command handles API failures gracefully', function () {
     $user = User::factory()->create(['email' => 'delegate@afges.org']);
-    Delegate::factory()->create([
+    Delegate::factory()->approved()->create([
         'user_id' => $user->id,
         'started_at' => now(),
         'ended_at' => null,

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalStatus;
 use App\Filament\Pages\ApplyAsDelegate;
 use App\Models\College;
 use App\Models\CollegeOrganization;
@@ -113,6 +114,7 @@ test('user can submit delegate application successfully', function () {
         'user_id' => $this->user->id,
         'organization_id' => $this->organization->id,
         'seat_id' => $this->seat->id,
+        'status' => ApprovalStatus::Pending->value,
     ]);
 });
 
@@ -164,6 +166,7 @@ test('user cannot apply for the same seat twice', function () {
             'seat_id' => $this->seat->id,
             'started_at' => now(),
             'ended_at' => null,
+            'status' => ApprovalStatus::Pending,
         ]);
 
     $this->actingAs($this->user);
@@ -291,7 +294,8 @@ test('delegate application includes started_at timestamp', function () {
 
     expect($delegate->started_at)->not->toBeNull()
         ->and($delegate->started_at->isToday())->toBeTrue()
-        ->and($delegate->ended_at)->toBeNull();
+        ->and($delegate->ended_at)->toBeNull()
+        ->and($delegate->status)->toBe(ApprovalStatus::Pending);
 });
 
 test('form resets seat when organization changes', function () {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Volunteers\Schemas;
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -46,7 +46,7 @@ final class VolunteerInfolist
                                 TextEntry::make('status')
                                     ->label(__('volunteer.fields.status'))
                                     ->badge()
-                                    ->color(fn (VolunteerStatus $state): string => $state->color()),
+                                    ->color(fn (ApprovalStatus $state): string => $state->color()),
                                 TextEntry::make('approved_at')
                                     ->label(__('volunteer.fields.approved_at'))
                                     ->dateTime('d/m/Y H:i')
@@ -58,7 +58,7 @@ final class VolunteerInfolist
                         TextEntry::make('rejection_reason')
                             ->label(__('volunteer.fields.rejection_reason'))
                             ->columnSpanFull()
-                            ->visible(fn ($record) => $record->status === VolunteerStatus::Rejected),
+                            ->visible(fn ($record) => $record->status === ApprovalStatus::Rejected),
                     ])
                     ->collapsible(),
                 Section::make(__('volunteer.sections.metadata'))

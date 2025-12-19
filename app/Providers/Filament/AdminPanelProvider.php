@@ -75,6 +75,8 @@ final class AdminPanelProvider extends PanelProvider
                     ])
                     ->registration(true)
             )
+            ->sidebarCollapsibleOnDesktop()
+            ->topbar(false)
             ->spa();
     }
 }

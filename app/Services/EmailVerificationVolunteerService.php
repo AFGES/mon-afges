@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\VolunteerStatus;
+use App\Enums\ApprovalStatus;
 use App\Models\Email;
 use App\Models\Organization;
 use App\Models\Volunteer;
@@ -45,7 +45,7 @@ final class EmailVerificationVolunteerService
             'organization_id' => $organization->id,
             'position_title' => 'Membre',
             'started_at' => now(),
-            'status' => VolunteerStatus::Approved,
+            'status' => ApprovalStatus::Approved,
             'approved_at' => now(),
         ]);
     }

@@ -110,7 +110,7 @@ final class ManageOrganizations extends MyProfileComponent
                                     ->mapWithKeys(function ($seat) {
                                         return [
                                             $seat->id => sprintf(
-                                                '%s - %s (Seat %d)',
+                                                __('profile.manage_delegates.seat_format'),
                                                 $seat->collegeOrganization->organization->short_name,
                                                 $seat->collegeOrganization->college->name,
                                                 $seat->seat_number

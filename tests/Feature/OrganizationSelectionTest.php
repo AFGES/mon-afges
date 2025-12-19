@@ -71,7 +71,7 @@ test('user can select organizations on the profile page', function () {
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
+    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -85,7 +85,7 @@ test('user can select organizations on the profile page', function () {
             ],
         ])
         ->assertHasNoFormErrors()
-        ->call('submitOrganizations')
+        ->call('submitVolunteers')
         ->assertHasNoFormErrors();
 
     // Need to bypass global scope to find pending volunteers
@@ -113,11 +113,11 @@ test('user must select at least one organization', function () {
 
     actingAs($user);
 
-    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
+    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [],
         ])
-        ->call('submitOrganizations');
+        ->call('submitVolunteers');
 
     // Submitting empty organizations should not create any volunteers
     expect(Volunteer::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(0);
@@ -182,20 +182,34 @@ test('user can apply as delegate when selecting organizations', function () {
 
     $startDate = now()->subDays(7)->startOfDay();
 
-    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
+    // First submit volunteer application
+    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [
                 [
                     'organization_id' => $organization->id,
                     'started_at' => $startDate->format('Y-m-d'),
                     'position_title' => 'Membre',
-                    'apply_as_delegate' => true,
-                    'seat_id' => $seat->id,
                 ],
             ],
         ])
         ->assertHasNoFormErrors()
-        ->call('submitOrganizations')
+        ->call('submitVolunteers')
+        ->assertHasNoFormErrors();
+
+    // Then submit delegate application
+    Livewire::test(\App\Livewire\Profile\ManageDelegates::class)
+        ->fillForm([
+            'applications' => [
+                [
+                    'organization_id' => $organization->id,
+                    'seat_id' => $seat->id,
+                    'started_at' => $startDate->format('Y-m-d'),
+                ],
+            ],
+        ])
+        ->assertHasNoFormErrors()
+        ->call('submitDelegates')
         ->assertHasNoFormErrors();
 
     // Verify volunteer application was created
@@ -240,24 +254,37 @@ test('user can apply to multiple organizations with different delegate options',
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
+    // Submit volunteer applications for both organizations
+    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [
                 [
                     'organization_id' => $organization1->id,
                     'started_at' => $startDate1->format('Y-m-d'),
-                    'apply_as_delegate' => true,
-                    'seat_id' => $seat1->id,
                 ],
                 [
                     'organization_id' => $organization2->id,
                     'started_at' => $startDate2->format('Y-m-d'),
-                    'apply_as_delegate' => false,
                 ],
             ],
         ])
         ->assertHasNoFormErrors()
-        ->call('submitOrganizations')
+        ->call('submitVolunteers')
+        ->assertHasNoFormErrors();
+
+    // Submit delegate application for only organization1
+    Livewire::test(\App\Livewire\Profile\ManageDelegates::class)
+        ->fillForm([
+            'applications' => [
+                [
+                    'organization_id' => $organization1->id,
+                    'seat_id' => $seat1->id,
+                    'started_at' => $startDate1->format('Y-m-d'),
+                ],
+            ],
+        ])
+        ->assertHasNoFormErrors()
+        ->call('submitDelegates')
         ->assertHasNoFormErrors();
 
     // Verify both volunteer applications

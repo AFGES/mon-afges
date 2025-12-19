@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Enums\ApprovalStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,6 +25,26 @@ class DelegateFactory extends Factory
             'seat_id' => \App\Models\Seat::factory(),
             'started_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'ended_at' => fake()->optional()->dateTimeBetween('now', '+1 year'),
+            'status' => ApprovalStatus::Pending,
         ];
+    }
+
+    public function approved(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => ApprovalStatus::Approved,
+            'approved_at' => now(),
+            'approved_by' => \App\Models\User::factory(),
+        ]);
+    }
+
+    public function rejected(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => ApprovalStatus::Rejected,
+            'approved_at' => now(),
+            'approved_by' => \App\Models\User::factory(),
+            'rejection_reason' => fake()->sentence(),
+        ]);
     }
 }

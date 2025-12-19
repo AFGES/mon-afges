@@ -31,8 +31,8 @@ final class EnsureHasVolunteerOrganization
             return $next($request);
         }
 
-        // Skip if already on the select organization page
-        if ($request->routeIs('filament.root.pages.select-organization')) {
+        // Skip if already on the select organization page (now profile page)
+        if ($request->routeIs('filament.root.pages.my-profile')) {
             return $next($request);
         }
 
@@ -49,7 +49,7 @@ final class EnsureHasVolunteerOrganization
         // Check if user has at least one approved volunteer organization
         // (The ApprovedScope automatically filters for approved volunteers)
         if ($user->volunteers()->doesntExist()) {
-            return redirect()->route('filament.root.pages.select-organization');
+            return redirect()->route('filament.root.pages.my-profile');
         }
 
         return $next($request);

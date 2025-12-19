@@ -71,7 +71,7 @@ test('user can select organizations on the profile page', function () {
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Livewire\ManageOrganizations::class)
+    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -113,7 +113,7 @@ test('user must select at least one organization', function () {
 
     actingAs($user);
 
-    Livewire::test(\App\Livewire\ManageOrganizations::class)
+    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [],
         ])
@@ -182,7 +182,7 @@ test('user can apply as delegate when selecting organizations', function () {
 
     $startDate = now()->subDays(7)->startOfDay();
 
-    Livewire::test(\App\Livewire\ManageOrganizations::class)
+    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -240,7 +240,7 @@ test('user can apply to multiple organizations with different delegate options',
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Livewire\ManageOrganizations::class)
+    Livewire::test(\App\Livewire\Profile\ManageOrganizations::class)
         ->fillForm([
             'organizations' => [
                 [

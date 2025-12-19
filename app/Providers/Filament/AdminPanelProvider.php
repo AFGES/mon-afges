@@ -63,13 +63,10 @@ final class AdminPanelProvider extends PanelProvider
             ->plugins([
                 FilamentShieldPlugin::make(),
                 BreezyCore::make()
-                    ->myProfile(
-                        shouldRegisterUserMenu: true,
-                        shouldRegisterNavigation: false,
-                        hasAvatars: false,
-                        slug: 'my-profile'
-                    )
-                    ->customMyProfilePage(\App\Filament\Pages\MyProfile::class),
+                    ->myProfile()
+                    ->myProfileComponents([
+                        \App\Livewire\Profile\ManageOrganizations::class,
+                    ]),
             ])
             ->authMiddleware([
                 Authenticate::class,
@@ -86,6 +83,7 @@ final class AdminPanelProvider extends PanelProvider
             )
             ->sidebarCollapsibleOnDesktop()
             ->topbar(false)
+            ->viteTheme('resources/css/filament/root/theme.css')
             ->spa();
     }
 }

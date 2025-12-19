@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire;
+namespace App\Livewire\Profile;
 
 use App\Models\Delegate;
 use App\Models\Organization;
@@ -34,6 +34,24 @@ final class ManageOrganizations extends MyProfileComponent
             'organizations' => [],
         ];
         $this->form->fill($this->data);
+    }
+
+    public function getVolunteersProperty()
+    {
+        return Volunteer::withoutGlobalScopes()
+            ->where('user_id', auth()->id())
+            ->with('organization')
+            ->orderBy('started_at', 'desc')
+            ->get();
+    }
+
+    public function getDelegatesProperty()
+    {
+        return Delegate::withoutGlobalScopes()
+            ->where('user_id', auth()->id())
+            ->with(['organization', 'seat.collegeOrganization.college'])
+            ->orderBy('started_at', 'desc')
+            ->get();
     }
 
     public function form(Schema $schema): Schema

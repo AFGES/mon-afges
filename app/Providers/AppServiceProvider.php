@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Observers\DelegateObserver;
@@ -30,12 +31,20 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Pluralizer::useLanguage('french');
+        if (app()->runningInConsole()) {
+            \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
+                'user' => User::class,
+            ]);
+        }
+
+        if (app()->isLocale('fr')) {
+            Pluralizer::useLanguage('french');
+        }
 
         // Register Blueprint macro for approval status columns
         \Illuminate\Database\Schema\Blueprint::macro('approvalStatus', function (?string $after = null) {
             /** @var \Illuminate\Database\Schema\Blueprint $this */
-            $this->string('status')->default('pending')->after($after);
+            $this->enum('status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
             $this->timestamp('approved_at')->nullable()->after('status');
             $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
             $this->text('rejection_reason')->nullable()->after('approved_by');

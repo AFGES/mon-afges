@@ -160,3 +160,116 @@ test('super admin can bypass organization selection requirement', function () {
 
     $response->assertSuccessful();
 });
+
+test('user can apply as delegate when selecting organizations', function () {
+    $user = User::factory()->create(['email' => 'test@afges.org']);
+    $organization = Organization::factory()->create(['short_name' => 'Test Org']);
+
+    // Create college and seat for the organization
+    $college = \App\Models\College::factory()->create(['name' => 'Test College']);
+    $collegeOrganization = \App\Models\CollegeOrganization::factory()->create([
+        'college_id' => $college->id,
+        'organization_id' => $organization->id,
+        'delegates_per_seat' => 2,
+    ]);
+    $seat = \App\Models\Seat::factory()->create([
+        'college_organization_id' => $collegeOrganization->id,
+        'seat_number' => 1,
+    ]);
+
+    actingAs($user);
+
+    $startDate = now()->subDays(7)->startOfDay();
+
+    Livewire::test(\App\Filament\Pages\SelectOrganization::class)
+        ->fillForm([
+            'organizations' => [
+                [
+                    'organization_id' => $organization->id,
+                    'started_at' => $startDate->format('Y-m-d'),
+                    'position_title' => 'Membre',
+                    'apply_as_delegate' => true,
+                    'seat_id' => $seat->id,
+                ],
+            ],
+        ])
+        ->assertHasNoFormErrors()
+        ->call('submit')
+        ->assertHasNoFormErrors()
+        ->assertRedirect(route('filament.root.pages.dashboard'));
+
+    // Verify volunteer application was created
+    $volunteer = Volunteer::withoutGlobalScopes()
+        ->where('user_id', $user->id)
+        ->where('organization_id', $organization->id)
+        ->first();
+
+    expect($volunteer)->not->toBeNull();
+    expect($volunteer->isPending())->toBeTrue();
+
+    // Verify delegate application was created
+    $delegate = \App\Models\Delegate::withoutGlobalScopes()
+        ->where('user_id', $user->id)
+        ->where('organization_id', $organization->id)
+        ->where('seat_id', $seat->id)
+        ->first();
+
+    expect($delegate)->not->toBeNull();
+    expect($delegate->isPending())->toBeTrue();
+});
+
+test('user can apply to multiple organizations with different delegate options', function () {
+    $user = User::factory()->create(['email' => 'test@afges.org']);
+    $organization1 = Organization::factory()->create(['short_name' => 'Org 1']);
+    $organization2 = Organization::factory()->create(['short_name' => 'Org 2']);
+
+    // Create college and seats
+    $college = \App\Models\College::factory()->create(['name' => 'Test College']);
+    $collegeOrg1 = \App\Models\CollegeOrganization::factory()->create([
+        'college_id' => $college->id,
+        'organization_id' => $organization1->id,
+        'delegates_per_seat' => 2,
+    ]);
+    $seat1 = \App\Models\Seat::factory()->create([
+        'college_organization_id' => $collegeOrg1->id,
+        'seat_number' => 1,
+    ]);
+
+    actingAs($user);
+
+    $startDate1 = now()->subDays(7)->startOfDay();
+    $startDate2 = now()->subDays(14)->startOfDay();
+
+    Livewire::test(\App\Filament\Pages\SelectOrganization::class)
+        ->fillForm([
+            'organizations' => [
+                [
+                    'organization_id' => $organization1->id,
+                    'started_at' => $startDate1->format('Y-m-d'),
+                    'apply_as_delegate' => true,
+                    'seat_id' => $seat1->id,
+                ],
+                [
+                    'organization_id' => $organization2->id,
+                    'started_at' => $startDate2->format('Y-m-d'),
+                    'apply_as_delegate' => false,
+                ],
+            ],
+        ])
+        ->assertHasNoFormErrors()
+        ->call('submit')
+        ->assertHasNoFormErrors()
+        ->assertRedirect(route('filament.root.pages.dashboard'));
+
+    // Verify both volunteer applications
+    expect(Volunteer::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(2);
+
+    // Verify only one delegate application (for organization1)
+    $delegates = \App\Models\Delegate::withoutGlobalScopes()
+        ->where('user_id', $user->id)
+        ->get();
+
+    expect($delegates)->toHaveCount(1);
+    expect($delegates->first()->organization_id)->toBe($organization1->id);
+    expect($delegates->first()->seat_id)->toBe($seat1->id);
+});

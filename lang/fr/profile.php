@@ -38,16 +38,34 @@ return [
         'submit_button' => 'Soumettre ma demande',
         'notification_title' => 'Mandat de délégué(e) en attente d\'approbation',
         'notification_body' => 'Votre mandat de délégué(e) a été soumis et est en attente d\'approbation.',
+        'ended_on' => 'Terminé le :date',
+        'terminate' => [
+            'action' => 'Terminer ce mandat',
+            'confirm' => 'Êtes-vous sûr-e de vouloir terminer ce mandat de délégué(e) ?',
+            'success_title' => 'Mandat terminé',
+            'success_body' => 'Votre mandat de délégué(e) a été terminé avec succès.',
+            'not_authorized_title' => 'Action non autorisée',
+            'not_authorized_body' => 'Vous ne pouvez terminer que vos propres mandats approuvés et actifs.',
+        ],
     ],
 
     'manage_volunteers' => [
         'label' => 'Mandats de bénévolat',
         'section_heading' => 'Bénévolat',
         'section_description' => 'Gérez vos mandats de bénévolat dans les associations',
-        'my_affiliations' => 'Mes mandats actuels',
+        'my_affiliations' => 'Mes mandats dans des associations',
         'form_label' => 'Mandats de bénévolat',
         'add_action' => 'Ajouter un mandat',
         'new_item' => 'Nouveau mandat',
+        'ended_on' => 'Terminé le :date',
+        'terminate' => [
+            'action' => 'Terminer ce mandat',
+            'confirm' => 'Êtes-vous sûr-e de vouloir terminer ce mandat de bénévolat ?',
+            'success_title' => 'Mandat terminé',
+            'success_body' => 'Votre mandat de bénévolat a été terminé avec succès.',
+            'not_authorized_title' => 'Action non autorisée',
+            'not_authorized_body' => 'Vous ne pouvez terminer que vos propres mandats approuvés et actifs.',
+        ],
     ],
 
     'manage_organizations' => [

@@ -38,7 +38,22 @@
                                 <x-filament::badge :color="$volunteer->status->color()">
                                     {{ $volunteer->status->label() }}
                                 </x-filament::badge>
+                                @if($volunteer->ended_at)
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                                        ({{ __('profile.manage_volunteers.ended_on', ['date' => $volunteer->ended_at->format('d/m/Y')]) }})
+                                    </span>
+                                @endif
                             </span>
+                            @can('terminate', $volunteer)
+                                <x-filament::icon-button
+                                    icon="heroicon-o-x-mark"
+                                    color="danger"
+                                    size="sm"
+                                    :tooltip="__('profile.manage_volunteers.terminate.action')"
+                                    wire:click="terminateVolunteer({{ $volunteer->id }})"
+                                    wire:confirm="{{ __('profile.manage_volunteers.terminate.confirm') }}"
+                                />
+                            @endcan
                         </li>
                     @endforeach
                 </ul>

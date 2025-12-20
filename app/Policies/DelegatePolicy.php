@@ -66,4 +66,12 @@ class DelegatePolicy
     {
         return $authUser->can('Reorder:Delegate');
     }
+
+    public function terminate(AuthUser $authUser, Delegate $delegate): bool
+    {
+        // User can only terminate their own approved delegate mandates that haven't ended
+        return $delegate->user_id === $authUser->id
+            && $delegate->isApproved()
+            && $delegate->ended_at === null;
+    }
 }

@@ -25,6 +25,16 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
+        $approveUrl = \Illuminate\Support\Facades\URL::signedRoute(
+            'delegates.approve',
+            ['delegate' => $this->delegate->id]
+        );
+
+        $rejectUrl = \Illuminate\Support\Facades\URL::signedRoute(
+            'delegates.reject',
+            ['delegate' => $this->delegate->id]
+        );
+
         return (new MailMessage)
             ->subject(__('delegate.notifications.approval_requested.subject'))
             ->greeting(__('delegate.notifications.approval_requested.greeting', ['name' => $notifiable->name]))
@@ -42,9 +52,13 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
                 'date' => $this->delegate->started_at->format('d/m/Y'),
             ]))
             ->action(
-                __('delegate.notifications.approval_requested.action'),
-                route('filament.root.resources.delegates.edit', $this->delegate)
+                __('delegate.notifications.approval_requested.approve_action'),
+                $approveUrl
             )
+            ->line('['.__('delegate.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
+            ->line(__('delegate.notifications.approval_requested.view_details', [
+                'url' => route('filament.root.resources.delegates.edit', $this->delegate),
+            ]))
             ->line(__('delegate.notifications.approval_requested.outro'));
     }
 }

@@ -55,5 +55,16 @@ return [
         'rejected' => [
             'title' => 'Délégué refusé avec succès',
         ],
+        'approval_requested' => [
+            'subject' => 'Nouvelle demande d\'approbation de délégué-e',
+            'greeting' => 'Bonjour :name,',
+            'intro' => 'Une nouvelle demande de délégué-e requiert votre approbation.',
+            'applicant' => 'Demandeur : :name',
+            'organization' => 'Association : :organization',
+            'seat' => 'Siège : :seat',
+            'started_at' => 'Date de début : :date',
+            'action' => 'Examiner la demande',
+            'outro' => 'Merci de traiter cette demande dans les meilleurs délais.',
+        ],
     ],
 ];

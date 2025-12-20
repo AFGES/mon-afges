@@ -47,6 +47,17 @@ return [
             'title' => 'Candidature en attente d\'approbation',
             'body' => 'Votre candidature pour un mandat de bénévolat est en attente d\'approbation. Vous serez notifié(e) une fois qu\'elle aura été examinée.',
         ],
+        'approval_requested' => [
+            'subject' => 'Nouvelle demande d\'approbation de mandat de bénévolat',
+            'greeting' => 'Bonjour :name,',
+            'intro' => 'Une nouvelle demande de mandat de bénévolat requiert votre approbation.',
+            'applicant' => 'Demandeur : :name',
+            'organization' => 'Association : :organization',
+            'position' => 'Poste : :position',
+            'started_at' => 'Date de début : :date',
+            'action' => 'Examiner la demande',
+            'outro' => 'Merci de traiter cette demande dans les meilleurs délais.',
+        ],
     ],
 
     'stats' => [

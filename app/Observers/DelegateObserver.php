@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Models\Delegate;
+use App\Models\User;
+use App\Notifications\DelegateApprovalRequested;
 use App\Services\GoogleWorkspaceService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 final class DelegateObserver
 {
@@ -46,6 +49,7 @@ final class DelegateObserver
      */
     public function created(Delegate $delegate): void
     {
+        $this->notifyApprovers($delegate);
         $this->addToGroup($delegate);
     }
 
@@ -74,6 +78,25 @@ final class DelegateObserver
     public function restored(Delegate $delegate): void
     {
         $this->addToGroup($delegate);
+    }
+
+    /**
+     * Notify users with approval permissions about the new delegate application.
+     */
+    private function notifyApprovers(Delegate $delegate): void
+    {
+        try {
+            $approvers = User::permission('Update:Delegate')->get();
+
+            if ($approvers->isEmpty()) {
+                return;
+            }
+
+            Notification::send($approvers, new DelegateApprovalRequested($delegate));
+        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+            // Permission doesn't exist yet, skip notification
+            return;
+        }
     }
 
     /**

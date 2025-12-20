@@ -7,7 +7,10 @@ namespace App\Providers;
 use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
 use App\Models\User;
+use App\Models\Volunteer;
 use App\Observers\DelegateObserver;
+use App\Observers\VolunteerObserver;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Pluralizer;
@@ -32,35 +35,34 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register Livewire components explicitly
-        Livewire::component('profile.manage-volunteers', \App\Livewire\Profile\ManageVolunteers::class);
-        Livewire::component('profile.manage-delegates', \App\Livewire\Profile\ManageDelegates::class);
-        Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);
-        Livewire::component('manage_delegates', \App\Livewire\Profile\ManageDelegates::class);
+        if (app()->runningInConsole()) {
+            \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
+                'user' => User::class,
+            ]);
+        }
 
-        // Set Pluralizer language based on app locale
         if (app()->isLocale('fr')) {
             Pluralizer::useLanguage('french');
         }
 
         // Register Blueprint macro for approval status columns
-        \Illuminate\Database\Schema\Blueprint::macro('approvalStatus', function (?string $after = null) {
-            /** @var \Illuminate\Database\Schema\Blueprint $this */
+        Blueprint::macro('approvalStatus', function (?string $after = null) {
+            /** @var Blueprint $this */
             $this->enum('status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
             $this->timestamp('approved_at')->nullable()->after('status');
             $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
             $this->text('rejection_reason')->nullable()->after('approved_by');
         });
 
-        \Illuminate\Database\Schema\Blueprint::macro('dropApprovalStatus', function () {
-            /** @var \Illuminate\Database\Schema\Blueprint $this */
+        Blueprint::macro('dropApprovalStatus', function () {
+            /** @var Blueprint $this */
             $this->dropForeign(['approved_by']);
             $this->dropColumn(['status', 'approved_at', 'approved_by', 'rejection_reason']);
         });
 
         // Register Blueprint macro for period (start/end date) columns
-        \Illuminate\Database\Schema\Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null) {
-            /** @var \Illuminate\Database\Schema\Blueprint $this */
+        Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null) {
+            /** @var Blueprint $this */
             if ($startType === 'datetime') {
                 $this->datetime('started_at')->useCurrent()->after($after);
                 $this->datetime('ended_at')->nullable()->after('started_at');
@@ -70,13 +72,18 @@ final class AppServiceProvider extends ServiceProvider
             }
         });
 
-        \Illuminate\Database\Schema\Blueprint::macro('dropPeriod', function () {
-            /** @var \Illuminate\Database\Schema\Blueprint $this */
+        Blueprint::macro('dropPeriod', function () {
+            /** @var Blueprint $this */
             $this->dropColumn(['started_at', 'ended_at']);
         });
 
         // Register model observers
         Delegate::observe(DelegateObserver::class);
+        Volunteer::observe(VolunteerObserver::class);
+
+        // Register custom Filament Breezy profile components
+        Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);
+        Livewire::component('manage_delegates', \App\Livewire\Profile\ManageDelegates::class);
 
         Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
             $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);

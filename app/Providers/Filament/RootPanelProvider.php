@@ -26,7 +26,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 
-final class AdminPanelProvider extends PanelProvider
+final class RootPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {

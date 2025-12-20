@@ -38,12 +38,7 @@ final class AppServiceProvider extends ServiceProvider
         Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);
         Livewire::component('manage_delegates', \App\Livewire\Profile\ManageDelegates::class);
 
-        if (app()->runningInConsole()) {
-            \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
-                'user' => User::class,
-            ]);
-        }
-
+        // Set Pluralizer language based on app locale
         if (app()->isLocale('fr')) {
             Pluralizer::useLanguage('french');
         }

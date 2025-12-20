@@ -115,4 +115,29 @@ final class ManageVolunteers extends MyProfileComponent
             ->info()
             ->send();
     }
+
+    public function terminateVolunteer(int $volunteerId): void
+    {
+        $volunteer = Volunteer::withoutGlobalScopes()
+            ->where('id', $volunteerId)
+            ->firstOrFail();
+
+        if (! auth()->user()->can('terminate', $volunteer)) {
+            Notification::make()
+                ->title(__('profile.manage_volunteers.terminate.not_authorized_title'))
+                ->body(__('profile.manage_volunteers.terminate.not_authorized_body'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $volunteer->terminate();
+
+        Notification::make()
+            ->title(__('profile.manage_volunteers.terminate.success_title'))
+            ->body(__('profile.manage_volunteers.terminate.success_body'))
+            ->success()
+            ->send();
+    }
 }

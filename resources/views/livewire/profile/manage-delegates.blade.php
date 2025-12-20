@@ -38,7 +38,22 @@
                                 <x-filament::badge :color="$delegate->status->color()">
                                     {{ $delegate->status->label() }}
                                 </x-filament::badge>
+                                @if($delegate->ended_at)
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                                        ({{ __('profile.manage_delegates.ended_on', ['date' => $delegate->ended_at->format('d/m/Y')]) }})
+                                    </span>
+                                @endif
                             </span>
+                            @can('terminate', $delegate)
+                                <x-filament::icon-button
+                                    icon="heroicon-o-x-mark"
+                                    color="danger"
+                                    size="sm"
+                                    :tooltip="__('profile.manage_delegates.terminate.action')"
+                                    wire:click="terminateDelegate({{ $delegate->id }})"
+                                    wire:confirm="{{ __('profile.manage_delegates.terminate.confirm') }}"
+                                />
+                            @endcan
                         </li>
                     @endforeach
                 </ul>

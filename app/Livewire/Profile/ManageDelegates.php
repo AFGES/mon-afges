@@ -134,4 +134,29 @@ final class ManageDelegates extends MyProfileComponent
             ->info()
             ->send();
     }
+
+    public function terminateDelegate(int $delegateId): void
+    {
+        $delegate = Delegate::withoutGlobalScopes()
+            ->where('id', $delegateId)
+            ->firstOrFail();
+
+        if (! auth()->user()->can('terminate', $delegate)) {
+            Notification::make()
+                ->title(__('profile.manage_delegates.terminate.not_authorized_title'))
+                ->body(__('profile.manage_delegates.terminate.not_authorized_body'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $delegate->terminate();
+
+        Notification::make()
+            ->title(__('profile.manage_delegates.terminate.success_title'))
+            ->body(__('profile.manage_delegates.terminate.success_body'))
+            ->success()
+            ->send();
+    }
 }

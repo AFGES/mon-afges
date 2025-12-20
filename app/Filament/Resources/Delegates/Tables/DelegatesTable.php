@@ -114,12 +114,22 @@ final class DelegatesTable
                     ->color('success')
                     ->requiresConfirmation()
                     ->visible(fn ($record) => $record->isPending())
-                    ->action(function ($record) {
+                    ->action(function ($record, $livewire) {
                         $record->approve();
                         Notification::make()
                             ->title(__('delegate.notifications.approved.title'))
                             ->success()
                             ->send();
+
+                        // Check if there are any more pending delegates
+                        $pendingCount = Delegate::withoutGlobalScopes()
+                            ->where('status', ApprovalStatus::Pending)
+                            ->count();
+
+                        if ($pendingCount === 0) {
+                            // Update the status filter to show approved delegates
+                            $livewire->tableFilters['status'] = [ApprovalStatus::Approved->value];
+                        }
                     }),
                 Action::make('reject')
                     ->label(__('delegate.actions.reject'))

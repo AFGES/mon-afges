@@ -25,6 +25,16 @@ final class VolunteerApprovalRequested extends Notification implements ShouldQue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $approveUrl = \Illuminate\Support\Facades\URL::signedRoute(
+            'volunteers.approve',
+            ['volunteer' => $this->volunteer->id]
+        );
+
+        $rejectUrl = \Illuminate\Support\Facades\URL::signedRoute(
+            'volunteers.reject',
+            ['volunteer' => $this->volunteer->id]
+        );
+
         return (new MailMessage)
             ->subject(__('volunteer.notifications.approval_requested.subject'))
             ->greeting(__('volunteer.notifications.approval_requested.greeting', ['name' => $notifiable->name]))
@@ -42,9 +52,13 @@ final class VolunteerApprovalRequested extends Notification implements ShouldQue
                 'date' => $this->volunteer->started_at->format('d/m/Y'),
             ]))
             ->action(
-                __('volunteer.notifications.approval_requested.action'),
-                route('filament.root.resources.volunteers.edit', $this->volunteer)
+                __('volunteer.notifications.approval_requested.approve_action'),
+                $approveUrl
             )
+            ->line('['.__('volunteer.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
+            ->line(__('volunteer.notifications.approval_requested.view_details', [
+                'url' => route('filament.root.resources.volunteers.edit', $this->volunteer),
+            ]))
             ->line(__('volunteer.notifications.approval_requested.outro'));
     }
 }

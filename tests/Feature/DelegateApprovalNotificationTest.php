@@ -75,7 +75,7 @@ test('notification is queued for background processing', function () {
     Notification::assertSentTo($approver, DelegateApprovalRequested::class);
 });
 
-test('notification includes action link to delegate edit page', function () {
+test('notification includes action link to approve delegate', function () {
     $approver = User::factory()->create();
     $approver->givePermissionTo('Update:Delegate');
 
@@ -87,7 +87,10 @@ test('notification includes action link to delegate edit page', function () {
         function ($notification) use ($delegate) {
             $mailMessage = $notification->toMail($delegate->user);
 
-            return $mailMessage->actionUrl === route('filament.root.resources.delegates.edit', $delegate);
+            return str_contains(
+                $mailMessage->actionUrl,
+                route('delegates.approve', ['delegate' => $delegate->id], false)
+            );
         }
     );
 });

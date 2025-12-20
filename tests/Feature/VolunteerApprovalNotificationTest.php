@@ -76,7 +76,7 @@ test('notification is queued for background processing', function () {
     Notification::assertSentTo($approver, VolunteerApprovalRequested::class);
 });
 
-test('notification includes action link to volunteer edit page', function () {
+test('notification includes action link to approve volunteer', function () {
     $approver = User::factory()->create();
     $approver->givePermissionTo('Update:Volunteer');
 
@@ -88,7 +88,10 @@ test('notification includes action link to volunteer edit page', function () {
         function ($notification) use ($volunteer) {
             $mailMessage = $notification->toMail($volunteer->user);
 
-            return $mailMessage->actionUrl === route('filament.root.resources.volunteers.edit', $volunteer);
+            return str_contains(
+                $mailMessage->actionUrl,
+                route('volunteers.approve', ['volunteer' => $volunteer->id], false)
+            );
         }
     );
 });

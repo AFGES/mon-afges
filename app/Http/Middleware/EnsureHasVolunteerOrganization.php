@@ -31,7 +31,7 @@ final class EnsureHasVolunteerOrganization
             return $next($request);
         }
 
-        // Skip if already on the select organization page (now profile page)
+        // Skip if already on the profile page
         if ($request->routeIs('filament.root.pages.my-profile')) {
             return $next($request);
         }

@@ -75,16 +75,7 @@ final class ManageDelegates extends MyProfileComponent
                                     })
                                     ->with(['collegeOrganization.college', 'collegeOrganization.organization'])
                                     ->get()
-                                    ->mapWithKeys(function ($seat) {
-                                        return [
-                                            $seat->id => sprintf(
-                                                __('profile.manage_delegates.seat_format'),
-                                                $seat->collegeOrganization->organization->short_name,
-                                                $seat->collegeOrganization->college->name,
-                                                $seat->seat_number
-                                            ),
-                                        ];
-                                    });
+                                    ->mapWithKeys(fn ($seat) => [$seat->id => $seat->label()]);
                             })
                             ->searchable()
                             ->preload()

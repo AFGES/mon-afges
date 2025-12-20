@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Delegates\Schemas;
 
 use App\Enums\ApprovalStatus;
-use Filament\Schemas\Components\DatePicker;
-use Filament\Schemas\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\Textarea;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -52,7 +52,7 @@ final class DelegateForm
                         Select::make('seat_id')
                             ->label(__('delegate.fields.seat'))
                             ->relationship('seat')
-                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->label)
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                             ->searchable()
                             ->preload()
                             ->required()

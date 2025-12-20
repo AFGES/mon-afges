@@ -63,15 +63,20 @@ final class Seat extends Model
      */
     public function label(): string
     {
-        $organization = $this->collegeOrganization->organization;
+        // $organization = $this->collegeOrganization->organization;
         $college = $this->collegeOrganization->college;
         $delegates = $this->delegates()->with('user')->get();
 
         $delegateNames = $delegates->map(fn ($delegate) => $delegate->user->name)->join(', ');
 
+        // return sprintf(
+        //     '%s (%s): %s',
+        //     $organization->short_name,
+        //     $college->name,
+        //     $delegateNames ?: 'Vide'
+        // );
         return sprintf(
-            '%s (%s): %s',
-            $organization->short_name,
+            '%s: %s',
             $college->name,
             $delegateNames ?: 'Vide'
         );

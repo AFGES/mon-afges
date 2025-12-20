@@ -31,6 +31,7 @@ test('sync command shows active delegates', function () {
 
     $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->with('delegate@afges.org')->andReturn(false);
+        $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldReceive('addToGroup')->with('delegate@afges.org')->once()->andReturn(true);
     });
 
@@ -49,7 +50,7 @@ test('sync command works in dry run mode', function () {
     ]);
 
     $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
-        $mock->shouldReceive('isInGroup')->with('delegate@afges.org')->andReturn(false);
+        $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldNotReceive('addToGroup');
         $mock->shouldNotReceive('removeFromGroup');
     });
@@ -87,6 +88,8 @@ test('sync command identifies users to remove from group', function () {
         $mock->shouldReceive('isInGroup')
             ->with('notdelegate@afges.org')
             ->andReturn(true);
+        $mock->shouldReceive('isInGroup')
+            ->andReturn(false);
         $mock->shouldReceive('removeFromGroup')
             ->with('notdelegate@afges.org')
             ->once()
@@ -107,9 +110,13 @@ test('sync command handles users already in group', function () {
     ]);
 
     $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+        // More specific expectation must come first
         $mock->shouldReceive('isInGroup')
             ->with('existing@afges.org')
             ->andReturn(true);
+        // Catch-all for other emails
+        $mock->shouldReceive('isInGroup')
+            ->andReturn(false);
         $mock->shouldNotReceive('addToGroup');
     });
 
@@ -127,7 +134,7 @@ test('sync command handles API failures gracefully', function () {
     ]);
 
     $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
-        $mock->shouldReceive('isInGroup')->with('delegate@afges.org')->andReturn(false);
+        $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldReceive('addToGroup')->with('delegate@afges.org')->once()->andReturn(false);
     });
 

@@ -48,7 +48,7 @@ trait HasApprovalStatus
         return true;
     }
 
-    public function reject(string $reason, ?int $rejectedBy = null): bool
+    public function reject(?string $reason = null, ?int $rejectedBy = null): bool
     {
         if ($this->isRejected()) {
             return false;

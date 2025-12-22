@@ -39,9 +39,6 @@ final class DelegatesTable
                     ->label(__('College'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('seat.seat_number')
-                    ->label(__('Seat #'))
-                    ->sortable(),
                 TextColumn::make('status')
                     ->label(__('delegate.fields.status'))
                     ->badge()

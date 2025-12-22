@@ -60,6 +60,13 @@ return [
             'view_details' => 'Voir les détails : :url',
             'outro' => 'Merci de traiter cette demande dans les meilleurs délais.',
         ],
+        'approval_approved' => [
+            'subject' => 'Votre candidature au mandat de bénévolat a été approuvée',
+            'greeting' => 'Bonjour :name,',
+            'intro' => 'Nous avons le plaisir de vous informer que votre candidature au mandat de bénévolat a été approuvée.',
+            'body' => 'Vous pouvez désormais accéder aux fonctionnalités réservées aux bénévoles.',
+            'outro' => 'Merci de votre engagement.',
+        ],
     ],
 
     'stats' => [

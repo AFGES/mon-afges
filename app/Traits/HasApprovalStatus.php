@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Enums\ApprovalStatus;
+use App\Notifications\ApprovalApprovedNotification;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasApprovalStatus
@@ -41,6 +42,8 @@ trait HasApprovalStatus
             'approved_by' => $approvedBy ?? auth()->id(),
             'rejection_reason' => null,
         ]);
+
+        $this->sendApprovalNotification();
 
         return true;
     }
@@ -83,5 +86,32 @@ trait HasApprovalStatus
             'status' => ApprovalStatus::class,
             'approved_at' => 'datetime',
         ]);
+    }
+
+    /**
+     * Send a notification to the user when their request is approved.
+     */
+    protected function sendApprovalNotification(): void
+    {
+        $notifiable = $this->getApprovalNotifiable();
+
+        if ($notifiable !== null) {
+            $notifiable->notify(new ApprovalApprovedNotification($this));
+        }
+    }
+
+    /**
+     * Get the notifiable user for approval notifications.
+     * Override this method if the model has a different relationship name.
+     *
+     * @return object|null An object that uses the Notifiable trait
+     */
+    protected function getApprovalNotifiable(): ?object
+    {
+        if (method_exists($this, 'user') && $this->user !== null) {
+            return $this->user;
+        }
+
+        return null;
     }
 }

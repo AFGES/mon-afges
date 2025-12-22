@@ -68,5 +68,12 @@ return [
             'view_details' => 'Voir les détails : :url',
             'outro' => 'Merci de traiter cette demande dans les meilleurs délais.',
         ],
+        'approval_approved' => [
+            'subject' => 'Votre demande de délégué-e a été approuvée',
+            'greeting' => 'Bonjour :name,',
+            'intro' => 'Nous avons le plaisir de vous informer que votre demande de délégué-e a été approuvée.',
+            'body' => 'Vous pouvez désormais accéder aux fonctionnalités réservées aux délégué-e-s.',
+            'outro' => 'Merci de votre engagement.',
+        ],
     ],
 ];

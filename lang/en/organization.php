@@ -40,5 +40,12 @@ return [
             'title' => 'Cannot Remove Seats',
             'body' => 'College :college has only :empty empty seat(s), but you requested to remove :requested. Free occupied seats first.',
         ],
+        'seats_updated' => [
+            'title' => 'Seats Updated',
+            'body' => 'Seat allocations have been successfully updated.',
+        ],
+        'seats_update_failed' => [
+            'title' => 'Update Failed',
+        ],
     ],
 ];

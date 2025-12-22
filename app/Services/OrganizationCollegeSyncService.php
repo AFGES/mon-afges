@@ -103,7 +103,14 @@ final class OrganizationCollegeSyncService
             ->get();
 
         if ($emptySeats->count() < $count) {
-            throw new \Exception("Cannot remove {$count} seats. Only {$emptySeats->count()} empty seats available.");
+            $collegeName = $collegeOrg->college->name;
+            $message = __('organization.notifications.cannot_remove_seats.body', [
+                'college' => $collegeName,
+                'empty' => $emptySeats->count(),
+                'requested' => $count,
+            ]);
+
+            throw new \Exception($message);
         }
 
         foreach ($emptySeats as $seat) {

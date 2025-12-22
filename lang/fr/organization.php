@@ -40,5 +40,12 @@ return [
             'title' => 'Impossible de supprimer les sièges',
             'body' => 'Le collège :college a seulement :empty siège(s) vide(s), mais vous avez demandé d\'en supprimer :requested. Libérez d\'abord les sièges occupés.',
         ],
+        'seats_updated' => [
+            'title' => 'Sièges mis à jour',
+            'body' => 'Les allocations de sièges ont été mises à jour avec succès.',
+        ],
+        'seats_update_failed' => [
+            'title' => 'Échec de la mise à jour',
+        ],
     ],
 ];

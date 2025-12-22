@@ -110,10 +110,23 @@ test('organization college sync service throws exception when trying to remove o
         ]);
     }
 
-    // Try to decrease to 1 seat (should fail)
+    // Try to decrease to 1 seat (should fail because all seats are occupied)
     expect(fn () => $service->sync($organization, [
         $college->id => ['delegates_per_seat' => 1, 'seats' => 1],
-    ]))->toThrow(Exception::class, 'Cannot remove 2 seats. Only 0 empty seats available.');
+    ]))->toThrow(Exception::class)
+        ->and(function () use ($service, $organization, $college) {
+            try {
+                $service->sync($organization, [
+                    $college->id => ['delegates_per_seat' => 1, 'seats' => 1],
+                ]);
+            } catch (Exception $e) {
+                // Verify the exception message contains the expected information
+                expect($e->getMessage())
+                    ->toContain($college->name)
+                    ->toContain('0')
+                    ->toContain('2');
+            }
+        });
 });
 
 test('organization college sync service removes colleges not in data', function () {

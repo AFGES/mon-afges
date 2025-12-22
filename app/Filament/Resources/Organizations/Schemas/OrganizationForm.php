@@ -170,56 +170,30 @@ final class OrganizationForm
                                     ]];
                                 })->toArray();
 
-                                $record->colleges()->sync($syncData);
+                                // Use the service to handle seat synchronization
+                                try {
+                                    $collegesData = collect($state)->mapWithKeys(function ($item) {
+                                        return [$item['college_id'] => [
+                                            'delegates_per_seat' => $item['delegates_per_seat'],
+                                            'seats' => $item['seats'],
+                                        ]];
+                                    })->toArray();
 
-                                // Now handle seat creation/deletion for each college
-                                foreach ($state as $item) {
-                                    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $item['college_id'])
-                                        ->where('organization_id', $record->id)
-                                        ->first();
+                                    $record->syncCollegesWithSeats($collegesData);
 
-                                    if ($collegeOrg) {
-                                        $desiredSeats = $item['seats'];
-                                        $currentSeats = $collegeOrg->seatRecords()->count();
+                                    \Filament\Notifications\Notification::make()
+                                        ->title(__('organization.notifications.seats_updated.title'))
+                                        ->body(__('organization.notifications.seats_updated.body'))
+                                        ->success()
+                                        ->send();
+                                } catch (\Exception $e) {
+                                    \Filament\Notifications\Notification::make()
+                                        ->title(__('organization.notifications.seats_update_failed.title'))
+                                        ->body($e->getMessage())
+                                        ->danger()
+                                        ->send();
 
-                                        if ($desiredSeats > $currentSeats) {
-                                            // Add more seats
-                                            $existingSeatNumbers = $collegeOrg->seatRecords()->pluck('seat_number')->toArray();
-                                            $nextSeatNumber = empty($existingSeatNumbers) ? 1 : max($existingSeatNumbers) + 1;
-
-                                            for ($i = 0; $i < ($desiredSeats - $currentSeats); $i++) {
-                                                \App\Models\Seat::create([
-                                                    'college_organization_id' => $collegeOrg->id,
-                                                    'seat_number' => $nextSeatNumber + $i,
-                                                ]);
-                                            }
-                                        } elseif ($desiredSeats < $currentSeats) {
-                                            // Remove seats - only empty ones
-                                            $seatsToRemove = $currentSeats - $desiredSeats;
-                                            $emptySeats = $collegeOrg->seatRecords()
-                                                ->whereDoesntHave('delegates')
-                                                ->orderBy('seat_number', 'desc')
-                                                ->limit($seatsToRemove)
-                                                ->get();
-
-                                            if ($emptySeats->count() < $seatsToRemove) {
-                                                \Filament\Notifications\Notification::make()
-                                                    ->title(__('organization.notifications.cannot_remove_seats.title'))
-                                                    ->body(__('organization.notifications.cannot_remove_seats.body', [
-                                                        'college' => \App\Models\College::find($item['college_id'])?->name,
-                                                        'empty' => $emptySeats->count(),
-                                                        'requested' => $seatsToRemove,
-                                                    ]))
-                                                    ->danger()
-                                                    ->send();
-                                            } else {
-                                                // Soft delete the empty seats
-                                                foreach ($emptySeats as $seat) {
-                                                    $seat->delete();
-                                                }
-                                            }
-                                        }
-                                    }
+                                    throw $e;
                                 }
                             })
                             ->dehydrated(false),

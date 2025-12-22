@@ -11,11 +11,7 @@ final class DelegateApprovalController extends Controller
 {
     public function approve(Delegate $delegate): RedirectResponse
     {
-        if (! auth()->user()->can('update', $delegate)) {
-            abort(403);
-        }
-
-        $delegate->approve(auth()->user());
+        $delegate->approve();
 
         return redirect()
             ->route('filament.root.resources.delegates.edit', $delegate)
@@ -24,11 +20,7 @@ final class DelegateApprovalController extends Controller
 
     public function reject(Delegate $delegate): RedirectResponse
     {
-        if (! auth()->user()->can('update', $delegate)) {
-            abort(403);
-        }
-
-        $delegate->reject(auth()->user());
+        $delegate->reject();
 
         return redirect()
             ->route('filament.root.resources.delegates.edit', $delegate)

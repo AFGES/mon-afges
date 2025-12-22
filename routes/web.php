@@ -17,13 +17,17 @@ Route::get('/magic-link/verify', [MagicLinkController::class, 'verify'])
 
 // Volunteer Approval Routes (signed URLs)
 Route::middleware(['auth', 'signed'])->group(function () {
-    Route::get('/volunteers/{volunteer}/approve', [VolunteerApprovalController::class, 'approve'])
-        ->name('volunteers.approve');
-    Route::get('/volunteers/{volunteer}/reject', [VolunteerApprovalController::class, 'reject'])
-        ->name('volunteers.reject');
+    Route::prefix('/volunteers/{volunteer}')->group(function () {
+        Route::get('/approve', [VolunteerApprovalController::class, 'approve'])
+            ->name('volunteers.approve');
+        Route::get('/reject', [VolunteerApprovalController::class, 'reject'])
+            ->name('volunteers.reject');
+    })->can("update", "volunteer");
 
-    Route::get('/delegates/{delegate}/approve', [DelegateApprovalController::class, 'approve'])
-        ->name('delegates.approve');
-    Route::get('/delegates/{delegate}/reject', [DelegateApprovalController::class, 'reject'])
-        ->name('delegates.reject');
+    Route::prefix('/delegates/{delegate}')->group(function () {
+        Route::get('/approve', [DelegateApprovalController::class, 'approve'])
+            ->name('delegates.approve');
+        Route::get('/reject', [DelegateApprovalController::class, 'reject'])
+            ->name('delegates.reject');
+    })->can("update", "delegate");
 });

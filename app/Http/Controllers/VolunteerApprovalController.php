@@ -11,11 +11,7 @@ final class VolunteerApprovalController extends Controller
 {
     public function approve(Volunteer $volunteer): RedirectResponse
     {
-        if (! auth()->user()->can('update', $volunteer)) {
-            abort(403);
-        }
-
-        $volunteer->approve(auth()->user());
+        $volunteer->approve();
 
         return redirect()
             ->route('filament.root.resources.volunteers.edit', $volunteer)
@@ -24,11 +20,7 @@ final class VolunteerApprovalController extends Controller
 
     public function reject(Volunteer $volunteer): RedirectResponse
     {
-        if (! auth()->user()->can('update', $volunteer)) {
-            abort(403);
-        }
-
-        $volunteer->reject(auth()->user());
+        $volunteer->reject();
 
         return redirect()
             ->route('filament.root.resources.volunteers.edit', $volunteer)

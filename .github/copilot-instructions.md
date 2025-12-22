@@ -64,12 +64,6 @@ Critical: Understand default query behavior via global scopes:
 - `OrganizationCollegeSyncService`: Syncs college relationships with seat creation (called via `syncCollegesWithSeats()` on Organization model)
 - `EmailVerificationVolunteerService`: Handles volunteer email verification logic
 
-### Enum Pattern with UI Helpers
-All enums (see `app/Enums/`) provide:
-- `label()`: Returns translated display text
-- `color()`: Returns Filament color for UI badges (success/warning/danger)
-Example: `ApprovalStatus::Approved->label()` → translated text from `lang/*/approval.php`
-
 ## Conventions
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, naming.
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.

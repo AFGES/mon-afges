@@ -64,12 +64,8 @@ final class DelegateForm
                             ->schema([
                                 Select::make('status')
                                     ->label(__('delegate.fields.status'))
-                                    ->options([
-                                        ApprovalStatus::Pending->value => __('approval.status.pending'),
-                                        ApprovalStatus::Approved->value => __('approval.status.approved'),
-                                        ApprovalStatus::Rejected->value => __('approval.status.rejected'),
-                                    ])
-                                    ->default(ApprovalStatus::Pending->value)
+                                    ->options(ApprovalStatus::class)
+                                    ->default(ApprovalStatus::Pending)
                                     ->native(false)
                                     ->live()
                                     ->required(),

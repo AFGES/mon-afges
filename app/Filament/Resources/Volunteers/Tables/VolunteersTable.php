@@ -17,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Google\Service\CloudCommercePartnerProcurementService\Approval;
 
 class VolunteersTable
 {
@@ -72,12 +73,8 @@ class VolunteersTable
             ->filters([
                 SelectFilter::make('status')
                     ->label(__('volunteer.filters.status'))
-                    ->options([
-                        ApprovalStatus::Pending->value => __('volunteer.status.pending'),
-                        ApprovalStatus::Approved->value => __('volunteer.status.approved'),
-                        ApprovalStatus::Rejected->value => __('volunteer.status.rejected'),
-                    ])
-                    ->default(ApprovalStatus::Pending->value),
+                    ->options(ApprovalStatus::class)
+                    ->default(ApprovalStatus::Pending),
                 TrashedFilter::make(),
             ])
             ->recordActions([

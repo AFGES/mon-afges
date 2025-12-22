@@ -1,31 +1,38 @@
 {
-    "servers": {
-        "laravel-boost": {
-            "command": "php",
-            "args": [
-                "artisan",
-                "boost:mcp"
-            ]
-        },
-        "github": {
-            "type": "http",
-            "url": "https://api.githubcopilot.com/mcp/"
-        },
-        
-        "deepl": {
-            "command": "bunx",
-            "args": ["deepl-mcp-server"],
-            "env": {
-                "DEEPL_API_KEY": "${input:deeplApiKey}"
-            }
-        }
-    },
-    "inputs": [
-        {
-            "id": "deeplApiKey",
-            "type": "promptString",
-            "description": "your DeepL API Key",
-            "password": true
-        }
-    ]
+	"servers": {
+		"laravel-boost": {
+			"type": "stdio",
+			"command": "php",
+			"args": [
+				"artisan",
+				"boost:mcp"
+			]
+		},
+		"github": {
+			"type": "http",
+			"url": "https://api.githubcopilot.com/mcp/"
+		},
+		"deepl": {
+			"type": "stdio",
+			"command": "bunx",
+			"args": [
+				"deepl-mcp-server"
+			],
+			"env": {
+				"DEEPL_API_KEY": "${input:deeplApiKey}"
+			}
+		},
+		"filament-shield Docs": {
+			"url": "https://gitmcp.io/bezhanSalleh/filament-shield",
+			"type": "http"
+		}
+	},
+	"inputs": [
+		{
+			"id": "deeplApiKey",
+			"type": "promptString",
+			"description": "your DeepL API Key",
+			"password": true
+		}
+	]
 }

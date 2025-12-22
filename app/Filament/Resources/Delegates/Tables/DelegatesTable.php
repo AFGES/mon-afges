@@ -42,8 +42,6 @@ final class DelegatesTable
                 TextColumn::make('status')
                     ->label(__('delegate.fields.status'))
                     ->badge()
-                    ->formatStateUsing(fn (ApprovalStatus $state): string => $state->label())
-                    ->color(fn (ApprovalStatus $state): string => $state->color())
                     ->sortable(),
                 TextColumn::make('started_at')
                     ->label(__('delegate.started_at'))
@@ -67,19 +65,15 @@ final class DelegatesTable
                 SelectFilter::make('status')
                     ->label(__('delegate.filters.status'))
                     ->multiple()
-                    ->options([
-                        ApprovalStatus::Pending->value => __('approval.status.pending'),
-                        ApprovalStatus::Approved->value => __('approval.status.approved'),
-                        ApprovalStatus::Rejected->value => __('approval.status.rejected'),
-                    ])
+                    ->options(ApprovalStatus::class)
                     ->default(function () {
                         $pendingCount = Delegate::withoutGlobalScopes()
                             ->where('status', ApprovalStatus::Pending)
                             ->count();
 
                         return $pendingCount > 0
-                            ? [ApprovalStatus::Pending->value]
-                            : [ApprovalStatus::Approved->value];
+                            ? [ApprovalStatus::Pending]
+                            : [ApprovalStatus::Approved];
                     }),
                 SelectFilter::make('period')
                     ->label(__('delegate.filters.period'))

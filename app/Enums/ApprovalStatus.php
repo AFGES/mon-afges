@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-enum ApprovalStatus: string
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
+enum ApprovalStatus: string implements HasLabel, HasColor
 {
     case Pending = 'pending';
     case Approved = 'approved';
     case Rejected = 'rejected';
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Pending => __('approval.status.pending'),
@@ -19,7 +22,7 @@ enum ApprovalStatus: string
         };
     }
 
-    public function color(): string
+    public function getcolor(): string
     {
         return match ($this) {
             self::Pending => 'warning',

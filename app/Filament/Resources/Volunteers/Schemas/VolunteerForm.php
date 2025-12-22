@@ -57,12 +57,8 @@ final class VolunteerForm
                             ->schema([
                                 Select::make('status')
                                     ->label(__('volunteer.fields.status'))
-                                    ->options([
-                                        ApprovalStatus::Pending->value => __('volunteer.status.pending'),
-                                        ApprovalStatus::Approved->value => __('volunteer.status.approved'),
-                                        ApprovalStatus::Rejected->value => __('volunteer.status.rejected'),
-                                    ])
-                                    ->default(ApprovalStatus::Pending->value)
+                                    ->options(ApprovalStatus::class)
+                                    ->default(ApprovalStatus::Pending)
                                     ->required(),
                                 Select::make('approved_by')
                                     ->label(__('volunteer.fields.approved_by'))

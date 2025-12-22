@@ -6,8 +6,13 @@ use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Models\User;
 use App\Models\Volunteer;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 
 use function Pest\Laravel\actingAs;
+
+beforeEach(function () {
+    Permission::firstOrCreate(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
+});
 
 test('pending volunteer stats widget displays correct count', function () {
     $admin = User::factory()->create();
@@ -76,4 +81,21 @@ test('widget counts only pending volunteers not approved ones', function () {
 
     Livewire::test(PendingVolunteerStats::class)
         ->assertSee('2');
+});
+
+test('widget is only visible to users with View:PendingVolunteerStats permission', function () {
+    Permission::firstOrCreate(['name' => 'View:PendingVolunteerStats', 'guard_name' => 'web']);
+
+    $userWithPermission = User::factory()->create();
+    $userWithPermission->givePermissionTo('View:PendingVolunteerStats');
+
+    $userWithoutPermission = User::factory()->create();
+
+    actingAs($userWithPermission);
+    expect(PendingVolunteerStats::canView())
+        ->toBeTrue('Widget should be visible to users with View:PendingVolunteerStats permission');
+
+    actingAs($userWithoutPermission);
+    expect(PendingVolunteerStats::canView())
+        ->toBeFalse('Widget should not be visible to users without View:PendingVolunteerStats permission');
 });

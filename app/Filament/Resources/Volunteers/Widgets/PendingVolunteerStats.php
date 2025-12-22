@@ -6,12 +6,15 @@ namespace App\Filament\Resources\Volunteers\Widgets;
 
 use App\Enums\ApprovalStatus;
 use App\Models\Volunteer;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 final class PendingVolunteerStats extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
         $pendingCount = Volunteer::withoutGlobalScopes()

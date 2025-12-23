@@ -6,6 +6,11 @@ return [
     'label' => 'Mandat',
     'plural_label' => 'Mandats',
 
+    'relation_managers' => [
+        'user_title' => 'Mandats',
+        'organization_title' => 'Bénévoles',
+    ],
+
     'fields' => [
         'user' => 'Utilisateur',
         'organization' => 'Association',

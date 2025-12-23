@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'label' => 'collège',
-    'plural' => 'collèges',
+    'label' => 'Collège',
+    'plural' => 'Collèges',
 
     'fields' => [
         'name' => 'Nom',

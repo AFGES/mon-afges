@@ -19,7 +19,7 @@ final class VolunteersRelationManager extends RelationManager
 
     public static function getTitle($ownerRecord, $livewire): string
     {
-        return __('volunteer.plural_label');
+        return __('volunteer.relation_managers.user_title');
     }
 
     public function form(Schema $schema): Schema

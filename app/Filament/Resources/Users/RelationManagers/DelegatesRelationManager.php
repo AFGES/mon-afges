@@ -19,7 +19,7 @@ final class DelegatesRelationManager extends RelationManager
 
     public static function getTitle($ownerRecord, $livewire): string
     {
-        return __('delegate.plural');
+        return __('delegate.relation_managers.user_title');
     }
 
     public function form(Schema $schema): Schema

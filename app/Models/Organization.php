@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class Organization extends Model
@@ -28,6 +29,16 @@ final class Organization extends Model
             ->using(CollegeOrganization::class)
             ->withPivot(['delegates_per_seat'])
             ->withTimestamps();
+    }
+
+    public function delegates(): HasMany
+    {
+        return $this->hasMany(Delegate::class);
+    }
+
+    public function volunteers(): HasMany
+    {
+        return $this->hasMany(Volunteer::class);
     }
 
     /**

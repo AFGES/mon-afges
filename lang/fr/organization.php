@@ -3,8 +3,8 @@
 // lang/fr/organization.php
 
 return [
-    'label' => 'association',
-    'plural' => 'associations',
+    'label' => 'Association',
+    'plural' => 'Associations',
 
     'fields' => [
         'short_name' => 'Nom court',

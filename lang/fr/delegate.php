@@ -3,10 +3,15 @@
 // lang/fr/delegate.php
 
 return [
-    'label' => 'délégué',
-    'plural' => 'délégués',
+    'label' => 'Délégué',
+    'plural' => 'Délégués',
     'started_at' => 'À partir du',
     'ended_at' => 'Jusqu\'au',
+
+    'relation_managers' => [
+        'user_title' => 'Délégué-e',
+        'organization_title' => 'Délégué-e-s',
+    ],
 
     'fields' => [
         'seat' => 'Siège',

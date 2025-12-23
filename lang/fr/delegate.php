@@ -24,15 +24,6 @@ return [
         'rejected' => 'Refusé',
     ],
 
-    'tabs' => [
-        'current' => 'Actuel',
-        'pending' => 'En attente',
-        'rejected' => 'Refusés',
-        'old' => 'Ancien',
-        'future' => 'Futur',
-        'all' => 'Tout',
-    ],
-
     'sections' => [
         'general' => 'Informations générales',
         'approval' => 'Statut d\'approbation',
@@ -41,6 +32,12 @@ return [
     'filters' => [
         'status' => 'Statut',
         'period' => 'Période',
+        'current' => 'Actuel',
+        'pending' => 'En attente',
+        'rejected' => 'Refusés',
+        'old' => 'Ancien',
+        'future' => 'Futur',
+        'all' => 'Tout',
     ],
 
     'actions' => [

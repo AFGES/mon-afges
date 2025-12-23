@@ -20,6 +20,7 @@ class RejectAction extends Action
         parent::setUp();
 
         $this->label(__('approval.actions.reject'))
+            ->tooltip(__('approval.actions.reject_tooltip'))
             ->color('danger')
             ->icon('heroicon-o-x-circle')
             ->requiresConfirmation()

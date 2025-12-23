@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Delegates\Tables;
 
 use App\Enums\ApprovalStatus;
+use App\Filament\Actions\ApproveAction;
 use App\Filament\Actions\BulkApproveAction;
 use App\Filament\Actions\BulkRejectAction;
+use App\Filament\Actions\RejectAction;
 use App\Models\Delegate;
-use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -100,47 +99,11 @@ final class DelegatesTable
             ])
             ->deferFilters(false)
             ->recordActions([
-                Action::make('approve')
-                    ->label(__('delegate.actions.approve'))
-                    ->icon(Heroicon::OutlinedCheck)
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->visible(fn ($record) => $record->isPending())
-                    ->action(function ($record, $livewire) {
-                        $record->approve();
-                        Notification::make()
-                            ->title(__('delegate.notifications.approved.title'))
-                            ->success()
-                            ->send();
-
-                        // Check if there are any more pending delegates
-                        $pendingCount = Delegate::withoutGlobalScopes()
-                            ->where('status', ApprovalStatus::Pending)
-                            ->count();
-
-                        if ($pendingCount === 0) {
-                            // Update the status filter to show approved delegates
-                            $livewire->tableFilters['status'] = [ApprovalStatus::Approved->value];
-                        }
-                    }),
-                Action::make('reject')
-                    ->label(__('delegate.actions.reject'))
-                    ->icon(Heroicon::OutlinedXMark)
-                    ->color('danger')
-                    ->visible(fn ($record) => $record->isPending())
-                    ->schema([
-                        Textarea::make('rejection_reason')
-                            ->label(__('delegate.fields.rejection_reason'))
-                            ->required()
-                            ->maxLength(1000),
-                    ])
-                    ->action(function ($record, array $data) {
-                        $record->reject($data['rejection_reason']);
-                        Notification::make()
-                            ->title(__('delegate.notifications.rejected.title'))
-                            ->success()
-                            ->send();
-                    }),
+                ActionGroup::make([
+                    ApproveAction::make()->hiddenLabel(),
+                    RejectAction::make()->hiddenLabel(),
+                ])
+                    ->buttonGroup(),
                 EditAction::make(),
             ])
             ->toolbarActions([

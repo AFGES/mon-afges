@@ -21,6 +21,8 @@ return [
     'actions' => [
         'approve' => 'Approuver',
         'reject' => 'Refuser',
+        'approve_tooltip' => 'Approuver cette demande',
+        'reject_tooltip' => 'Refuser cette demande et fournir une raison',
     ],
 
     'modal' => [

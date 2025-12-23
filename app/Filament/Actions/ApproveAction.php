@@ -19,6 +19,7 @@ class ApproveAction extends Action
         parent::setUp();
 
         $this->label(__('approval.actions.approve'))
+            ->tooltip(__('approval.actions.approve_tooltip'))
             ->color('success')
             ->icon('heroicon-o-check-circle')
             ->requiresConfirmation()

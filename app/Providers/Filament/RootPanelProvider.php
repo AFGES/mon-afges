@@ -61,7 +61,8 @@ final class RootPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->plugins([
-                FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make()
+                    ->globallySearchable(false),
                 BreezyCore::make()
                     ->myProfile()
                     ->myProfileComponents([

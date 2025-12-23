@@ -24,6 +24,8 @@ final class OrganizationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
+    protected static ?string $recordTitleAttribute = 'short_name';
+
     public static function getModelLabel(): string
     {
         return __('organization.label');
@@ -66,5 +68,18 @@ final class OrganizationResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['short_name', 'legal_name', 'domain'];
+    }
+
+    public static function getGlobalSearchResultDetails($record): array
+    {
+        return [
+            __('organization.fields.legal_name') => $record->legal_name,
+            __('organization.fields.domain') => $record->domain,
+        ];
     }
 }

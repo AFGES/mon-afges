@@ -2,4 +2,5 @@
 
 return [
     'label' => 'Utilisateur',
+    'email' => 'Courriel',
 ];

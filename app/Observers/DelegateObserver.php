@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Notification;
 
 final class DelegateObserver
 {
-    private ?GoogleWorkspaceService $googleWorkspaceService = null;
+    public function __construct(
+        private ?GoogleWorkspaceService $googleWorkspaceService = null
+    ) {}
 
     /**
      * Get or create the Google Workspace service instance.

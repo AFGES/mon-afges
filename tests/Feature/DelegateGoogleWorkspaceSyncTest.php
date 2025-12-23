@@ -22,8 +22,7 @@ test('delegate observer adds user to google workspace group when created', funct
         ->once()
         ->andReturn(true);
 
-    $observer = new DelegateObserver;
-    $this->app->instance(GoogleWorkspaceService::class, $mockService);
+    $observer = new DelegateObserver($mockService);
 
     $user = User::factory()->create(['email' => 'delegate@afges.org']);
     $delegate = Delegate::factory()->make([
@@ -33,7 +32,7 @@ test('delegate observer adds user to google workspace group when created', funct
     ]);
 
     $observer->created($delegate);
-})->skip('Requires refactoring to support dependency injection');
+});
 
 test('delegate observer removes user from google workspace group when ended', function () {
     Config::set('services.google.workspace.service_account_json', '{"type":"service_account"}');
@@ -41,24 +40,26 @@ test('delegate observer removes user from google workspace group when ended', fu
     Config::set('services.google.workspace.delegate_group', 'test-mon@afges.org');
 
     $user = User::factory()->create(['email' => 'delegate@afges.org']);
-    $delegate = Delegate::factory()->make([
+    $delegate = Delegate::factory()->create([
         'user_id' => $user->id,
         'started_at' => now()->subDays(10),
         'ended_at' => null,
     ]);
 
+    // Now update the delegate to mark it as ended
     $delegate->ended_at = now();
+    $delegate->syncChanges(); // Mark as changed
 
     $mockService = mock(GoogleWorkspaceService::class)->makePartial();
     $mockService->shouldReceive('removeFromGroup')
         ->once()
+        ->with($user->email)
         ->andReturn(true);
 
-    $observer = new DelegateObserver;
-    $this->app->instance(GoogleWorkspaceService::class, $mockService);
+    $observer = new DelegateObserver($mockService);
 
     $observer->updated($delegate);
-})->skip('Requires refactoring to support dependency injection');
+});
 
 test('delegate observer removes user from google workspace group when deleted', function () {
     Config::set('services.google.workspace.service_account_json', '{"type":"service_account"}');
@@ -77,11 +78,10 @@ test('delegate observer removes user from google workspace group when deleted', 
         ->once()
         ->andReturn(true);
 
-    $observer = new DelegateObserver;
-    $this->app->instance(GoogleWorkspaceService::class, $mockService);
+    $observer = new DelegateObserver($mockService);
 
     $observer->deleted($delegate);
-})->skip('Requires refactoring to support dependency injection');
+});
 
 test('delegate observer re-adds user to google workspace group when restored', function () {
     Config::set('services.google.workspace.service_account_json', '{"type":"service_account"}');
@@ -100,11 +100,10 @@ test('delegate observer re-adds user to google workspace group when restored', f
         ->once()
         ->andReturn(true);
 
-    $observer = new DelegateObserver;
-    $this->app->instance(GoogleWorkspaceService::class, $mockService);
+    $observer = new DelegateObserver($mockService);
 
     $observer->restored($delegate);
-})->skip('Requires refactoring to support dependency injection');
+});
 
 test('delegate sync skips when google workspace config is missing', function () {
     Config::set('services.google.workspace.service_account_json', null);

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Volunteers\Schemas;
 
-use App\Enums\ApprovalStatus;
+use App\Filament\Schemas\Components\ApprovalField;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -53,26 +52,17 @@ final class VolunteerForm
                     ]),
                 Section::make(__('volunteer.sections.approval'))
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('status')
-                                    ->label(__('volunteer.fields.status'))
-                                    ->options(ApprovalStatus::class)
-                                    ->default(ApprovalStatus::Pending)
-                                    ->required(),
-                                Select::make('approved_by')
-                                    ->label(__('volunteer.fields.approved_by'))
-                                    ->relationship('approver', 'name')
-                                    ->searchable()
-                                    ->preload(),
-                            ]),
-                        Textarea::make('rejection_reason')
-                            ->label(__('volunteer.fields.rejection_reason'))
-                            ->rows(3)
-                            ->maxLength(1000)
-                            ->visible(fn ($get) => $get('status') === ApprovalStatus::Rejected->value),
+                        ApprovalField::make('approval')
+                            ->label(__('volunteer.sections.approval'))
+                            ->statusAttribute('status')
+                            ->approvedAtAttribute('approved_at')
+                            ->approvedByAttribute('approved_by')
+                            ->rejectionReasonAttribute('rejection_reason')
+                            ->approverRelationship('approver')
+                            ->hiddenOn('create'),
                     ])
-                    ->collapsible(),
+                    ->collapsible()
+                    ->hiddenOn('create'),
             ]);
     }
 }

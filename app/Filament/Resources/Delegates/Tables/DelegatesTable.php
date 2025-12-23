@@ -18,7 +18,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -38,7 +37,7 @@ final class DelegatesTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('seat.collegeOrganization.college.name')
-                    ->label(__('College'))
+                    ->label(__('college.label'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')
@@ -81,9 +80,9 @@ final class DelegatesTable
                     ->label(__('delegate.filters.period'))
                     ->multiple()
                     ->options([
-                        'current' => __('delegate.tabs.current'),
-                        'old' => __('delegate.tabs.old'),
-                        'future' => __('delegate.tabs.future'),
+                        'current' => __('delegate.filters.current'),
+                        'old' => __('delegate.filters.old'),
+                        'future' => __('delegate.filters.future'),
                     ])
                     ->default(['current'])
                     ->query(function (Builder $query, array $data) {
@@ -98,7 +97,7 @@ final class DelegatesTable
                             default => $query,
                         };
                     }),
-            ], layout: FiltersLayout::AboveContent)
+            ])
             ->deferFilters(false)
             ->recordActions([
                 Action::make('approve')

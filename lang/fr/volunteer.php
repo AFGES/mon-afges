@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 return [
-    'label' => 'Mandat de bénévolat',
-    'plural_label' => 'Mandats de bénévolat',
+    'label' => 'Mandat',
+    'plural_label' => 'Mandats',
 
     'fields' => [
         'user' => 'Utilisateur',
         'organization' => 'Association',
-        'position_title' => 'Titre du poste',
+        'position_title' => 'Poste',
         'status' => 'Statut',
         'started_at' => 'Date de début',
         'ended_at' => 'Date de fin',
@@ -29,6 +29,13 @@ return [
 
     'filters' => [
         'status' => 'Statut',
+        'period' => 'Période',
+        'current' => 'Actuel',
+        'pending' => 'En attente',
+        'rejected' => 'Refusés',
+        'old' => 'Ancien',
+        'future' => 'Futur',
+        'all' => 'Tout',
     ],
 
     'actions' => [

@@ -22,6 +22,7 @@
         <exclude>
             <directory>app/Filament</directory>
             <directory>app/Policies</directory>
+            <directory>app/Http/Controllers</directory>
             <file>app/Providers/TelescopeServiceProvider.php</file>
         </exclude>
     </source>

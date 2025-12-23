@@ -45,8 +45,7 @@ final class VolunteerInfolist
                             ->schema([
                                 TextEntry::make('status')
                                     ->label(__('volunteer.fields.status'))
-                                    ->badge()
-                                    ->color(fn (ApprovalStatus $state): string => $state->color()),
+                                    ->badge(),
                                 TextEntry::make('approved_at')
                                     ->label(__('volunteer.fields.approved_at'))
                                     ->dateTime('d/m/Y H:i')

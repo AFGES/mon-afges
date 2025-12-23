@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Delegates\Schemas;
 
-use App\Enums\ApprovalStatus;
+use App\Filament\Schemas\Components\ApprovalField;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -60,36 +58,17 @@ final class DelegateForm
                     ]),
                 Section::make(__('delegate.sections.approval'))
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('status')
-                                    ->label(__('delegate.fields.status'))
-                                    ->options(ApprovalStatus::class)
-                                    ->default(ApprovalStatus::Pending)
-                                    ->native(false)
-                                    ->live()
-                                    ->required(),
-                                DateTimePicker::make('approved_at')
-                                    ->label(__('delegate.fields.approved_at'))
-                                    ->native(false)
-                                    ->displayFormat('d/m/Y H:i')
-                                    ->seconds(false),
-                            ]),
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('approved_by')
-                                    ->label(__('delegate.fields.approved_by'))
-                                    ->relationship('approver', 'name')
-                                    ->searchable()
-                                    ->preload(),
-                            ]),
-                        Textarea::make('rejection_reason')
-                            ->label(__('delegate.fields.rejection_reason'))
-                            ->rows(3)
-                            ->maxLength(1000)
-                            ->visible(fn ($get) => $get('status') === ApprovalStatus::Rejected->value),
+                        ApprovalField::make('approval')
+                            ->label(__('delegate.sections.approval'))
+                            ->statusAttribute('status')
+                            ->approvedAtAttribute('approved_at')
+                            ->approvedByAttribute('approved_by')
+                            ->rejectionReasonAttribute('rejection_reason')
+                            ->approverRelationship('approver')
+                            ->hiddenOn('create'),
                     ])
-                    ->collapsible(),
+                    ->collapsible()
+                    ->hiddenOn('create'),
             ]);
     }
 }

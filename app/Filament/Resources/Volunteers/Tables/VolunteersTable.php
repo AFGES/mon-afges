@@ -3,13 +3,14 @@
 namespace App\Filament\Resources\Volunteers\Tables;
 
 use App\Enums\ApprovalStatus;
+use App\Filament\Actions\BulkApproveAction;
+use App\Filament\Actions\BulkRejectAction;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
@@ -17,7 +18,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Google\Service\CloudCommercePartnerProcurementService\Approval;
 
 class VolunteersTable
 {
@@ -39,7 +39,6 @@ class VolunteersTable
                 TextColumn::make('status')
                     ->label(__('volunteer.fields.status'))
                     ->badge()
-                    ->color(fn (ApprovalStatus $state): string => $state->color())
                     ->sortable(),
                 TextColumn::make('started_at')
                     ->label(__('volunteer.fields.started_at'))
@@ -96,7 +95,7 @@ class VolunteersTable
                     ->icon(Heroicon::OutlinedXMark)
                     ->color('danger')
                     ->visible(fn ($record) => $record->isPending())
-                    ->form([
+                    ->scheme([
                         Textarea::make('rejection_reason')
                             ->label(__('volunteer.fields.rejection_reason'))
                             ->required()
@@ -109,11 +108,12 @@ class VolunteersTable
                             ->success()
                             ->send();
                     }),
-                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkApproveAction::make(),
+                    BulkRejectAction::make(),
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Delegates\Tables;
 
 use App\Enums\ApprovalStatus;
+use App\Filament\Actions\BulkApproveAction;
+use App\Filament\Actions\BulkRejectAction;
 use App\Models\Delegate;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -127,7 +129,7 @@ final class DelegatesTable
                     ->icon(Heroicon::OutlinedXMark)
                     ->color('danger')
                     ->visible(fn ($record) => $record->isPending())
-                    ->form([
+                    ->schema([
                         Textarea::make('rejection_reason')
                             ->label(__('delegate.fields.rejection_reason'))
                             ->required()
@@ -144,6 +146,8 @@ final class DelegatesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkApproveAction::make(),
+                    BulkRejectAction::make(),
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),

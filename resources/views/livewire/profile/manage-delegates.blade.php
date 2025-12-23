@@ -35,8 +35,8 @@
                             <span class="flex-1">
                                 <strong>{{ $delegate->organization->short_name }}</strong>
                                 - {{ $delegate->seat->collegeOrganization->college->name }}, {{ __('profile.manage_delegates.seat_label', ['number' => $delegate->seat->seat_number]) }}
-                                <x-filament::badge :color="$delegate->status->color()">
-                                    {{ $delegate->status->label() }}
+                                <x-filament::badge :color="$delegate->status->getColor()">
+                                    {{ $delegate->status->getLabel() }}
                                 </x-filament::badge>
                                 @if($delegate->ended_at)
                                     <span class="text-xs text-gray-500 dark:text-gray-400">

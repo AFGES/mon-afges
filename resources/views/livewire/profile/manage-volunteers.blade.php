@@ -35,8 +35,8 @@
                             <span class="flex-1">
                                 <strong>{{ $volunteer->organization->short_name }}</strong>
                                 - {{ $volunteer->position_title ?? __('profile.form.position_title.placeholder') }}
-                                <x-filament::badge :color="$volunteer->status->color()">
-                                    {{ $volunteer->status->label() }}
+                                <x-filament::badge :color="$volunteer->status->getColor()">
+                                    {{ $volunteer->status->getLabel() }}
                                 </x-filament::badge>
                                 @if($volunteer->ended_at)
                                     <span class="text-xs text-gray-500 dark:text-gray-400">

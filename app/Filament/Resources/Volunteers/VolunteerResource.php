@@ -5,9 +5,7 @@ namespace App\Filament\Resources\Volunteers;
 use App\Filament\Resources\Volunteers\Pages\CreateVolunteer;
 use App\Filament\Resources\Volunteers\Pages\EditVolunteer;
 use App\Filament\Resources\Volunteers\Pages\ListVolunteers;
-use App\Filament\Resources\Volunteers\Pages\ViewVolunteer;
 use App\Filament\Resources\Volunteers\Schemas\VolunteerForm;
-use App\Filament\Resources\Volunteers\Schemas\VolunteerInfolist;
 use App\Filament\Resources\Volunteers\Tables\VolunteersTable;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Volunteer;
@@ -35,10 +33,6 @@ class VolunteerResource extends Resource
         return VolunteerForm::configure($schema);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return VolunteerInfolist::configure($schema);
-    }
 
     public static function table(Table $table): Table
     {
@@ -57,7 +51,6 @@ class VolunteerResource extends Resource
         return [
             'index' => ListVolunteers::route('/'),
             'create' => CreateVolunteer::route('/create'),
-            'view' => ViewVolunteer::route('/{record}'),
             'edit' => EditVolunteer::route('/{record}/edit'),
         ];
     }

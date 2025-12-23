@@ -8,6 +8,7 @@ use App\Filament\Actions\BulkApproveAction;
 use App\Filament\Actions\BulkRejectAction;
 use App\Filament\Actions\RejectAction;
 use App\Models\Volunteer;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -106,8 +107,11 @@ class VolunteersTable
             ])
             ->deferFilters(false)
             ->recordActions([
-                ApproveAction::make(),
-                RejectAction::make(),
+                ActionGroup::make([
+                    ApproveAction::make()->hiddenLabel(),
+                    RejectAction::make()->hiddenLabel(),
+                ])
+                    ->buttonGroup(),
                 EditAction::make(),
             ])
             ->toolbarActions([

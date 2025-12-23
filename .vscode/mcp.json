@@ -22,10 +22,6 @@
 				"DEEPL_API_KEY": "${input:deeplApiKey}"
 			}
 		},
-		"filament-shield Docs": {
-			"url": "https://gitmcp.io/bezhanSalleh/filament-shield",
-			"type": "http"
-		}
 	},
 	"inputs": [
 		{

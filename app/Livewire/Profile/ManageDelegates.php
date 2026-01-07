@@ -164,7 +164,7 @@ final class ManageDelegates extends MyProfileComponent
             return;
         }
 
-        $delegate->terminate();
+        $delegate->end();
 
         Notification::make()
             ->title(__('profile.manage_delegates.terminate.success_title'))

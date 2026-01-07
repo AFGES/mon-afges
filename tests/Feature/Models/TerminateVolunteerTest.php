@@ -98,7 +98,7 @@ test('volunteer terminate method sets ended_at to current time', function () {
 
     expect($volunteer->ended_at)->toBeNull();
 
-    $result = $volunteer->terminate();
+    $result = $volunteer->end();
 
     expect($result)->toBeTrue();
     expect($volunteer->fresh()->ended_at)->not->toBeNull();
@@ -110,7 +110,7 @@ test('volunteer terminate method returns false if already terminated', function 
     ]);
 
     $originalEndedAt = $volunteer->ended_at;
-    $result = $volunteer->terminate();
+    $result = $volunteer->end();
 
     expect($result)->toBeFalse();
     expect($volunteer->fresh()->ended_at->toDateTimeString())->toBe($originalEndedAt->toDateTimeString());

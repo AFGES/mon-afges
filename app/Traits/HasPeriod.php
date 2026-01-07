@@ -51,11 +51,6 @@ trait HasPeriod
         return true;
     }
 
-    public function terminate(): bool
-    {
-        return $this->end();
-    }
-
     public function initializeHasPeriod(): void
     {
         $this->fillable = array_merge($this->fillable, [

@@ -111,7 +111,7 @@ test('delegate terminate method sets ended_at to current time', function () {
 
     expect($delegate->ended_at)->toBeNull();
 
-    $result = $delegate->terminate();
+    $result = $delegate->end();
 
     expect($result)->toBeTrue();
     expect($delegate->fresh()->ended_at)->not->toBeNull();
@@ -123,7 +123,7 @@ test('delegate terminate method returns false if already terminated', function (
     ]);
 
     $originalEndedAt = $delegate->ended_at;
-    $result = $delegate->terminate();
+    $result = $delegate->end();
 
     expect($result)->toBeFalse();
     expect($delegate->fresh()->ended_at->toDateString())->toBe($originalEndedAt->toDateString());

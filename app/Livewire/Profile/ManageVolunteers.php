@@ -132,7 +132,7 @@ final class ManageVolunteers extends MyProfileComponent
             return;
         }
 
-        $volunteer->terminate();
+        $volunteer->end();
 
         Notification::make()
             ->title(__('profile.manage_volunteers.terminate.success_title'))

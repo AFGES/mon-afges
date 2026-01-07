@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\Delegate;
-use App\Models\User;
-use App\Services\GoogleWorkspaceService;
+use App\Services\DelegateGoogleWorkspaceSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -48,34 +46,33 @@ final class SyncDelegatesToGoogleWorkspace extends Command
         }
 
         // Use bound mock if available, otherwise create new service
-        $service = app()->bound(GoogleWorkspaceService::class)
-            ? app(GoogleWorkspaceService::class)
-            : new GoogleWorkspaceService($serviceAccountJson, $adminEmail, $delegateGroup);
+        $syncService = app()->bound(DelegateGoogleWorkspaceSyncService::class)
+            ? app(DelegateGoogleWorkspaceSyncService::class)
+            : new DelegateGoogleWorkspaceSyncService;
 
-        // Get all current active delegates
-        $activeDelegateEmails = Delegate::whereNotNull('email')
-            ->pluck('email')
-            ->unique();
+        $activeDelegateEmails = $syncService->getActiveDelegateEmails();
 
-        $this->info('Found '. $activeDelegateEmails->count() .' active delegate(s)');
+        $this->info('Found '.$activeDelegateEmails->count().' active delegate(s)');
 
-        // Get all users who should be in the group (active delegates)
-        $addedCount = 0;
+        // Initialize counters
         $alreadyInCount = 0;
+        $addedCount = 0;
         $failedToAddCount = 0;
+        $removedCount = 0;
+        $failedToRemoveCount = 0;
 
         $this->info('Ensuring active delegates are in the group...');
         $this->newLine();
 
         foreach ($activeDelegateEmails as $email) {
-            if ($service->isInGroup($email)) {
+            if ($syncService->isInGroup($email)) {
                 $this->line("  ✓ {$email} - already in group");
                 $alreadyInCount++;
             } else {
                 if ($isDryRun) {
                     $this->line("  [DRY RUN] Would add {$email}");
                     $addedCount++;
-                } elseif ($service->addToGroup($email)) {
+                } elseif ($syncService->addToGroup($email)) {
                     $this->line("  + {$email} - added to group");
                     $addedCount++;
                 } else {
@@ -85,29 +82,27 @@ final class SyncDelegatesToGoogleWorkspace extends Command
             }
         }
 
-        // Find users who are in the group but are not active delegates
+        // Perform the bulk sync operation
         $this->newLine();
         $this->info('Checking for users to remove from the group...');
         $this->newLine();
 
-        $removedCount = 0;
-        $failedToRemoveCount = 0;
+        // Get all user emails and check for removals
+        $allUserEmails = \App\Models\User::whereNotNull('email')->get('email');
 
-        // Get all users with email addresses
-        $allUserEmails = User::whereNotNull('email')->pluck('email')->toArray();
-
-        foreach ($allUserEmails as $email) {
+        foreach ($allUserEmails as $userEmail) {
+            $email = $userEmail->email;
             // Skip if this user is an active delegate
             if ($activeDelegateEmails->contains($email)) {
                 continue;
             }
 
             // Check if they're in the group
-            if ($service->isInGroup($email)) {
+            if ($syncService->isInGroup($email)) {
                 if ($isDryRun) {
                     $this->line("  [DRY RUN] Would remove {$email}");
                     $removedCount++;
-                } elseif ($service->removeFromGroup($email)) {
+                } elseif ($syncService->removeFromGroup($email)) {
                     $this->line("  - {$email} - removed from group");
                     $removedCount++;
                 } else {

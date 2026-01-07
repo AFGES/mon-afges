@@ -20,9 +20,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
 final class Delegate extends Model implements MustVerifyEmail
 {
+    use AuthMustVerifyEmail, HasApprovalStatus, HasPeriod, SoftDeletes;
+
     /** @use HasFactory<\Database\Factories\DelegateFactory> */
     use HasFactory;
-    use HasApprovalStatus, HasPeriod, SoftDeletes, AuthMustVerifyEmail;
 
     protected static function booted(): void
     {
@@ -35,8 +36,8 @@ final class Delegate extends Model implements MustVerifyEmail
             if ($delegate->user &&
                 $delegate->user->hasVerifiedEmail() &&
                 $delegate->email === $delegate->user->email &&
-                ! $delegate->hasVerifiedEmail()) {
-                $delegate->markEmailAsVerified();
+                is_null($delegate->email_verified_at)) {
+                $delegate->email_verified_at = now();
             }
         });
     }

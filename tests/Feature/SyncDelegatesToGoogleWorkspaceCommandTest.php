@@ -2,6 +2,7 @@
 
 use App\Models\Delegate;
 use App\Models\User;
+use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\GoogleWorkspaceService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
@@ -22,18 +23,21 @@ test('sync command fails when configuration is incomplete', function () {
 });
 
 test('sync command shows active delegates', function () {
-    $user = User::factory()->create(['email' => 'delegate@afges.org']);
     Delegate::factory()->approved()->create([
-        'user_id' => $user->id,
+        'email' => 'delegate@afges.org',
+        'email_verified_at' => now(),
         'started_at' => now(),
         'ended_at' => null,
     ]);
 
-    $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->with('delegate@afges.org')->andReturn(false);
         $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldReceive('addToGroup')->with('delegate@afges.org')->once()->andReturn(true);
     });
+
+    $mockSyncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+    app()->instance(DelegateGoogleWorkspaceSyncService::class, $mockSyncService);
 
     $this->artisan('delegates:sync-google-workspace')
         ->assertSuccessful()
@@ -42,18 +46,21 @@ test('sync command shows active delegates', function () {
 });
 
 test('sync command works in dry run mode', function () {
-    $user = User::factory()->create(['email' => 'delegate@afges.org']);
     Delegate::factory()->approved()->create([
-        'user_id' => $user->id,
+        'email' => 'delegate@afges.org',
+        'email_verified_at' => now(),
         'started_at' => now(),
         'ended_at' => null,
     ]);
 
-    $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldNotReceive('addToGroup');
         $mock->shouldNotReceive('removeFromGroup');
     });
+
+    $mockSyncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+    app()->instance(DelegateGoogleWorkspaceSyncService::class, $mockSyncService);
 
     $this->artisan('delegates:sync-google-workspace --dry-run')
         ->assertSuccessful()
@@ -70,9 +77,12 @@ test('sync command has proper signature and description', function () {
 });
 
 test('sync command displays summary table', function () {
-    $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->andReturn(false);
     });
+
+    $mockSyncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+    app()->instance(DelegateGoogleWorkspaceSyncService::class, $mockSyncService);
 
     $this->artisan('delegates:sync-google-workspace')
         ->assertSuccessful()
@@ -84,7 +94,7 @@ test('sync command identifies users to remove from group', function () {
     // Create a user who is not a delegate
     $nonDelegate = User::factory()->create(['email' => 'notdelegate@afges.org']);
 
-    $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')
             ->with('notdelegate@afges.org')
             ->andReturn(true);
@@ -96,20 +106,25 @@ test('sync command identifies users to remove from group', function () {
             ->andReturn(true);
     });
 
+    $mockSyncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+    app()->instance(DelegateGoogleWorkspaceSyncService::class, $mockSyncService);
+
     $this->artisan('delegates:sync-google-workspace')
         ->assertSuccessful()
         ->expectsOutputToContain('removed from group');
 });
 
 test('sync command handles users already in group', function () {
-    $user = User::factory()->create(['email' => 'existing@afges.org']);
+    $user = User::factory()->create();
     Delegate::factory()->approved()->create([
         'user_id' => $user->id,
+        'email' => 'existing@afges.org',
+        'email_verified_at' => now(),
         'started_at' => now(),
         'ended_at' => null,
     ]);
 
-    $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         // More specific expectation must come first
         $mock->shouldReceive('isInGroup')
             ->with('existing@afges.org')
@@ -120,23 +135,31 @@ test('sync command handles users already in group', function () {
         $mock->shouldNotReceive('addToGroup');
     });
 
+    $mockSyncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+    app()->instance(DelegateGoogleWorkspaceSyncService::class, $mockSyncService);
+
     $this->artisan('delegates:sync-google-workspace')
         ->assertSuccessful()
         ->expectsOutputToContain('already in group');
 });
 
 test('sync command handles API failures gracefully', function () {
-    $user = User::factory()->create(['email' => 'delegate@afges.org']);
+    $user = User::factory()->create();
     Delegate::factory()->approved()->create([
         'user_id' => $user->id,
+        'email' => 'delegate@afges.org',
+        'email_verified_at' => now(),
         'started_at' => now(),
         'ended_at' => null,
     ]);
 
-    $this->mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldReceive('addToGroup')->with('delegate@afges.org')->once()->andReturn(false);
     });
+
+    $mockSyncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+    app()->instance(DelegateGoogleWorkspaceSyncService::class, $mockSyncService);
 
     $this->artisan('delegates:sync-google-workspace')
         ->assertSuccessful()

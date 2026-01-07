@@ -7,43 +7,27 @@ namespace App\Observers;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Notifications\DelegateApprovalRequested;
-use App\Services\GoogleWorkspaceService;
-use Illuminate\Support\Facades\Log;
+use App\Services\DelegateGoogleWorkspaceSyncService;
 use Illuminate\Support\Facades\Notification;
 
 final class DelegateObserver
 {
     public function __construct(
-        private ?GoogleWorkspaceService $googleWorkspaceService = null
+        private ?DelegateGoogleWorkspaceSyncService $syncService = null
     ) {}
 
     /**
-     * Get or create the Google Workspace service instance.
+     * Get or create the sync service instance.
      */
-    private function getGoogleWorkspaceService(): ?GoogleWorkspaceService
+    private function getSyncService(): DelegateGoogleWorkspaceSyncService
     {
-        if ($this->googleWorkspaceService !== null) {
-            return $this->googleWorkspaceService;
+        if ($this->syncService !== null) {
+            return $this->syncService;
         }
 
-        $serviceAccountJson = config('services.google.workspace.service_account_json');
-        $adminEmail = config('services.google.workspace.admin_email');
-        $delegateGroup = config('services.google.workspace.delegate_group');
+        $this->syncService = new DelegateGoogleWorkspaceSyncService;
 
-        // If any required config is missing, disable sync
-        if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
-            Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
-
-            return null;
-        }
-
-        $this->googleWorkspaceService = new GoogleWorkspaceService(
-            $serviceAccountJson,
-            $adminEmail,
-            $delegateGroup
-        );
-
-        return $this->googleWorkspaceService;
+        return $this->syncService;
     }
 
     /**
@@ -106,43 +90,7 @@ final class DelegateObserver
      */
     private function addToGroup(Delegate $delegate): void
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return;
-        }
-
-        if (! $delegate->email) {
-            Log::warning('Cannot sync delegate to Google Workspace: email missing', [
-                'delegate_id' => $delegate->id,
-            ]);
-
-            return;
-        }
-
-        if (! $delegate->hasVerifiedEmail()) {
-            Log::warning('Cannot sync delegate to Google Workspace: email not verified', [
-                'delegate_id' => $delegate->id,
-                'email' => $delegate->email,
-            ]);
-
-            return;
-        }
-
-        // Only add if delegate is currently active
-        if ($delegate->isCurrentlyActive()) {
-            // Check if this email is already in use by other active delegates
-            if ($this->otherDelegateUsesEmail($delegate)) {
-                Log::info('Skipping Google Workspace add: email already in use by other active delegates', [
-                    'delegate_id' => $delegate->id,
-                    'email' => $delegate->email,
-                ]);
-
-                return;
-            }
-
-            $service->addToGroup($delegate->email);
-        }
+        $this->getSyncService()->addDelegate($delegate);
     }
 
     /**
@@ -150,41 +98,6 @@ final class DelegateObserver
      */
     private function removeFromGroup(Delegate $delegate): void
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return;
-        }
-
-        if (! $delegate->email) {
-            Log::warning('Cannot remove delegate from Google Workspace: email missing', [
-                'delegate_id' => $delegate->id,
-            ]);
-
-            return;
-        }
-
-        // Check if this email is still in use by other active delegates
-        if ($this->otherDelegateUsesEmail($delegate)) {
-            Log::info('Skipping Google Workspace removal: email still in use by other active delegates', [
-                'delegate_id' => $delegate->id,
-                'email' => $delegate->email,
-            ]);
-
-            return;
-        }
-
-        $service->removeFromGroup($delegate->email);
-    }
-
-    /**
-     * Check if other active delegates are using the same email.
-     */
-    private function otherDelegateUsesEmail(Delegate $delegate): bool
-    {
-        return Delegate::whereEmail($delegate->email)
-            ->where('id', '!=', $delegate->id)
-            ->whereNotNull('email_verified_at')
-            ->exists();
+        $this->getSyncService()->removeDelegate($delegate);
     }
 }

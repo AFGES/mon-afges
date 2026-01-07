@@ -12,6 +12,7 @@ This is a Laravel 12 + Filament v4 application for managing AFGES delegates, org
 - **Organizations**: Educational institutions (identified by email domain) with college-based seat allocation
 - **Volunteers**: Users applying for volunteer positions with approval workflow
 - **Seats**: College-specific positions within organizations (many-to-many with delegates)
+- **Colleges**: Academic divisions (e.g., different faculties) within organizations
 - **Users**: Authenticated via Google OAuth, magic links, or Filament Breezy
 
 **Key Business Rules:**
@@ -19,6 +20,7 @@ This is a Laravel 12 + Filament v4 application for managing AFGES delegates, org
 - Delegates are scoped to "current" periods using `CurrentlyScope` (checks `started_at`)
 - Organizations sync with Google Workspace groups for delegate access
 - Email domain matching determines organization association during registration
+- Email verification: Delegate emails auto-verify if user's email is verified and matches
 - French is the primary language (see `lang/fr/` and translation keys in Enums)
 
 **French Translation Guidelines:**
@@ -52,16 +54,25 @@ Models use `HasApprovalStatus` trait (see `app/Traits/HasApprovalStatus.php`):
 - Tracks approver via `approved_by` relationship
 - Status tracked via `ApprovalStatus` enum (Pending/Approved/Rejected)
 - Applied to: `Delegate`, `Volunteer` models
+- Includes `getNavigationBadge()` for showing pending counts in Filament navigation
+- Auto-sends approval notifications via `sendApprovalNotification()` method
 
 ### Global Scopes Architecture
 Critical: Understand default query behavior via global scopes:
-- `ApprovedScope`: Filters to approved-only records (applied to Delegate model)
-- `CurrentlyScope`: Filters to currently active records based on `started_at` date
-- Use `withoutGlobalScope()` or model attributes to bypass when needed
+- `ApprovedScope`: Filters to approved-only records (applied to Delegate & Volunteer models)
+- `CurrentlyScope`: Filters to currently active records based on `started_at` date (uses custom `whereTodayOrBefore` and `whereTodayOrAfter` macros)
+- Both scopes applied via `#[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]` attribute
+- Use `withoutGlobalScope(ApprovedScope::class)` or `withoutGlobalScopes()` to bypass when needed
+- Example: Show pending approvals with `Model::withoutGlobalScope(ApprovedScope::class)->where('status', ApprovalStatus::Pending)->get()`
 
 ### Service Layer for Complex Operations
 - `GoogleWorkspaceService`: Manages Google Workspace group membership for delegates
+- `DelegateGoogleWorkspaceSyncService`: Orchestrates delegate sync logic (checks config, validates email, prevents duplicates)
 - `OrganizationCollegeSyncService`: Syncs college relationships with seat creation (called via `syncCollegesWithSeats()` on Organization model)
+
+### Model Lifecycle Hooks
+- Use `booted()` static method for model event listeners (see `Delegate::booted()` for email defaults and verification)
+- Prefer Observers (`app/Observers/`) for complex cross-cutting concerns like notifications and external sync
 
 ## Conventions
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, naming.
@@ -91,6 +102,13 @@ When delegates are approved, they should be added to Google Workspace groups:
 - Configured via `GOOGLE_WORKSPACE_*` env vars (service account JSON, admin email, group email)
 - Service handles 409 conflicts (already a member) gracefully
 - See `GoogleWorkspaceService::addToGroup()` for implementation pattern
+- Sync is managed by `DelegateGoogleWorkspaceSyncService` (injected into `DelegateObserver`)
+- Observer pattern: delegates added to group on `created`/`restored`, removed on `deleted`/`updated` (when ended)
+
+### Observers
+- `DelegateObserver`: Manages Google Workspace sync and sends approval notifications to users with `Update:Delegate` permission
+- `VolunteerObserver`: Sends approval notifications to users with `Update:Volunteer` permission
+- Both observers notify approvers when new records are created (pending approval)
 
 ### Event Listeners
 - `AssignsOrganizationRegistrationListener`: Attempts to match user to organization by email domain on registration (Filament `Registered` event)
@@ -98,6 +116,14 @@ When delegates are approved, they should be added to Google Workspace groups:
 
 ## Frontend Bundling
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `bun run build`, `bun run dev`, or `composer run dev`. Ask them.
+
+## Development Workflow Commands
+- **Run tests**: `php artisan test` (or filter: `php artisan test --filter=testName` or by file path)
+- **Lint/format code**: `vendor/bin/pint` (auto-formats with Laravel Pint)
+- **Build assets**: `bun run build` (production) or `bun run dev` (development watch mode)
+- **Tinker debugging**: Use Laravel Boost's `tinker` tool or `php artisan tinker`
+- **Database queries**: Use Boost's `database-query` tool for read-only queries
+- **List artisan commands**: Use Boost's `list-artisan-commands` tool for up-to-date command info
 
 ## Replies
 - Be concise in your explanations - focus on what's important rather than explaining obvious details.

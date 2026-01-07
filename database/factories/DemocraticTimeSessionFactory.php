@@ -16,13 +16,13 @@ class DemocraticTimeSessionFactory extends Factory
      */
     public function definition(): array
     {
-        $startsAt = fake()->dateTimeBetween('now', '+1 month');
-        $endsAt = fake()->dateTimeBetween($startsAt, $startsAt->format('Y-m-d H:i:s').' +4 hours');
+        $startedAt = fake()->dateTimeBetween('now', '+1 month');
+        $endedAt = fake()->dateTimeBetween($startedAt, $startedAt->format('Y-m-d H:i:s').' +4 hours');
 
         return [
             'democratic_time_type_id' => \App\Models\DemocraticTimeType::factory(),
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
+            'started_at' => $startedAt,
+            'ended_at' => $endedAt,
             'location' => fake()->address(),
         ];
     }

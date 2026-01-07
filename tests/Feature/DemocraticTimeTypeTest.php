@@ -64,3 +64,11 @@ test('multiple democratic time types can exist with different names', function (
 
     expect(DemocraticTimeType::count())->toBe(3);
 });
+
+test('democratic time type has many sessions', function () {
+    $type = DemocraticTimeType::factory()->create();
+
+    \App\Models\DemocraticTimeSession::factory()->count(3)->create(['democratic_time_type_id' => $type->id]);
+
+    expect($type->sessions()->count())->toBe(3);
+});

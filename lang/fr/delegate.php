@@ -17,6 +17,8 @@ return [
         'seat' => 'Siège',
         'seat_helper' => 'Sélectionnez le siège pour ce délégué',
         'seat_number' => 'Siège #',
+        'email' => 'Courriel',
+        'email_helper' => 'Courriel qui sera ajouté au groupe Google Workspace lors de l\'approbation',
         'status' => 'Statut',
         'approved_at' => 'Approuvé le',
         'approved_by' => 'Approuvé par',

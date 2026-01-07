@@ -23,6 +23,7 @@ class DelegateFactory extends Factory
             'user_id' => \App\Models\User::factory(),
             'organization_id' => \App\Models\Organization::factory(),
             'seat_id' => \App\Models\Seat::factory(),
+            'email' => fake()->unique()->safeEmail(),
             'started_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'ended_at' => fake()->optional()->dateTimeBetween('now', '+1 year'),
             'status' => ApprovalStatus::Pending,
@@ -35,6 +36,20 @@ class DelegateFactory extends Factory
             'status' => ApprovalStatus::Approved,
             'approved_at' => now(),
             'approved_by' => \App\Models\User::factory(),
+        ]);
+    }
+
+    public function verified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    public function unverified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => null,
         ]);
     }
 

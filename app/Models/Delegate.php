@@ -9,6 +9,8 @@ use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
 use App\Traits\HasPeriod;
+use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,20 +18,34 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
-final class Delegate extends Model
+final class Delegate extends Model implements MustVerifyEmail
 {
-    use HasApprovalStatus;
-
     /** @use HasFactory<\Database\Factories\DelegateFactory> */
     use HasFactory;
+    use HasApprovalStatus, HasPeriod, SoftDeletes, AuthMustVerifyEmail;
 
-    use HasPeriod;
-    use SoftDeletes;
+    protected static function booted(): void
+    {
+        self::creating(function (Delegate $delegate) {
+            if (! $delegate->email && $delegate->user) {
+                $delegate->email = $delegate->user->email;
+            }
+
+            // Mark delegate email as verified if user's email is verified and matches
+            if ($delegate->user &&
+                $delegate->user->hasVerifiedEmail() &&
+                $delegate->email === $delegate->user->email &&
+                ! $delegate->hasVerifiedEmail()) {
+                $delegate->markEmailAsVerified();
+            }
+        });
+    }
 
     public $fillable = [
         'user_id',
         'organization_id',
         'seat_id',
+        'email',
     ];
 
     public function user(): BelongsTo
@@ -53,6 +69,7 @@ final class Delegate extends Model
             'started_at' => 'date',
             'ended_at' => 'date',
             'approved_at' => 'datetime',
+            'email_verified_at' => 'datetime',
             'status' => ApprovalStatus::class,
         ];
     }

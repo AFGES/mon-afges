@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Delegates\Schemas;
 use App\Filament\Schemas\Components\ApprovalField;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -41,6 +42,12 @@ final class DelegateForm
                             ->preload()
                             ->default(auth()->id())
                             ->required(),
+                        TextInput::make('email')
+                            ->label(__('delegate.fields.email'))
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->helperText(__('delegate.fields.email_helper')),
                         Select::make('organization_id')
                             ->label(Str::ucfirst(__('organization.label')))
                             ->relationship(name: 'organization', titleAttribute: 'short_name')

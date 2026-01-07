@@ -53,15 +53,11 @@ final class SyncDelegatesToGoogleWorkspace extends Command
             : new GoogleWorkspaceService($serviceAccountJson, $adminEmail, $delegateGroup);
 
         // Get all current active delegates
-        $activeDelegateEmails = Delegate::with('user')
-            ->get()
-            ->pluck('user.email')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
+        $activeDelegateEmails = Delegate::whereNotNull('email')
+            ->pluck('email')
+            ->unique();
 
-        $this->info('Found '.count($activeDelegateEmails).' active delegate(s)');
+        $this->info('Found '. $activeDelegateEmails->count() .' active delegate(s)');
 
         // Get all users who should be in the group (active delegates)
         $addedCount = 0;
@@ -102,7 +98,7 @@ final class SyncDelegatesToGoogleWorkspace extends Command
 
         foreach ($allUserEmails as $email) {
             // Skip if this user is an active delegate
-            if (in_array($email, $activeDelegateEmails)) {
+            if ($activeDelegateEmails->contains($email)) {
                 continue;
             }
 

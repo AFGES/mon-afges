@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Models\User;
 use DutchCodingCompany\FilamentSocialite\Events\Login;
 use DutchCodingCompany\FilamentSocialite\Events\Registered;
 use DutchCodingCompany\FilamentSocialite\Events\SocialiteUserConnected;
@@ -37,17 +38,15 @@ final class MarkEmailAsVerifiedOnSocialiteLogin
     /**
      * Mark the user's primary email as verified.
      */
-    private function markEmailAsVerified($user): void
+    private function markEmailAsVerified(User $user): void
     {
         if (! $user) {
             return;
         }
 
         // Get or create the primary email
-        $primaryEmail = $user->primaryEmail();
-
-        if ($primaryEmail && ! $primaryEmail->isVerified()) {
-            $primaryEmail->markAsVerified();
+        if ($user->email && ! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
         }
     }
 }

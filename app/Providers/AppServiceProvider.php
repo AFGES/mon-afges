@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Volunteer;
 use App\Observers\DelegateObserver;
 use App\Observers\VolunteerObserver;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -35,47 +36,15 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (app()->runningInConsole()) {
-            \Illuminate\Database\Eloquent\Relations\Relation::morphMap([
-                'user' => User::class,
-            ]);
-        }
+        // Enable strict mode for Eloquent models in non-production environments
+        Model::shouldBeStrict(! app()->isProduction());
 
         if (app()->isLocale('fr')) {
             Pluralizer::useLanguage('french');
         }
 
-        // Register Blueprint macro for approval status columns
-        Blueprint::macro('approvalStatus', function (?string $after = null) {
-            /** @var Blueprint $this */
-            $this->enum('status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
-            $this->timestamp('approved_at')->nullable()->after('status');
-            $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
-            $this->text('rejection_reason')->nullable()->after('approved_by');
-        });
-
-        Blueprint::macro('dropApprovalStatus', function () {
-            /** @var Blueprint $this */
-            $this->dropForeign(['approved_by']);
-            $this->dropColumn(['status', 'approved_at', 'approved_by', 'rejection_reason']);
-        });
-
-        // Register Blueprint macro for period (start/end date) columns
-        Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null) {
-            /** @var Blueprint $this */
-            if ($startType === 'datetime') {
-                $this->datetime('started_at')->useCurrent()->after($after);
-                $this->datetime('ended_at')->nullable()->after('started_at');
-            } else {
-                $this->date('started_at')->useCurrent()->after($after);
-                $this->date('ended_at')->nullable()->after('started_at');
-            }
-        });
-
-        Blueprint::macro('dropPeriod', function () {
-            /** @var Blueprint $this */
-            $this->dropColumn(['started_at', 'ended_at']);
-        });
+        $this->blueprintApprovalStatusMacro();
+        $this->blueprintPeriodMacro();
 
         // Register model observers
         Delegate::observe(DelegateObserver::class);
@@ -107,6 +76,48 @@ final class AppServiceProvider extends ServiceProvider
 
         Gate::before(function (User $user, $ability) {
             return $user->hasRole('super_admin') ?: null;
+        });
+    }
+
+    /**
+     * Register Blueprint macro for approval status columns
+     */
+    private function blueprintApprovalStatusMacro(): void
+    {
+        Blueprint::macro('approvalStatus', function (?string $after = null) {
+            /** @var Blueprint $this */
+            $this->enum('status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
+            $this->timestamp('approved_at')->nullable()->after('status');
+            $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
+            $this->text('rejection_reason')->nullable()->after('approved_by');
+        });
+
+        Blueprint::macro('dropApprovalStatus', function () {
+            /** @var Blueprint $this */
+            $this->dropForeign(['approved_by']);
+            $this->dropColumn(['status', 'approved_at', 'approved_by', 'rejection_reason']);
+        });
+    }
+
+    /**
+     * Register Blueprint macro for period (start/end date) columns
+     */
+    private function blueprintPeriodMacro(): void
+    {
+        Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null) {
+            /** @var Blueprint $this */
+            if ($startType === 'datetime') {
+                $this->datetime('started_at')->useCurrent()->after($after);
+                $this->datetime('ended_at')->nullable()->after('started_at');
+            } else {
+                $this->date('started_at')->useCurrent()->after($after);
+                $this->date('ended_at')->nullable()->after('started_at');
+            }
+        });
+
+        Blueprint::macro('dropPeriod', function () {
+            /** @var Blueprint $this */
+            $this->dropColumn(['started_at', 'ended_at']);
         });
     }
 }

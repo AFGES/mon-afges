@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class DemocraticTimeType extends Model
 {
@@ -23,5 +24,10 @@ final class DemocraticTimeType extends Model
         return [
             'convocation_interval_days' => 'integer',
         ];
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(DemocraticTimeSession::class);
     }
 }

@@ -102,7 +102,7 @@ test('organization can remove college associations', function () {
     $college2 = College::factory()->create();
     $organization = Organization::factory()->create();
 
-    $organization->colleges()->attach([
+    $organization->syncCollegesWithSeats([
         $college1->id => ['seats' => 2, 'delegates_per_seat' => 1],
         $college2->id => ['seats' => 3, 'delegates_per_seat' => 1],
     ]);
@@ -110,7 +110,9 @@ test('organization can remove college associations', function () {
     expect($organization->colleges)->toHaveCount(2);
 
     // Remove one association
-    $organization->colleges()->detach($college1->id);
+    $organization->syncCollegesWithSeats([
+        $college2->id => ['seats' => 3, 'delegates_per_seat' => 1],
+    ]);
 
     expect($organization->fresh()->colleges)->toHaveCount(1)
         ->and($organization->fresh()->colleges->first()->id)->toBe($college2->id);
@@ -122,9 +124,9 @@ test('multiple organizations can be associated with same college', function () {
     $org2 = Organization::factory()->create(['short_name' => 'Org 2']);
     $org3 = Organization::factory()->create(['short_name' => 'Org 3']);
 
-    $org1->colleges()->attach($college->id, ['seats' => 2, 'delegates_per_seat' => 1]);
-    $org2->colleges()->attach($college->id, ['seats' => 3, 'delegates_per_seat' => 2]);
-    $org3->colleges()->attach($college->id, ['seats' => 1, 'delegates_per_seat' => 1]);
+    $org1->syncCollegesWithSeats([$college->id => ['seats' => 2, 'delegates_per_seat' => 1]]);
+    $org2->syncCollegesWithSeats([$college->id => ['seats' => 3, 'delegates_per_seat' => 2]]);
+    $org3->syncCollegesWithSeats([$college->id => ['seats' => 1, 'delegates_per_seat' => 1]]);
 
     expect($college->organizations)->toHaveCount(3)
         ->and($college->organizations->pluck('short_name')->toArray())->toContain('Org 1', 'Org 2', 'Org 3');

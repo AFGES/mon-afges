@@ -112,19 +112,36 @@ final class DelegateObserver
             return;
         }
 
-        $user = $delegate->user;
-
-        if (! $user || ! $user->email) {
-            Log::warning('Cannot sync delegate to Google Workspace: user or email missing', [
+        if (! $delegate->email) {
+            Log::warning('Cannot sync delegate to Google Workspace: email missing', [
                 'delegate_id' => $delegate->id,
             ]);
 
             return;
         }
 
-        // Only add if delegate is currently active (no end date or future end date)
-        if ($delegate->ended_at === null || $delegate->ended_at->isFuture()) {
-            $service->addToGroup($user->email);
+        if (! $delegate->hasVerifiedEmail()) {
+            Log::warning('Cannot sync delegate to Google Workspace: email not verified', [
+                'delegate_id' => $delegate->id,
+                'email' => $delegate->email,
+            ]);
+
+            return;
+        }
+
+        // Only add if delegate is currently active
+        if ($delegate->isCurrentlyActive()) {
+            // Check if this email is already in use by other active delegates
+            if ($this->otherDelegateUsesEmail($delegate)) {
+                Log::info('Skipping Google Workspace add: email already in use by other active delegates', [
+                    'delegate_id' => $delegate->id,
+                    'email' => $delegate->email,
+                ]);
+
+                return;
+            }
+
+            $service->addToGroup($delegate->email);
         }
     }
 
@@ -139,16 +156,35 @@ final class DelegateObserver
             return;
         }
 
-        $user = $delegate->user;
-
-        if (! $user || ! $user->email) {
-            Log::warning('Cannot remove delegate from Google Workspace: user or email missing', [
+        if (! $delegate->email) {
+            Log::warning('Cannot remove delegate from Google Workspace: email missing', [
                 'delegate_id' => $delegate->id,
             ]);
 
             return;
         }
 
-        $service->removeFromGroup($user->email);
+        // Check if this email is still in use by other active delegates
+        if ($this->otherDelegateUsesEmail($delegate)) {
+            Log::info('Skipping Google Workspace removal: email still in use by other active delegates', [
+                'delegate_id' => $delegate->id,
+                'email' => $delegate->email,
+            ]);
+
+            return;
+        }
+
+        $service->removeFromGroup($delegate->email);
+    }
+
+    /**
+     * Check if other active delegates are using the same email.
+     */
+    private function otherDelegateUsesEmail(Delegate $delegate): bool
+    {
+        return Delegate::whereEmail($delegate->email)
+            ->where('id', '!=', $delegate->id)
+            ->whereNotNull('email_verified_at')
+            ->exists();
     }
 }

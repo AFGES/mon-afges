@@ -8,6 +8,12 @@ return [
             'label' => 'Association',
             'required' => 'L\'association est requise.',
         ],
+        'email' => [
+            'label' => 'Courriel',
+            'helper' => 'Courriel qui sera ajouté au groupe Google Workspace lors de l\'approbation',
+            'required' => 'Le courriel est requis.',
+            'invalid' => 'Le courriel doit être une adresse courriel valide.',
+        ],
         'seat' => [
             'label' => 'Siège',
             'helper' => 'Sélectionnez le siège pour lequel vous souhaitez devenir délégué(e).',

@@ -9,7 +9,7 @@ use App\Models\Seat;
 test('seats can be created for college organization', function () {
     $collegeOrg = CollegeOrganization::factory()->withSeats(3)->create();
 
-    $seats = $collegeOrg->seatRecords;
+    $seats = $collegeOrg->seatRecords()->with('collegeOrganization')->get();
     $seat1 = $seats->where('seat_number', 1)->first();
     $seat2 = $seats->where('seat_number', 2)->first();
     $seat3 = $seats->where('seat_number', 3)->first();

@@ -8,6 +8,12 @@ return [
             'label' => 'Organization',
             'required' => 'The organization is required.',
         ],
+        'email' => [
+            'label' => 'Email',
+            'helper' => 'Email that will be added to the Google Workspace group upon approval',
+            'required' => 'The email is required.',
+            'invalid' => 'The email must be a valid email address.',
+        ],
         'seat' => [
             'label' => 'Seat',
             'helper' => 'Select the seat you wish to apply for as a delegate.',

@@ -10,6 +10,7 @@ use App\Models\Seat;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
@@ -59,6 +60,17 @@ final class ManageDelegates extends MyProfileComponent
                             ->live()
                             ->validationMessages([
                                 'required' => __('profile.form.organization.required'),
+                            ]),
+                        TextInput::make('email')
+                            ->label(__('profile.form.email.label'))
+                            ->helperText(__('profile.form.email.helper'))
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->default(fn () => auth()->user()->email)
+                            ->validationMessages([
+                                'required' => __('profile.form.email.required'),
+                                'email' => __('profile.form.email.invalid'),
                             ]),
                         Select::make('seat_id')
                             ->label(__('profile.form.seat.label'))
@@ -120,6 +132,7 @@ final class ManageDelegates extends MyProfileComponent
                 'user_id' => $user->id,
                 'organization_id' => $item['organization_id'],
                 'seat_id' => $item['seat_id'],
+                'email' => $item['email'],
                 'started_at' => $item['started_at'] ?? now(),
             ]);
         }

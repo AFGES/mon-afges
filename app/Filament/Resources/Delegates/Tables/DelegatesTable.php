@@ -31,6 +31,11 @@ final class DelegatesTable
                     ->label(__('user.label'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('email')
+                    ->label(__('delegate.fields.email'))
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
                 TextColumn::make('organization.short_name')
                     ->label(__('organization.label'))
                     ->searchable()

@@ -204,6 +204,7 @@ test('user can apply as delegate when selecting organizations', function () {
                 [
                     'organization_id' => $organization->id,
                     'seat_id' => $seat->id,
+                    'email' => $user->email,
                     'started_at' => $startDate->format('Y-m-d'),
                 ],
             ],
@@ -279,6 +280,7 @@ test('user can apply to multiple organizations with different delegate options',
                 [
                     'organization_id' => $organization1->id,
                     'seat_id' => $seat1->id,
+                    'email' => $user->email,
                     'started_at' => $startDate1->format('Y-m-d'),
                 ],
             ],

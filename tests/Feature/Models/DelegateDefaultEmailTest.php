@@ -19,7 +19,7 @@ test('delegate email defaults to user email when not provided', function () {
 test('delegate email is not overwritten when explicitly provided', function () {
     $delegate = Delegate::factory()
         ->forUser(['email' => 'user@example.com'])
-        ->create([    
+        ->create([
             'email' => 'custom@example.com',
         ]);
 
@@ -46,7 +46,7 @@ test('delegate email is not marked as verified when user email is not verified',
     $delegate = Delegate::factory()
         ->forUser([
             'email' => 'unverified@example.com',
-            'email_verified_at' => null
+            'email_verified_at' => null,
         ])
         ->create([
             'email' => null,

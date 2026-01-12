@@ -23,7 +23,7 @@ test('democratic time session belongs to democratic time type', function () {
     $type = DemocraticTimeType::factory()->create(['name' => 'Assemblée Générale']);
     $session = DemocraticTimeSession::factory()->create(['democratic_time_type_id' => $type->id]);
 
-    expect($session->democraticTimeSession->name)->toBe('Assemblée Générale');
+    expect($session->democraticTimeType->name)->toBe('Assemblée Générale');
 });
 
 test('democratic time session dates are cast to datetime', function () {

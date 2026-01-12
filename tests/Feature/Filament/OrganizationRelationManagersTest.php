@@ -48,11 +48,11 @@ test('can load volunteers relation manager for organization', function () {
 
 test('organization delegates relation manager shows pending delegates by default', function () {
     $organization = Organization::factory()->create();
-    
+
     $pendingDelegate = Delegate::factory()->create([
         'organization_id' => $organization->id,
     ]);
-    
+
     $approvedDelegate = Delegate::factory()->approved()->create([
         'organization_id' => $organization->id,
     ]);
@@ -68,11 +68,11 @@ test('organization delegates relation manager shows pending delegates by default
 
 test('organization volunteers relation manager shows pending volunteers by default', function () {
     $organization = Organization::factory()->create();
-    
+
     $pendingVolunteer = Volunteer::factory()->create([
         'organization_id' => $organization->id,
     ]);
-    
+
     $approvedVolunteer = Volunteer::factory()->approved()->create([
         'organization_id' => $organization->id,
     ]);

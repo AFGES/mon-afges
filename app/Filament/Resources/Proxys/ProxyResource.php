@@ -20,6 +20,8 @@ final class ProxyResource extends Resource
 {
     protected static ?string $model = Proxy::class;
 
+    protected static ?string $slug = 'proxies';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
     public static function getNavigationGroup(): ?string

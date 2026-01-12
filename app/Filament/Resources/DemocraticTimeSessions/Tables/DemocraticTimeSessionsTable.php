@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\DemocraticTimeSessions\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -38,6 +40,30 @@ final class DemocraticTimeSessionsTable
                     ->label(__('democratic_time_session.fields.location'))
                     ->searchable()
                     ->limit(30),
+
+                TextColumn::make('sign_in_status')
+                    ->label(__('emargement.label'))
+                    ->badge()
+                    ->getStateUsing(function ($record) {
+                        if ($record->isSignInOpen()) {
+                            return __('emargement.status.open');
+                        }
+                        if ($record->sign_in_closes_at !== null) {
+                            return __('emargement.status.closed');
+                        }
+
+                        return __('emargement.status.not_opened');
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'ouvert' => Color::Green,
+                        'fermé' => Color::Gray,
+                        default => Color::Orange,
+                    }),
+
+                TextColumn::make('signIns_count')
+                    ->label(__('emargement.plural'))
+                    ->counts('signIns')
+                    ->sortable(),
 
                 TextColumn::make('status')
                     ->label('Statut')
@@ -73,6 +99,28 @@ final class DemocraticTimeSessionsTable
                 //
             ])
             ->recordActions([
+                Action::make('open_sign_in')
+                    ->label(__('emargement.actions.open_sign_in'))
+                    ->icon(Heroicon::OutlinedLockOpen)
+                    ->color('success')
+                    ->visible(fn ($record) => $record->sign_in_opens_at === null)
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $record->openSignIn();
+                    })
+                    ->successNotificationTitle(__('emargement.messages.sign_in_opened')),
+
+                Action::make('close_sign_in')
+                    ->label(__('emargement.actions.close_sign_in'))
+                    ->icon(Heroicon::OutlinedLockClosed)
+                    ->color('danger')
+                    ->visible(fn ($record) => $record->sign_in_opens_at !== null && $record->sign_in_closes_at === null)
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $record->closeSignIn();
+                    })
+                    ->successNotificationTitle(__('emargement.messages.sign_in_closed')),
+
                 EditAction::make(),
             ])
             ->toolbarActions([

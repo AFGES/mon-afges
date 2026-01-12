@@ -215,7 +215,7 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
 - **DO NOT** manually run tests after making changes - the Lefthook pre-commit hook will run them automatically.
-- Run the minimum number of tests needed during development to ensure code quality and speed. Use `php artisan test` with a specific filename or filter only when actively developing/debugging tests.
+- Run the minimum number of tests needed during development to ensure code quality and speed. Use `php artisan test --parallel` with a specific filename or filter only when actively developing/debugging tests.
 
 
 === laravel/core rules ===

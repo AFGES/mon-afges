@@ -56,6 +56,14 @@ final class Seat extends Model
     }
 
     /**
+     * Session sign-ins for this seat.
+     */
+    public function signIns(): HasMany
+    {
+        return $this->hasMany(SessionSignIn::class);
+    }
+
+    /**
      * Check if this seat belongs to the same college as another seat.
      */
     public function isSameCollegeAs(Seat $otherSeat): bool

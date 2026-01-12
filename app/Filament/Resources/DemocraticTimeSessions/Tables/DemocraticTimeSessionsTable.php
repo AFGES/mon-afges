@@ -8,7 +8,6 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -55,9 +54,9 @@ final class DemocraticTimeSessionsTable
                         return __('emargement.status.not_opened');
                     })
                     ->color(fn (string $state): string => match ($state) {
-                        'ouvert' => Color::Green,
-                        'fermé' => Color::Gray,
-                        default => Color::Orange,
+                        'ouvert' => 'success',
+                        'fermé' => 'gray',
+                        default => 'warning',
                     }),
 
                 TextColumn::make('signIns_count')
@@ -79,9 +78,9 @@ final class DemocraticTimeSessionsTable
                         return 'À venir';
                     })
                     ->color(fn (string $state): string => match ($state) {
-                        'En cours' => Color::Green,
-                        'Terminée' => Color::Gray,
-                        'À venir' => Color::Blue,
+                        'En cours' => 'success',
+                        'Terminée' => 'gray',
+                        'À venir' => 'info',
                     }),
 
                 TextColumn::make('created_at')

@@ -8,6 +8,7 @@ use App\Filament\Resources\DemocraticTimeSessions\Pages\CreateDemocraticTimeSess
 use App\Filament\Resources\DemocraticTimeSessions\Pages\EditDemocraticTimeSession;
 use App\Filament\Resources\DemocraticTimeSessions\Pages\ListDemocraticTimeSessions;
 use App\Filament\Resources\DemocraticTimeSessions\RelationManagers\ProxiesRelationManager;
+use App\Filament\Resources\DemocraticTimeSessions\RelationManagers\SessionSignInsRelationManager;
 use App\Filament\Resources\DemocraticTimeSessions\Schemas\DemocraticTimeSessionForm;
 use App\Filament\Resources\DemocraticTimeSessions\Tables\DemocraticTimeSessionsTable;
 use App\Models\DemocraticTimeSession;
@@ -54,6 +55,7 @@ final class DemocraticTimeSessionResource extends Resource
     {
         return [
             ProxiesRelationManager::class,
+            SessionSignInsRelationManager::class,
         ];
     }
 

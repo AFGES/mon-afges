@@ -16,6 +16,6 @@ final class ApprovedScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        $builder->where('status', ApprovalStatus::Approved);
+        $builder->where('approval_status', ApprovalStatus::Approved);
     }
 }

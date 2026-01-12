@@ -63,7 +63,7 @@ Critical: Understand default query behavior via global scopes:
 - `CurrentlyScope`: Filters to currently active records based on `started_at` date (uses custom `whereTodayOrBefore` and `whereTodayOrAfter` macros)
 - Both scopes applied via `#[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]` attribute
 - Use `withoutGlobalScope(ApprovedScope::class)` or `withoutGlobalScopes()` to bypass when needed
-- Example: Show pending approvals with `Model::withoutGlobalScope(ApprovedScope::class)->where('status', ApprovalStatus::Pending)->get()`
+- Example: Show pending approvals with `Model::withoutGlobalScope(ApprovedScope::class)->where('approval_status', ApprovalStatus::Pending)->get()`
 
 ### Service Layer for Complex Operations
 - `GoogleWorkspaceService`: Manages Google Workspace group membership for delegates

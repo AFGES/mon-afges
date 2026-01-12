@@ -54,7 +54,7 @@ final class VolunteerForm
                     ->schema([
                         ApprovalField::make('approval')
                             ->label(__('volunteer.sections.approval'))
-                            ->statusAttribute('status')
+                            ->statusAttribute('approval_status')
                             ->approvedAtAttribute('approved_at')
                             ->approvedByAttribute('approved_by')
                             ->rejectionReasonAttribute('rejection_reason')

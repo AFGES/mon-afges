@@ -28,7 +28,7 @@ final class Proxy extends Model
         'democratic_time_session_id',
         'started_at',
         'ended_at',
-        'status',
+        'approval_status',
         'approved_by',
         'approved_at',
         'rejection_reason',
@@ -39,7 +39,7 @@ final class Proxy extends Model
         return [
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
-            'status' => ApprovalStatus::class,
+            'approval_status' => ApprovalStatus::class,
             'approved_at' => 'datetime',
         ];
     }

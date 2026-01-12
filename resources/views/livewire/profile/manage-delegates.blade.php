@@ -15,12 +15,12 @@
                     @foreach($this->delegates as $delegate)
                         <li class="flex items-start gap-2 text-sm">
                             <span class="mt-0.5">
-                                @if($delegate->status->value === 'approved')
+                                @if($delegate->approval_status->value === 'approved')
                                     <x-filament::icon 
                                         icon="heroicon-o-check-circle" 
                                         class="h-5 w-5 text-success-500"
                                     />
-                                @elseif($delegate->status->value === 'pending')
+                                @elseif($delegate->approval_status->value === 'pending')
                                     <x-filament::icon 
                                         icon="heroicon-o-clock" 
                                         class="h-5 w-5 text-warning-500"
@@ -41,8 +41,8 @@
                                         {{ $delegate->email }}
                                     </span>
                                 @endif
-                                <x-filament::badge :color="$delegate->status->getColor()">
-                                    {{ $delegate->status->getLabel() }}
+                                <x-filament::badge :color="$delegate->approval_status->getColor()">
+                                    {{ $delegate->approval_status->getLabel() }}
                                 </x-filament::badge>
                                 @if($delegate->ended_at)
                                     <span class="text-xs text-gray-500 dark:text-gray-400">

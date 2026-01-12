@@ -71,7 +71,7 @@ final class Delegate extends Model implements MustVerifyEmail
             'ended_at' => 'date',
             'approved_at' => 'datetime',
             'email_verified_at' => 'datetime',
-            'status' => ApprovalStatus::class,
+            'approval_status' => ApprovalStatus::class,
         ];
     }
 }

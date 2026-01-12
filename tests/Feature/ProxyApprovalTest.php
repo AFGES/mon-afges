@@ -43,7 +43,7 @@ test('new proxy is pending by default', function () {
         'democratic_time_session_id' => $session->id,
     ]);
 
-    expect($proxy->status)->toBe(ApprovalStatus::Pending);
+    expect($proxy->approval_status)->toBe(ApprovalStatus::Pending);
     expect($proxy->isPending())->toBeTrue();
     expect($proxy->isApproved())->toBeFalse();
     expect($proxy->isRejected())->toBeFalse();
@@ -55,7 +55,7 @@ test('proxy can be approved', function () {
 
     $proxy->approve($user->id);
 
-    expect($proxy->fresh()->status)->toBe(ApprovalStatus::Approved);
+    expect($proxy->fresh()->approval_status)->toBe(ApprovalStatus::Approved);
     expect($proxy->isApproved())->toBeTrue();
     expect($proxy->approved_by)->toBe($user->id);
     expect($proxy->approved_at)->not->toBeNull();
@@ -67,7 +67,7 @@ test('proxy can be rejected', function () {
 
     $proxy->reject('Invalid proxy request', $user->id);
 
-    expect($proxy->fresh()->status)->toBe(ApprovalStatus::Rejected);
+    expect($proxy->fresh()->approval_status)->toBe(ApprovalStatus::Rejected);
     expect($proxy->isRejected())->toBeTrue();
     expect($proxy->approved_by)->toBe($user->id);
     expect($proxy->rejection_reason)->toBe('Invalid proxy request');
@@ -76,7 +76,7 @@ test('proxy can be rejected', function () {
 test('approved proxy factory state creates approved proxy', function () {
     $proxy = Proxy::factory()->approved()->create();
 
-    expect($proxy->status)->toBe(ApprovalStatus::Approved);
+    expect($proxy->approval_status)->toBe(ApprovalStatus::Approved);
     expect($proxy->isApproved())->toBeTrue();
     expect($proxy->approved_by)->not->toBeNull();
     expect($proxy->approved_at)->not->toBeNull();
@@ -85,7 +85,7 @@ test('approved proxy factory state creates approved proxy', function () {
 test('rejected proxy factory state creates rejected proxy', function () {
     $proxy = Proxy::factory()->rejected('Test rejection')->create();
 
-    expect($proxy->status)->toBe(ApprovalStatus::Rejected);
+    expect($proxy->approval_status)->toBe(ApprovalStatus::Rejected);
     expect($proxy->isRejected())->toBeTrue();
     expect($proxy->approved_by)->not->toBeNull();
     expect($proxy->rejection_reason)->toBe('Test rejection');
@@ -108,7 +108,7 @@ test('can query pending proxies without global scope', function () {
     Proxy::factory()->rejected()->create();
 
     $pendingProxies = Proxy::withoutGlobalScopes()
-        ->where('status', ApprovalStatus::Pending)
+        ->where('approval_status', ApprovalStatus::Pending)
         ->get();
 
     expect($pendingProxies)->toHaveCount(1);

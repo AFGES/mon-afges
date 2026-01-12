@@ -13,7 +13,7 @@ class ApprovalField extends Field
 
     protected string|Closure|null $approverRelationship = 'approver';
 
-    protected string|Closure|null $statusAttribute = 'status';
+    protected string|Closure|null $statusAttribute = 'approval_status';
 
     protected string|Closure|null $approvedAtAttribute = 'approved_at';
 

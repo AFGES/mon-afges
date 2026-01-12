@@ -18,7 +18,7 @@ final class PendingVolunteerStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         $pendingCount = Volunteer::withoutGlobalScopes()
-            ->where('status', ApprovalStatus::Pending)
+            ->where('approval_status', ApprovalStatus::Pending)
             ->count();
 
         return [
@@ -28,7 +28,7 @@ final class PendingVolunteerStats extends StatsOverviewWidget
                 ->color('warning')
                 ->url(route('filament.root.resources.volunteers.index', [
                     'tableFilters' => [
-                        'status' => [
+                        'approval_status' => [
                             'value' => ApprovalStatus::Pending->value,
                         ],
                     ],

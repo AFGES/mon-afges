@@ -67,7 +67,7 @@ final class DelegateForm
                     ->schema([
                         ApprovalField::make('approval')
                             ->label(__('delegate.sections.approval'))
-                            ->statusAttribute('status')
+                            ->statusAttribute('approval_status')
                             ->approvedAtAttribute('approved_at')
                             ->approvedByAttribute('approved_by')
                             ->rejectionReasonAttribute('rejection_reason')

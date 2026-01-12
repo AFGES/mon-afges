@@ -48,7 +48,7 @@ test('delegate can be rejected', function () {
 test('new delegate is pending by default', function () {
     $delegate = Delegate::withoutGlobalScopes()->create(Delegate::factory()->make()->toArray());
 
-    expect($delegate->status)->toBe(ApprovalStatus::Pending);
+    expect($delegate->approval_status)->toBe(ApprovalStatus::Pending);
     expect($delegate->isPending())->toBeTrue();
     expect($delegate->isApproved())->toBeFalse();
     expect($delegate->isRejected())->toBeFalse();
@@ -91,7 +91,7 @@ test('can query pending delegates without global scope', function () {
     Delegate::factory()->approved()->create(); // Approved
 
     $pendingDelegates = Delegate::withoutGlobalScopes()
-        ->where('status', ApprovalStatus::Pending)
+        ->where('approval_status', ApprovalStatus::Pending)
         ->get();
 
     expect($pendingDelegates)->toHaveCount(2);

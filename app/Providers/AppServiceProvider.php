@@ -89,8 +89,8 @@ final class AppServiceProvider extends ServiceProvider
     {
         Blueprint::macro('approvalStatus', function (?string $after = null) {
             /** @var Blueprint $this */
-            $this->enum('status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
-            $this->timestamp('approved_at')->nullable()->after('status');
+            $this->enum('approval_status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
+            $this->timestamp('approved_at')->nullable()->after('approval_status');
             $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
             $this->text('rejection_reason')->nullable()->after('approved_by');
         });
@@ -98,7 +98,7 @@ final class AppServiceProvider extends ServiceProvider
         Blueprint::macro('dropApprovalStatus', function () {
             /** @var Blueprint $this */
             $this->dropForeign(['approved_by']);
-            $this->dropColumn(['status', 'approved_at', 'approved_by', 'rejection_reason']);
+            $this->dropColumn(['approval_status', 'approved_at', 'approved_by', 'rejection_reason']);
         });
     }
 

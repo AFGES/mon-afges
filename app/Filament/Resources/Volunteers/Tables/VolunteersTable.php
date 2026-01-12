@@ -36,7 +36,7 @@ class VolunteersTable
                 TextColumn::make('position_title')
                     ->label(__('volunteer.fields.position_title'))
                     ->searchable(),
-                TextColumn::make('status')
+                TextColumn::make('approval_status')
                     ->label(__('volunteer.fields.status'))
                     ->badge()
                     ->sortable(),
@@ -70,13 +70,13 @@ class VolunteersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('status')
+                SelectFilter::make('approval_status')
                     ->label(__('volunteer.filters.status'))
                     ->multiple()
                     ->options(ApprovalStatus::class)
                     ->default(function () {
                         $pendingCount = Volunteer::withoutGlobalScopes()
-                            ->where('status', ApprovalStatus::Pending)
+                            ->where('approval_status', ApprovalStatus::Pending)
                             ->count();
 
                         return $pendingCount > 0

@@ -35,7 +35,7 @@ final class OrganizationCollegeSyncService
      *
      * @throws \Exception
      */
-    private function syncCollege(Organization $organization, int $collegeId, array $data): void
+    private function syncCollege(Organization $organization, string $collegeId, array $data): void
     {
         // Attach or update the pivot
         $organization->colleges()->syncWithoutDetaching([

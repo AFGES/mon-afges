@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,11 +13,13 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 final class CollegeOrganization extends Pivot
 {
     /** @use HasFactory<\Database\Factories\CollegeOrganizationFactory> */
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $table = 'college_organization';
 
-    public $incrementing = true;
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         'college_id',

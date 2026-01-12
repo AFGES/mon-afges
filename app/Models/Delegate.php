@@ -12,6 +12,7 @@ use App\Traits\HasPeriod;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,8 @@ final class Delegate extends Model implements MustVerifyEmail
 
     /** @use HasFactory<\Database\Factories\DelegateFactory> */
     use HasFactory;
+
+    use HasUuids;
 
     protected static function booted(): void
     {

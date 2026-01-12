@@ -148,7 +148,7 @@ final class ManageDelegates extends MyProfileComponent
             ->send();
     }
 
-    public function terminateDelegate(int $delegateId): void
+    public function terminateDelegate(string $delegateId): void
     {
         $delegate = Delegate::withoutGlobalScopes()
             ->where('id', $delegateId)

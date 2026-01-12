@@ -11,7 +11,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class ProxyDelegatesFromSameCollege implements ValidationRule
 {
     public function __construct(
-        private readonly int $delegatorSeatId
+        private readonly string $delegatorSeatId
     ) {}
 
     /**

@@ -14,18 +14,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('session_sign_ins', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('democratic_time_session_id')
+            $table->uuid('id')->primary();
+            $table->foreignUuid('democratic_time_session_id')
                 ->constrained('democratic_time_sessions')
                 ->cascadeOnDelete();
-            $table->foreignId('seat_id')
+            $table->foreignUuid('seat_id')
                 ->constrained('seats')
                 ->cascadeOnDelete();
-            $table->foreignId('delegate_id')
+            $table->foreignUuid('delegate_id')
                 ->constrained('delegates')
                 ->cascadeOnDelete()
                 ->comment('The specific delegate who signed in');
-            $table->foreignId('signed_in_by_seat_id')
+            $table->foreignUuid('signed_in_by_seat_id')
                 ->nullable()
                 ->constrained('seats')
                 ->nullOnDelete()

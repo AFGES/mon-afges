@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\Organization;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +11,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('delegates', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->period('date');
-            $table->foreignIdFor(User::class);
-            $table->foreignIdFor(Organization::class)->constrained('organizations');
-            $table->foreignId('seat_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained();
+            $table->foreignUuid('organization_id')->constrained('organizations');
+            $table->foreignUuid('seat_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->approvalStatus('seat_id');

@@ -33,7 +33,6 @@ class VolunteerResource extends Resource
         return VolunteerForm::configure($schema);
     }
 
-
     public static function table(Table $table): Table
     {
         return VolunteersTable::configure($table);

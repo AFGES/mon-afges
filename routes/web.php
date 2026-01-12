@@ -22,12 +22,12 @@ Route::middleware(['auth', 'signed'])->group(function () {
             ->name('volunteers.approve');
         Route::get('/reject', [VolunteerApprovalController::class, 'reject'])
             ->name('volunteers.reject');
-    })->can("update", "volunteer");
+    })->can('update', 'volunteer');
 
     Route::prefix('/delegates/{delegate}')->group(function () {
         Route::get('/approve', [DelegateApprovalController::class, 'approve'])
             ->name('delegates.approve');
         Route::get('/reject', [DelegateApprovalController::class, 'reject'])
             ->name('delegates.reject');
-    })->can("update", "delegate");
+    })->can('update', 'delegate');
 });

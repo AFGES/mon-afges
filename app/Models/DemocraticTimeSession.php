@@ -22,7 +22,7 @@ final class DemocraticTimeSession extends Model
         'location',
     ];
 
-    public function democraticTimeSession(): BelongsTo
+    public function democraticTimeType(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeType::class);
     }

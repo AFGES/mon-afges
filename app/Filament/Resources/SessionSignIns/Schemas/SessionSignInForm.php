@@ -28,7 +28,10 @@ final class SessionSignInForm
 
                         Select::make('seat_id')
                             ->label(__('emargement.fields.seat'))
-                            ->relationship('seat')
+                            ->relationship(
+                                'seat',
+                                modifyQueryUsing: fn ($query) => $query->with('collegeOrganization.college')
+                            )
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                             ->searchable()
                             ->preload()
@@ -53,7 +56,10 @@ final class SessionSignInForm
 
                         Select::make('signed_in_by_seat_id')
                             ->label(__('emargement.fields.signed_in_by_seat'))
-                            ->relationship('signedInBySeat')
+                            ->relationship(
+                                'signedInBySeat',
+                                modifyQueryUsing: fn ($query) => $query->with('collegeOrganization.college')
+                            )
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                             ->searchable()
                             ->preload()

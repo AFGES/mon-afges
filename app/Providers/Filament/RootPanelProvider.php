@@ -82,6 +82,7 @@ final class RootPanelProvider extends PanelProvider
                             ->icon('fab-google'),
                     ])
                     ->registration(true)
+                    ->socialiteUserModelClass(\App\Models\SocialiteUser::class)
             )
             ->sidebarCollapsibleOnDesktop()
             ->topbar(false)

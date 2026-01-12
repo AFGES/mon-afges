@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\SessionSignIns\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 final class SessionSignInForm
@@ -57,7 +57,7 @@ final class SessionSignInForm
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                             ->searchable()
                             ->preload()
-                            ->helperText(__('emargement.help.signed_in_by_seat', default: 'Laisser vide si le-a délégué-e signe pour lui-elle-même'))
+                            ->helperText(__('emargement.help.signed_in_by_seat'))
                             ->nullable(),
 
                         DateTimePicker::make('signed_in_at')

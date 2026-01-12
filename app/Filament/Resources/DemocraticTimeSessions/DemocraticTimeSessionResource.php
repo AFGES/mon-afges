@@ -7,6 +7,7 @@ namespace App\Filament\Resources\DemocraticTimeSessions;
 use App\Filament\Resources\DemocraticTimeSessions\Pages\CreateDemocraticTimeSession;
 use App\Filament\Resources\DemocraticTimeSessions\Pages\EditDemocraticTimeSession;
 use App\Filament\Resources\DemocraticTimeSessions\Pages\ListDemocraticTimeSessions;
+use App\Filament\Resources\DemocraticTimeSessions\RelationManagers\ProxiesRelationManager;
 use App\Filament\Resources\DemocraticTimeSessions\Schemas\DemocraticTimeSessionForm;
 use App\Filament\Resources\DemocraticTimeSessions\Tables\DemocraticTimeSessionsTable;
 use App\Models\DemocraticTimeSession;
@@ -50,7 +51,7 @@ final class DemocraticTimeSessionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProxiesRelationManager::class,
         ];
     }
 

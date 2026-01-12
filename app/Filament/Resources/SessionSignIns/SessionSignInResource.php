@@ -26,6 +26,11 @@ final class SessionSignInResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.groups.democratic_moments');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('emargement.plural');

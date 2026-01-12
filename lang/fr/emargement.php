@@ -33,6 +33,11 @@ return [
         'not_opened' => 'pas encore ouvert',
     ],
 
+    'filters' => [
+        'currently_signed_in' => 'Actuellement présent-e-s',
+        'signed_out' => 'Parti-e-s',
+    ],
+
     'actions' => [
         'open_sign_in' => 'Ouvrir l\'émargement',
         'close_sign_in' => 'Fermer l\'émargement',

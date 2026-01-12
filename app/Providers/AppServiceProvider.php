@@ -6,9 +6,11 @@ namespace App\Providers;
 
 use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
+use App\Models\Proxy;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Observers\DelegateObserver;
+use App\Observers\ProxyObserver;
 use App\Observers\VolunteerObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
@@ -49,6 +51,7 @@ final class AppServiceProvider extends ServiceProvider
         // Register model observers
         Delegate::observe(DelegateObserver::class);
         Volunteer::observe(VolunteerObserver::class);
+        Proxy::observe(ProxyObserver::class);
 
         // Register custom Filament Breezy profile components
         Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);

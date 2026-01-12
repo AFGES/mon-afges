@@ -55,11 +55,11 @@ test('seat can give multiple proxies for different sessions', function () {
     $session1 = DemocraticTimeSession::factory()->create();
     $session2 = DemocraticTimeSession::factory()->create();
 
-    Proxy::factory()->create([
+    Proxy::factory()->approved()->create([
         'delegator_seat_id' => $delegatorSeat->id,
         'democratic_time_session_id' => $session1->id,
     ]);
-    Proxy::factory()->create([
+    Proxy::factory()->approved()->create([
         'delegator_seat_id' => $delegatorSeat->id,
         'democratic_time_session_id' => $session2->id,
     ]);
@@ -71,11 +71,11 @@ test('seat can receive multiple proxies for same session', function () {
     $proxyHolderSeat = Seat::factory()->create();
     $session = DemocraticTimeSession::factory()->create();
 
-    Proxy::factory()->create([
+    Proxy::factory()->approved()->create([
         'proxy_holder_seat_id' => $proxyHolderSeat->id,
         'democratic_time_session_id' => $session->id,
     ]);
-    Proxy::factory()->create([
+    Proxy::factory()->approved()->create([
         'proxy_holder_seat_id' => $proxyHolderSeat->id,
         'democratic_time_session_id' => $session->id,
     ]);

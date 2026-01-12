@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\ApprovalStatus;
 use App\Models\DemocraticTimeSession;
 use App\Models\Seat;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,7 +28,33 @@ class ProxyFactory extends Factory
             'democratic_time_session_id' => DemocraticTimeSession::factory(),
             'started_at' => null,
             'ended_at' => null,
+            'status' => ApprovalStatus::Pending,
         ];
+    }
+
+    /**
+     * Indicate that the proxy is approved.
+     */
+    public function approved(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => ApprovalStatus::Approved,
+            'approved_by' => User::factory(),
+            'approved_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the proxy is rejected.
+     */
+    public function rejected(?string $reason = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => ApprovalStatus::Rejected,
+            'approved_by' => User::factory(),
+            'approved_at' => now(),
+            'rejection_reason' => $reason ?? 'Rejected for testing purposes',
+        ]);
     }
 
     /**

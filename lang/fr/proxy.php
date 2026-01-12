@@ -45,6 +45,20 @@ return [
         'group' => 'Temps démocratique',
     ],
 
+    'notifications' => [
+        'approval_needed' => [
+            'subject' => 'Nouvelle procuration à approuver',
+            'line1' => 'Une nouvelle procuration a été créée et nécessite votre approbation.',
+            'line2' => 'Délégant-e : :delegator → Mandataire : :proxy_holder pour :session',
+            'action' => 'Voir les procurations',
+        ],
+        'approved' => [
+            'subject' => 'Votre procuration a été approuvée',
+            'line1' => 'Votre procuration a été approuvée.',
+            'line2' => 'Délégant-e : :delegator → Mandataire : :proxy_holder pour :session',
+        ],
+    ],
+
     'validation' => [
         'same_college' => 'Le siège mandataire doit appartenir au même collège que le siège délégateur.',
         'different_seats' => 'Le siège mandataire doit être différent du siège délégateur.',

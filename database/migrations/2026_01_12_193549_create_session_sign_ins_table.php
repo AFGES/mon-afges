@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +21,10 @@ return new class extends Migration
             $table->foreignId('seat_id')
                 ->constrained('seats')
                 ->cascadeOnDelete();
+            $table->foreignId('delegate_id')
+                ->constrained('delegates')
+                ->cascadeOnDelete()
+                ->comment('The specific delegate who signed in');
             $table->foreignId('signed_in_by_seat_id')
                 ->nullable()
                 ->constrained('seats')
@@ -28,8 +34,8 @@ return new class extends Migration
             $table->timestamp('signed_out_at')->nullable();
             $table->timestamps();
 
-            // Unique constraint: one sign-in record per seat per session
-            $table->unique(['democratic_time_session_id', 'seat_id'], 'unique_seat_session_signin');
+            // Unique constraint: one sign-in record per delegate per seat per session
+            $table->unique(['democratic_time_session_id', 'seat_id', 'delegate_id'], 'unique_seat_delegate_session_signin');
 
             // Index for performance
             $table->index(['democratic_time_session_id', 'signed_in_at']);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,13 +13,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('seats', function (Blueprint $table) {
+        Schema::create('colleges', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('college_organization_id')->constrained('college_organization')->cascadeOnDelete();
-            $table->unsignedInteger('seat_number')->comment('Seat number within the organization-college allocation');
+            $table->string('name')->unique();
+            $table->boolean('can_vote')->default(true);
+            $table->unsignedInteger('max_seats_per_organization')->nullable();
+            $table->unsignedInteger('max_delegates_per_seat')->nullable();
             $table->timestamps();
-
-            $table->unique(['college_organization_id', 'seat_number']);
         });
     }
 
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('seats');
+        Schema::dropIfExists('colleges');
     }
 };

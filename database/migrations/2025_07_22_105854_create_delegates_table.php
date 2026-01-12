@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -15,6 +17,10 @@ return new class extends Migration
             $table->period('date');
             $table->foreignIdFor(User::class);
             $table->foreignIdFor(Organization::class)->constrained('organizations');
+            $table->foreignId('seat_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('email')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->approvalStatus('seat_id');
             $table->timestamps();
             $table->softDeletes();
         });

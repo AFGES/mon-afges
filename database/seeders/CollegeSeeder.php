@@ -13,16 +13,15 @@ class CollegeSeeder extends Seeder
     public function run(): void
     {
         $colleges = [
-            ['name' => 'Général', 'can_vote' => true],
-            ['name' => 'Fédéral', 'can_vote' => true],
-            ['name' => 'Consultatif', 'can_vote' => false],
+            ['name' => 'Général', 'can_vote' => true, 'max_seats_per_organization' => 6, 'max_delegates_per_seat' => 1],
+            ['name' => 'Fédéral', 'can_vote' => true, 'max_seats_per_organization' => 1, 'max_delegates_per_seat' => 2],
+            ['name' => 'Consultatif', 'can_vote' => false, 'max_seats_per_organization' => 1, 'max_delegates_per_seat' => 3],
         ];
 
-        foreach ($colleges as $college) {
-            College::firstOrCreate(
-                ['name' => $college['name']],
-                ['can_vote' => $college['can_vote']]
-            );
-        }
+        College::upsert(
+            $colleges,
+            ['name'],
+            ['can_vote', 'max_seats_per_organization', 'max_delegates_per_seat']
+        );
     }
 }

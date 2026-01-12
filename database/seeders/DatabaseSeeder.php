@@ -19,6 +19,13 @@ final class DatabaseSeeder extends Seeder
             CollegeSeeder::class,
             OrganizationSeeder::class,
             CollegeOrganizationSeeder::class,
+            SeatSeeder::class,
+            DemocraticTimeTypeSeeder::class,
+            DemocraticTimeSessionSeeder::class,
+            DelegateSeeder::class,
+            VolunteerSeeder::class,
+            ProxySeeder::class,
+            SessionSignInSeeder::class,
         ]);
 
         // Create a test user

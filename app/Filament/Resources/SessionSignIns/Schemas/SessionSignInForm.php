@@ -32,7 +32,24 @@ final class SessionSignInForm
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn (callable $set) => $set('delegate_id', null)),
+
+                        Select::make('delegate_id')
+                            ->label(__('emargement.fields.delegate'))
+                            ->relationship(
+                                'delegate',
+                                'email',
+                                fn ($query, callable $get) => $query
+                                    ->when($get('seat_id'), fn ($q, $seatId) => $q->where('seat_id', $seatId))
+                                    ->withoutGlobalScopes()
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->disabled(fn (callable $get) => ! $get('seat_id'))
+                            ->helperText(__('emargement.help.delegate')),
 
                         Select::make('signed_in_by_seat_id')
                             ->label(__('emargement.fields.signed_in_by_seat'))

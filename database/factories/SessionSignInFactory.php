@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Delegate;
 use App\Models\DemocraticTimeSession;
 use App\Models\Seat;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,11 +22,14 @@ class SessionSignInFactory extends Factory
     public function definition(): array
     {
         $session = DemocraticTimeSession::factory()->create();
+        $seat = Seat::factory()->create();
+        $delegate = Delegate::factory()->approved()->for($seat)->create();
         $signedInAt = $session->started_at ?? now();
 
         return [
             'democratic_time_session_id' => $session->id,
-            'seat_id' => Seat::factory(),
+            'seat_id' => $seat->id,
+            'delegate_id' => $delegate->id,
             'signed_in_by_seat_id' => null,
             'signed_in_at' => $signedInAt,
             'signed_out_at' => null,

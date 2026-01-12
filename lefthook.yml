@@ -1,0 +1,8 @@
+pre-commit:
+  parallel: false
+  commands:
+    format:
+      run: vendor/bin/pint --dirty
+      stage_fixed: true
+    test:
+      run: php artisan test

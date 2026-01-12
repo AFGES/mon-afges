@@ -16,6 +16,7 @@ final class SessionSignIn extends Model
     public $fillable = [
         'democratic_time_session_id',
         'seat_id',
+        'delegate_id',
         'signed_in_by_seat_id',
         'signed_in_at',
         'signed_out_at',
@@ -37,6 +38,11 @@ final class SessionSignIn extends Model
     public function seat(): BelongsTo
     {
         return $this->belongsTo(Seat::class);
+    }
+
+    public function delegate(): BelongsTo
+    {
+        return $this->belongsTo(Delegate::class);
     }
 
     /**
@@ -79,19 +85,5 @@ final class SessionSignIn extends Model
     public function isProxySignIn(): bool
     {
         return $this->signed_in_by_seat_id !== null && $this->signed_in_by_seat_id !== $this->seat_id;
-    }
-
-    /**
-     * Get the delegate for this seat at the time of sign-in.
-     */
-    public function delegate(): ?Delegate
-    {
-        return $this->seat->delegates()
-            ->where('started_at', '<=', $this->signed_in_at)
-            ->where(function ($query) {
-                $query->whereNull('ended_at')
-                    ->orWhere('ended_at', '>=', $this->signed_in_at);
-            })
-            ->first();
     }
 }

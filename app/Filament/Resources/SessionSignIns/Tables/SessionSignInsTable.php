@@ -29,6 +29,11 @@ final class SessionSignInsTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('delegate.email')
+                    ->label(__('emargement.fields.delegate'))
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('signed_in_at')
                     ->label(__('emargement.fields.signed_in_at'))
                     ->dateTime('d/m/Y H:i')

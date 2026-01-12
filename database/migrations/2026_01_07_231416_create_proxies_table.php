@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -14,18 +16,19 @@ return new class extends Migration
     {
         Schema::create('proxies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('delegator_id')->constrained('delegates')->cascadeOnDelete();
-            $table->foreignId('proxy_holder_id')->constrained('delegates')->cascadeOnDelete();
+            $table->foreignId('delegator_seat_id')->constrained('seats')->cascadeOnDelete();
+            $table->foreignId('proxy_holder_seat_id')->constrained('seats')->cascadeOnDelete();
             $table->foreignId('democratic_time_session_id')->constrained()->cascadeOnDelete();
             $table->dateTime('started_at')->nullable();
             $table->dateTime('ended_at')->nullable();
+            $table->approvalStatus('ended_at');
             $table->timestamps();
 
             // Prevent overlapping proxies for the same delegator in the same session
-            $table->unique(['delegator_id', 'democratic_time_session_id'], 'unique_delegator_session');
+            $table->unique(['delegator_seat_id', 'democratic_time_session_id'], 'unique_delegator_seat_session');
         });
 
-        // Add check constraint to ensure a delegate can't give proxy to themselves
+        // Add check constraint to ensure a seat can't give proxy to itself
         // Different syntax for different database drivers
         $driver = Schema::getConnection()->getDriverName();
 
@@ -35,7 +38,7 @@ return new class extends Migration
             // For now, we'll rely on application-level validation
         } else {
             // MySQL/PostgreSQL syntax
-            DB::statement('ALTER TABLE proxies ADD CONSTRAINT check_different_delegates CHECK (delegator_id != proxy_holder_id)');
+            DB::statement('ALTER TABLE proxies ADD CONSTRAINT check_different_seats CHECK (delegator_seat_id != proxy_holder_seat_id)');
         }
     }
 

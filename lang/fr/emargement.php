@@ -17,11 +17,6 @@ return [
         'is_proxy_sign_in' => 'signé-e via procuration',
     ],
 
-    'help' => [
-        'signed_in_by_seat' => 'Laisser vide si le-a délégué-e signe pour lui-elle-même',
-        'delegate' => 'Sélectionnez d\'abord un siège pour voir les délégué-e-s',
-    ],
-
     'sections' => [
         'sign_in_details' => 'Détails d\'émargement',
         'sign_in_management' => 'Gestion de l\'émargement',
@@ -48,6 +43,15 @@ return [
         'view_sign_ins' => 'Voir les émargements',
     ],
 
+    'help' => [
+        'signed_in_by_seat' => 'Laisser vide si le-a délégué-e signe pour lui-elle-même',
+        'delegate' => 'Sélectionnez d\'abord un siège pour voir les délégué-e-s',
+        'auto_open' => 'Ouvrir automatiquement l\'émargement X minutes avant le début',
+        'minutes_before_start' => 'Nombre de minutes avant le début pour ouvrir automatiquement',
+        'sign_in_opens_at' => 'Date et heure d\'ouverture de l\'émargement',
+        'sign_in_closes_at' => 'Date et heure de fermeture de l\'émargement',
+    ],
+
     'messages' => [
         'sign_in_opened' => 'L\'émargement a été ouvert.',
         'sign_in_closed' => 'L\'émargement a été fermé.',
@@ -59,12 +63,5 @@ return [
         'not_signed_in' => 'Ce siège n\'a pas encore émargé pour cette session.',
         'sign_in_not_open' => 'L\'émargement n\'est pas encore ouvert pour cette session.',
         'sign_in_closed_message' => 'L\'émargement est fermé pour cette session.',
-    ],
-
-    'help' => [
-        'auto_open' => 'Ouvrir automatiquement l\'émargement X minutes avant le début',
-        'minutes_before_start' => 'Nombre de minutes avant le début pour ouvrir automatiquement',
-        'sign_in_opens_at' => 'Date et heure d\'ouverture de l\'émargement',
-        'sign_in_closes_at' => 'Date et heure de fermeture de l\'émargement',
     ],
 ];

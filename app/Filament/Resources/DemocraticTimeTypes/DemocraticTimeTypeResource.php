@@ -24,6 +24,8 @@ final class DemocraticTimeTypeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static bool $hasTitleCaseModelLabel = false;
+
     public static function getNavigationGroup(): ?string
     {
         return __('navigation.groups.democratic_moments');

@@ -23,6 +23,8 @@ final class DemocraticTimeSessionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
+    protected static bool $hasTitleCaseModelLabel = false;
+
     public static function getNavigationGroup(): ?string
     {
         return __('navigation.groups.democratic_moments');

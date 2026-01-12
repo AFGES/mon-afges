@@ -80,6 +80,15 @@ Critical: Understand default query behavior via global scopes:
 - Check for existing components to reuse before writing a new one.
 - **French-first**: UI text and translation keys default to French (check `lang/fr/`)
 
+## Git Hooks (Lefthook)
+- **DO NOT** manually run `vendor/bin/pint` or `php artisan test` after making changes.
+- This project uses Lefthook to automatically format code and run tests on pre-commit.
+- The pre-commit hook will automatically:
+  1. Run Laravel Pint to format any changed files
+  2. Run the full test suite to ensure all tests pass
+- If formatting or tests fail, the commit will be blocked until issues are resolved.
+- Simply make your changes and commit - the hooks handle quality checks automatically.
+
 ## Verification Scripts
 - Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
 
@@ -118,8 +127,6 @@ When delegates are approved, they should be added to Google Workspace groups:
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `bun run build`, `bun run dev`, or `composer run dev`. Ask them.
 
 ## Development Workflow Commands
-- **Run tests**: `php artisan test` (or filter: `php artisan test --filter=testName` or by file path)
-- **Lint/format code**: `vendor/bin/pint` (auto-formats with Laravel Pint)
 - **Build assets**: `bun run build` (production) or `bun run dev` (development watch mode)
 - **Tinker debugging**: Use Laravel Boost's `tinker` tool or `php artisan tinker`
 - **Database queries**: Use Boost's `database-query` tool for read-only queries
@@ -207,7 +214,8 @@ protected function isAccessible(User $user, ?string $path = null): bool
 ## Test Enforcement
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test` with a specific filename or filter.
+- **DO NOT** manually run tests after making changes - the Lefthook pre-commit hook will run them automatically.
+- Run the minimum number of tests needed during development to ensure code quality and speed. Use `php artisan test` with a specific filename or filter only when actively developing/debugging tests.
 
 
 === laravel/core rules ===
@@ -361,14 +369,6 @@ document.addEventListener('livewire:init', function () {
 </code-snippet>
 
 
-=== pint/core rules ===
-
-## Laravel Pint Code Formatter
-
-- You must run `vendor/bin/pint --dirty` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test`, simply run `vendor/bin/pint` to fix any formatting issues.
-
-
 === pest/core rules ===
 
 ## Pest
@@ -388,11 +388,11 @@ it('is true', function () {
 </code-snippet>
 
 ### Running Tests
-- Run the minimal number of tests using an appropriate filter before finalizing code edits.
+- Run the minimal number of tests using an appropriate filter during active development to verify your changes work.
 - To run all tests: `php artisan test`.
 - To run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
 - To filter on a particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file).
-- When the tests relating to your changes are passing, ask the user if they would like to run the entire test suite to ensure everything is still passing.
+- Remember: The pre-commit hook will automatically run the full test suite, so you only need to run tests during development to verify your changes.
 
 ### Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden` and `assertNotFound` instead of using `assertStatus(403)` or similar, e.g.:

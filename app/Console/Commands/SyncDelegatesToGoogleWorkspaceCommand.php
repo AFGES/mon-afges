@@ -8,7 +8,7 @@ use App\Services\DelegateGoogleWorkspaceSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-final class SyncDelegatesToGoogleWorkspace extends Command
+final class SyncDelegatesToGoogleWorkspaceCommand extends Command
 {
     /**
      * The name and signature of the console command.

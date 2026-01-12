@@ -5,4 +5,4 @@ pre-commit:
       run: vendor/bin/pint --dirty
       stage_fixed: true
     test:
-      run: php artisan test
+      run: php artisan test --parallel

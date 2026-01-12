@@ -39,6 +39,37 @@ final class Seat extends Model
         return $this->hasMany(Delegate::class);
     }
 
+    /**
+     * Proxies where this seat's holder is giving their proxy to another seat.
+     */
+    public function proxiesGiven(): HasMany
+    {
+        return $this->hasMany(Proxy::class, 'delegator_seat_id');
+    }
+
+    /**
+     * Proxies where this seat's holder is receiving proxy from another seat.
+     */
+    public function proxiesReceived(): HasMany
+    {
+        return $this->hasMany(Proxy::class, 'proxy_holder_seat_id');
+    }
+
+    /**
+     * Check if this seat belongs to the same college as another seat.
+     */
+    public function isSameCollegeAs(Seat $otherSeat): bool
+    {
+        $thisCollegeId = $this->collegeOrganization?->college_id;
+        $otherCollegeId = $otherSeat->collegeOrganization?->college_id;
+
+        if ($thisCollegeId === null || $otherCollegeId === null) {
+            return false;
+        }
+
+        return $thisCollegeId === $otherCollegeId;
+    }
+
     public function college(): BelongsTo
     {
         return $this->collegeOrganization->college();

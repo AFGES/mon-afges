@@ -8,6 +8,7 @@ use App\Traits\HasPeriod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class DemocraticTimeSession extends Model
 {
@@ -21,8 +22,13 @@ final class DemocraticTimeSession extends Model
         'location',
     ];
 
-    public function type(): BelongsTo
+    public function democraticTimeSession(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeType::class);
+    }
+
+    public function proxies(): HasMany
+    {
+        return $this->hasMany(Proxy::class);
     }
 }

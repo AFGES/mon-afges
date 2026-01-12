@@ -4,13 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ApprovalStatus;
+use App\Models\Scopes\ApprovedScope;
+use App\Traits\HasApprovalStatus;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[ScopedBy([ApprovedScope::class])]
 final class Proxy extends Model
 {
     /** @use HasFactory<\Database\Factories\ProxyFactory> */
+    use HasApprovalStatus;
+
     use HasFactory;
 
     protected $table = 'proxies';
@@ -21,7 +28,21 @@ final class Proxy extends Model
         'democratic_time_session_id',
         'started_at',
         'ended_at',
+        'status',
+        'approved_by',
+        'approved_at',
+        'rejection_reason',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'status' => ApprovalStatus::class,
+            'approved_at' => 'datetime',
+        ];
+    }
 
     /**
      * The seat whose holder is giving their proxy (cannot be present).
@@ -70,11 +91,23 @@ final class Proxy extends Model
         return $this->delegatorSeat->isSameCollegeAs($this->proxyHolderSeat);
     }
 
-    protected function casts(): array
+    /**
+     * Send approval notification to the delegator seat's current delegate(s).
+     */
+    public function sendApprovalNotification(): void
     {
-        return [
-            'started_at' => 'datetime',
-            'ended_at' => 'datetime',
-        ];
+        $delegates = $this->delegatorSeat->delegates()
+            ->where('started_at', '<=', now())
+            ->where(function ($query) {
+                $query->whereNull('ended_at')
+                    ->orWhere('ended_at', '>=', now());
+            })
+            ->get();
+
+        foreach ($delegates as $delegate) {
+            if ($delegate->user) {
+                $delegate->user->notify(new \App\Notifications\ProxyApprovedNotification($this));
+            }
+        }
     }
 }

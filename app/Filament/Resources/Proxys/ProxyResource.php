@@ -42,6 +42,11 @@ final class ProxyResource extends Resource
         return __('proxy.plural');
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return Proxy::getNavigationBadge();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ProxyForm::configure($schema);

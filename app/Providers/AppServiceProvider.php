@@ -6,10 +6,12 @@ namespace App\Providers;
 
 use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
+use App\Models\DemocraticTimeSession;
 use App\Models\Proxy;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Observers\DelegateObserver;
+use App\Observers\DemocraticTimeSessionObserver;
 use App\Observers\ProxyObserver;
 use App\Observers\VolunteerObserver;
 use Illuminate\Database\Eloquent\Model;
@@ -52,6 +54,7 @@ final class AppServiceProvider extends ServiceProvider
         Delegate::observe(DelegateObserver::class);
         Volunteer::observe(VolunteerObserver::class);
         Proxy::observe(ProxyObserver::class);
+        DemocraticTimeSession::observe(DemocraticTimeSessionObserver::class);
 
         // Register custom Filament Breezy profile components
         Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);

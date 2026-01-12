@@ -25,14 +25,14 @@ class VolunteerFactory extends Factory
             'position_title' => fake()->jobTitle(),
             'started_at' => now(),
             'ended_at' => null,
-            'status' => ApprovalStatus::Pending,
+            'approval_status' => ApprovalStatus::Pending,
         ];
     }
 
     public function approved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ApprovalStatus::Approved,
+            'approval_status' => ApprovalStatus::Approved,
             'approved_at' => now(),
             'approved_by' => \App\Models\User::factory(),
         ]);
@@ -41,7 +41,7 @@ class VolunteerFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ApprovalStatus::Rejected,
+            'approval_status' => ApprovalStatus::Rejected,
             'approved_at' => now(),
             'approved_by' => \App\Models\User::factory(),
             'rejection_reason' => fake()->sentence(),

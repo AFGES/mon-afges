@@ -51,7 +51,7 @@ test('user cannot terminate pending delegate mandate', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->create([
         'user_id' => $user->id,
-        'status' => \App\Enums\ApprovalStatus::Pending,
+        'approval_status' => \App\Enums\ApprovalStatus::Pending,
         'approved_at' => null,
         'approved_by' => null,
         'ended_at' => null,

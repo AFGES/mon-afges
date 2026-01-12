@@ -48,7 +48,7 @@ final class Volunteer extends Model
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
             'approved_at' => 'datetime',
-            'status' => ApprovalStatus::class,
+            'approval_status' => ApprovalStatus::class,
         ];
     }
 }

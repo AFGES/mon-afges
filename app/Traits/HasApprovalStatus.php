@@ -17,17 +17,17 @@ trait HasApprovalStatus
 
     public function isPending(): bool
     {
-        return $this->status === ApprovalStatus::Pending;
+        return $this->approval_status === ApprovalStatus::Pending;
     }
 
     public function isApproved(): bool
     {
-        return $this->status === ApprovalStatus::Approved;
+        return $this->approval_status === ApprovalStatus::Approved;
     }
 
     public function isRejected(): bool
     {
-        return $this->status === ApprovalStatus::Rejected;
+        return $this->approval_status === ApprovalStatus::Rejected;
     }
 
     public function approve(?int $approvedBy = null): bool
@@ -37,7 +37,7 @@ trait HasApprovalStatus
         }
 
         $this->update([
-            'status' => ApprovalStatus::Approved,
+            'approval_status' => ApprovalStatus::Approved,
             'approved_at' => now(),
             'approved_by' => $approvedBy ?? auth()->id(),
             'rejection_reason' => null,
@@ -55,7 +55,7 @@ trait HasApprovalStatus
         }
 
         $this->update([
-            'status' => ApprovalStatus::Rejected,
+            'approval_status' => ApprovalStatus::Rejected,
             'approved_at' => now(),
             'approved_by' => $rejectedBy ?? auth()->id(),
             'rejection_reason' => $reason,
@@ -67,7 +67,7 @@ trait HasApprovalStatus
     public static function getNavigationBadge(): ?string
     {
         $count = self::withoutGlobalScopes()
-            ->where('status', ApprovalStatus::Pending)
+            ->where('approval_status', ApprovalStatus::Pending)
             ->count();
 
         return $count > 0 ? (string) $count : null;
@@ -76,14 +76,14 @@ trait HasApprovalStatus
     public function initializeHasApprovalStatus(): void
     {
         $this->fillable = array_merge($this->fillable, [
-            'status',
+            'approval_status',
             'approved_at',
             'approved_by',
             'rejection_reason',
         ]);
 
         $this->casts = array_merge($this->casts ?? [], [
-            'status' => ApprovalStatus::class,
+            'approval_status' => ApprovalStatus::class,
             'approved_at' => 'datetime',
         ]);
     }

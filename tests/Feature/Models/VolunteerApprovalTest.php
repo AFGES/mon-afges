@@ -66,7 +66,7 @@ test('rejected volunteer factory state creates rejected volunteer', function () 
 test('new volunteer is pending by default', function () {
     $volunteer = Volunteer::withoutGlobalScopes()->create(Volunteer::factory()->make()->toArray());
 
-    expect($volunteer->status)->toBe(ApprovalStatus::Pending);
+    expect($volunteer->approval_status)->toBe(ApprovalStatus::Pending);
     expect($volunteer->isPending())->toBeTrue();
     expect($volunteer->isApproved())->toBeFalse();
     expect($volunteer->isRejected())->toBeFalse();

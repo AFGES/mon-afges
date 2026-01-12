@@ -15,12 +15,12 @@
                     @foreach($this->volunteers as $volunteer)
                         <li class="flex items-start gap-2 text-sm">
                             <span class="mt-0.5">
-                                @if($volunteer->status->value === 'approved')
+                                @if($volunteer->approval_status->value === 'approved')
                                     <x-filament::icon 
                                         icon="heroicon-o-check-circle" 
                                         class="h-5 w-5 text-success-500"
                                     />
-                                @elseif($volunteer->status->value === 'pending')
+                                @elseif($volunteer->approval_status->value === 'pending')
                                     <x-filament::icon 
                                         icon="heroicon-o-clock" 
                                         class="h-5 w-5 text-warning-500"
@@ -35,8 +35,8 @@
                             <span class="flex-1">
                                 <strong>{{ $volunteer->organization->short_name }}</strong>
                                 - {{ $volunteer->position_title ?? __('profile.form.position_title.placeholder') }}
-                                <x-filament::badge :color="$volunteer->status->getColor()">
-                                    {{ $volunteer->status->getLabel() }}
+                                <x-filament::badge :color="$volunteer->approval_status->getColor()">
+                                    {{ $volunteer->approval_status->getLabel() }}
                                 </x-filament::badge>
                                 @if($volunteer->ended_at)
                                     <span class="text-xs text-gray-500 dark:text-gray-400">

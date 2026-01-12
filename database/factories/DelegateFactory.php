@@ -26,14 +26,14 @@ class DelegateFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'started_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'ended_at' => fake()->optional()->dateTimeBetween('now', '+1 year'),
-            'status' => ApprovalStatus::Pending,
+            'approval_status' => ApprovalStatus::Pending,
         ];
     }
 
     public function approved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ApprovalStatus::Approved,
+            'approval_status' => ApprovalStatus::Approved,
             'approved_at' => now(),
             'approved_by' => \App\Models\User::factory(),
         ]);
@@ -56,7 +56,7 @@ class DelegateFactory extends Factory
     public function rejected(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ApprovalStatus::Rejected,
+            'approval_status' => ApprovalStatus::Rejected,
             'approved_at' => now(),
             'approved_by' => \App\Models\User::factory(),
             'rejection_reason' => fake()->sentence(),

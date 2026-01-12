@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\DemocraticTimeSessions\RelationManagers;
 
-use App\Enums\ApprovalStatus;
 use App\Filament\Resources\Proxys\Schemas\ProxyForm;
 use App\Models\Scopes\ApprovedScope;
 use Filament\Actions\CreateAction;
@@ -41,7 +40,7 @@ final class ProxiesRelationManager extends RelationManager
                     ->label(__('proxy.fields.proxy_holder_seat'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('status')
+                TextColumn::make('approval_status')
                     ->badge()
                     ->sortable(),
                 TextColumn::make('started_at')

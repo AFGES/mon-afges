@@ -44,7 +44,7 @@ final class DelegatesTable
                     ->label(__('college.label'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('status')
+                TextColumn::make('approval_status')
                     ->label(__('delegate.fields.status'))
                     ->badge()
                     ->sortable(),
@@ -67,13 +67,13 @@ final class DelegatesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('status')
+                SelectFilter::make('approval_status')
                     ->label(__('delegate.filters.status'))
                     ->multiple()
                     ->options(ApprovalStatus::class)
                     ->default(function () {
                         $pendingCount = Delegate::withoutGlobalScopes()
-                            ->where('status', ApprovalStatus::Pending)
+                            ->where('approval_status', ApprovalStatus::Pending)
                             ->count();
 
                         return $pendingCount > 0

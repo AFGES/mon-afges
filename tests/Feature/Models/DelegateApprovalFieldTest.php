@@ -11,7 +11,7 @@ use function Pest\Laravel\actingAs;
 it('can approve a delegate and sets approval data correctly', function (): void {
     $approver = User::factory()->create();
     $delegate = Delegate::factory()->create([
-        'status' => ApprovalStatus::Pending,
+        'approval_status' => ApprovalStatus::Pending,
     ]);
 
     actingAs($approver);
@@ -28,7 +28,7 @@ it('can approve a delegate and sets approval data correctly', function (): void 
 it('can reject a delegate with a reason', function (): void {
     $rejecter = User::factory()->create();
     $delegate = Delegate::factory()->create([
-        'status' => ApprovalStatus::Pending,
+        'approval_status' => ApprovalStatus::Pending,
     ]);
     $rejectionReason = 'Documents incomplets';
 
@@ -45,7 +45,7 @@ it('can reject a delegate with a reason', function (): void {
 
 it('cannot approve an already approved delegate', function (): void {
     $delegate = Delegate::factory()->create([
-        'status' => ApprovalStatus::Approved,
+        'approval_status' => ApprovalStatus::Approved,
         'approved_at' => now()->subDay(),
         'approved_by' => User::factory()->create()->id,
     ]);
@@ -57,7 +57,7 @@ it('cannot approve an already approved delegate', function (): void {
 
 it('cannot reject an already rejected delegate', function (): void {
     $delegate = Delegate::factory()->create([
-        'status' => ApprovalStatus::Rejected,
+        'approval_status' => ApprovalStatus::Rejected,
         'approved_at' => now()->subDay(),
         'approved_by' => User::factory()->create()->id,
         'rejection_reason' => 'Original reason',
@@ -71,7 +71,7 @@ it('cannot reject an already rejected delegate', function (): void {
 
 it('clears rejection reason when approving a delegate', function (): void {
     $delegate = Delegate::factory()->create([
-        'status' => ApprovalStatus::Pending,
+        'approval_status' => ApprovalStatus::Pending,
     ]);
 
     // First reject
@@ -79,7 +79,7 @@ it('clears rejection reason when approving a delegate', function (): void {
     expect($delegate->refresh()->rejection_reason)->toBe('Test reason');
 
     // Then approve (simulating a status change)
-    $delegate->update(['status' => ApprovalStatus::Pending]);
+    $delegate->update(['approval_status' => ApprovalStatus::Pending]);
     $delegate->approve();
 
     expect($delegate->refresh()->rejection_reason)->toBeNull();

@@ -28,7 +28,7 @@ class ProxyFactory extends Factory
             'democratic_time_session_id' => DemocraticTimeSession::factory(),
             'started_at' => null,
             'ended_at' => null,
-            'status' => ApprovalStatus::Pending,
+            'approval_status' => ApprovalStatus::Pending,
         ];
     }
 
@@ -38,7 +38,7 @@ class ProxyFactory extends Factory
     public function approved(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ApprovalStatus::Approved,
+            'approval_status' => ApprovalStatus::Approved,
             'approved_by' => User::factory(),
             'approved_at' => now(),
         ]);
@@ -50,7 +50,7 @@ class ProxyFactory extends Factory
     public function rejected(?string $reason = null): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => ApprovalStatus::Rejected,
+            'approval_status' => ApprovalStatus::Rejected,
             'approved_by' => User::factory(),
             'approved_at' => now(),
             'rejection_reason' => $reason ?? 'Rejected for testing purposes',

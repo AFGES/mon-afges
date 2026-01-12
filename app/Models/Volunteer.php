@@ -10,6 +10,7 @@ use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
 use App\Traits\HasPeriod;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,7 @@ final class Volunteer extends Model
     use HasFactory;
 
     use HasPeriod;
+    use HasUuids;
     use SoftDeletes;
 
     public $fillable = [

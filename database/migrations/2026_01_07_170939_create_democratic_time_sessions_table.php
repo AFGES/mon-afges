@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('democratic_time_sessions', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('democratic_time_type_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('democratic_time_type_id')->constrained()->cascadeOnDelete();
             $table->period();
             $table->string('location');
             $table->timestamps();

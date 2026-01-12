@@ -30,7 +30,7 @@ trait HasApprovalStatus
         return $this->approval_status === ApprovalStatus::Rejected;
     }
 
-    public function approve(?int $approvedBy = null): bool
+    public function approve(?string $approvedBy = null): bool
     {
         if ($this->isApproved()) {
             return false;
@@ -48,7 +48,7 @@ trait HasApprovalStatus
         return true;
     }
 
-    public function reject(?string $reason = null, ?int $rejectedBy = null): bool
+    public function reject(?string $reason = null, ?string $rejectedBy = null): bool
     {
         if ($this->isRejected()) {
             return false;

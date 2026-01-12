@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('colleges', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('name')->unique();
             $table->boolean('can_vote')->default(true);
             $table->unsignedInteger('max_seats_per_organization')->nullable();

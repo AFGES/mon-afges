@@ -14,8 +14,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('seats', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('college_organization_id')->constrained('college_organization')->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('college_organization_id')->constrained('college_organization')->cascadeOnDelete();
             $table->unsignedInteger('seat_number')->comment('Seat number within the organization-college allocation');
             $table->timestamps();
             $table->softDeletes();

@@ -116,7 +116,7 @@ final class ManageVolunteers extends MyProfileComponent
             ->send();
     }
 
-    public function terminateVolunteer(int $volunteerId): void
+    public function terminateVolunteer(string $volunteerId): void
     {
         $volunteer = Volunteer::withoutGlobalScopes()
             ->where('id', $volunteerId)

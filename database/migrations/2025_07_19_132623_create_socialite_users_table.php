@@ -9,9 +9,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('socialite_users', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
 
-            $table->foreignId('user_id');
+            $table->foreignUuid('user_id');
             $table->string('provider');
             $table->string('provider_id');
 

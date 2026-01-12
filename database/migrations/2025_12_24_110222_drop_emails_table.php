@@ -20,8 +20,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::create('emails', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->string('email')->unique();
             $table->boolean('is_primary')->default(false);
             $table->timestamp('verified_at')->nullable();

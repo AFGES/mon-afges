@@ -94,7 +94,7 @@ final class AppServiceProvider extends ServiceProvider
             /** @var Blueprint $this */
             $this->enum('approval_status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
             $this->timestamp('approved_at')->nullable()->after('approval_status');
-            $this->foreignId('approved_by')->nullable()->constrained('users')->after('approved_at');
+            $this->foreignUuid('approved_by')->nullable()->constrained('users')->after('approved_at');
             $this->text('rejection_reason')->nullable()->after('approved_by');
         });
 

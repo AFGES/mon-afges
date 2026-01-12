@@ -15,10 +15,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('proxies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('delegator_seat_id')->constrained('seats')->cascadeOnDelete();
-            $table->foreignId('proxy_holder_seat_id')->constrained('seats')->cascadeOnDelete();
-            $table->foreignId('democratic_time_session_id')->constrained()->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('delegator_seat_id')->constrained('seats')->cascadeOnDelete();
+            $table->foreignUuid('proxy_holder_seat_id')->constrained('seats')->cascadeOnDelete();
+            $table->foreignUuid('democratic_time_session_id')->constrained()->cascadeOnDelete();
             $table->dateTime('started_at')->nullable();
             $table->dateTime('ended_at')->nullable();
             $table->approvalStatus('ended_at');

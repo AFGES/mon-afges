@@ -51,6 +51,145 @@ final class DemocraticTimeSession extends Model
     }
 
     /**
+     * Get total number of seats eligible for quorum (by college if specified).
+     */
+    public function getTotalEligibleSeats(?string $collegeId = null): int
+    {
+        $query = Seat::query()
+            ->whereHas('collegeOrganization.college', function ($q) {
+                $q->where('can_vote', true);
+            });
+
+        if ($collegeId) {
+            $query->whereHas('collegeOrganization', function ($q) use ($collegeId) {
+                $q->where('college_id', $collegeId);
+            });
+        }
+
+        return $query->count();
+    }
+
+    /**
+     * Get number of present seats (seats with at least one signed-in delegate).
+     */
+    public function getPresentSeatsCount(?string $collegeId = null, bool $includeProxies = true): int
+    {
+        // Count distinct seats with signed-in delegates
+        $query = $this->signIns()
+            ->whereNull('signed_out_at')
+            ->select('seat_id')
+            ->distinct();
+
+        if ($collegeId) {
+            $query->whereHas('seat.collegeOrganization', function ($q) use ($collegeId) {
+                $q->where('college_id', $collegeId);
+            });
+        }
+
+        $seats = $query->get();
+
+        if (! $includeProxies) {
+            return $seats->count();
+        }
+
+        // Add seats with approved proxies (if they're not already counted)
+        $proxyQuery = $this->proxies()
+            ->whereNotIn('delegator_seat_id', $seats->pluck('seat_id'))
+            ->distinct();
+
+        if ($collegeId) {
+            $proxyQuery->whereHas('delegatorSeat.collegeOrganization', function ($q) use ($collegeId) {
+                $q->where('college_id', $collegeId);
+            });
+        }
+
+        return $seats->count() + $proxyQuery->count();
+    }
+
+    /**
+     * Check if quorum is met for the session.
+     */
+    public function hasQuorum(?string $collegeId = null): bool
+    {
+        $type = $this->democraticTimeType;
+
+        if (! $type) {
+            return false;
+        }
+
+        $totalEligible = $this->getTotalEligibleSeats($collegeId);
+
+        if ($totalEligible === 0) {
+            return false;
+        }
+
+        $presentCount = $this->getPresentSeatsCount($collegeId, $type->include_proxies_in_quorum);
+        $attendancePercentage = ($presentCount / $totalEligible) * 100;
+
+        return $attendancePercentage >= $type->quorum_percentage;
+    }
+
+    /**
+     * Get quorum status for all voting colleges.
+     */
+    public function getQuorumStatus(): array
+    {
+        $type = $this->democraticTimeType;
+
+        if (! $type) {
+            return ['met' => false, 'details' => []];
+        }
+
+        if (! $type->calculate_quorum_per_college) {
+            // All colleges combined
+            $totalEligible = $this->getTotalEligibleSeats();
+            $presentCount = $this->getPresentSeatsCount(null, $type->include_proxies_in_quorum);
+            $percentage = $totalEligible > 0 ? ($presentCount / $totalEligible) * 100 : 0;
+
+            return [
+                'met' => $this->hasQuorum(),
+                'type' => 'combined',
+                'total_eligible' => $totalEligible,
+                'present_count' => $presentCount,
+                'percentage' => round($percentage, 2),
+                'required_percentage' => $type->quorum_percentage,
+            ];
+        }
+
+        // Per college calculation
+        $votingColleges = College::where('can_vote', true)->get();
+        $details = [];
+        $allMet = true;
+
+        foreach ($votingColleges as $college) {
+            $totalEligible = $this->getTotalEligibleSeats($college->id);
+            $presentCount = $this->getPresentSeatsCount($college->id, $type->include_proxies_in_quorum);
+            $percentage = $totalEligible > 0 ? ($presentCount / $totalEligible) * 100 : 0;
+            $met = $this->hasQuorum($college->id);
+
+            $details[] = [
+                'college_id' => $college->id,
+                'college_name' => $college->name,
+                'total_eligible' => $totalEligible,
+                'present_count' => $presentCount,
+                'percentage' => round($percentage, 2),
+                'required_percentage' => $type->quorum_percentage,
+                'met' => $met,
+            ];
+
+            if (! $met && $totalEligible > 0) {
+                $allMet = false;
+            }
+        }
+
+        return [
+            'met' => $allMet,
+            'type' => 'per_college',
+            'details' => $details,
+        ];
+    }
+
+    /**
      * Check if sign-in is currently open.
      */
     public function isSignInOpen(): bool

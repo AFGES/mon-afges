@@ -52,6 +52,20 @@ return [
         'sign_in_closes_at' => 'Date et heure de fermeture de l\'émargement',
     ],
 
+    'quorum' => [
+        'no_type' => 'Aucun type de temps démocratique configuré',
+        'calculation_type' => 'Type de calcul',
+        'per_college' => 'Par collège',
+        'combined' => 'Tous collèges confondus',
+        'required_percentage' => 'Pourcentage requis',
+        'includes_proxies' => 'Procurations incluses',
+        'status' => 'État du quorum',
+        'overall_status' => 'État global du quorum',
+        'attendance' => 'Présences',
+        'met' => 'Quorum atteint',
+        'not_met' => 'Quorum non atteint',
+    ],
+
     'messages' => [
         'sign_in_opened' => 'L\'émargement a été ouvert.',
         'sign_in_closed' => 'L\'émargement a été fermé.',

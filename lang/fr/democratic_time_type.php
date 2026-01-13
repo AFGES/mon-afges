@@ -7,5 +7,16 @@ return [
         'name' => 'Nom',
         'acronym' => 'Acronyme',
         'convocation_interval_days' => 'Délai de convocation (jours)',
+        'calculate_quorum_per_college' => 'Calculer le quorum par collège',
+        'quorum_percentage' => 'Pourcentage requis pour le quorum',
+        'include_proxies_in_quorum' => 'Inclure les procurations dans le quorum',
+    ],
+    'sections' => [
+        'quorum_configuration' => 'Configuration du quorum',
+    ],
+    'help' => [
+        'calculate_quorum_per_college' => 'Si activé, le quorum doit être atteint par chaque collège. Sinon, le quorum est calculé sur l\'ensemble des collèges',
+        'quorum_percentage' => 'Pourcentage de délégué-e-s présent-e-s requis pour atteindre le quorum',
+        'include_proxies_in_quorum' => 'Si activé, les procurations comptent dans le calcul du quorum',
     ],
 ];

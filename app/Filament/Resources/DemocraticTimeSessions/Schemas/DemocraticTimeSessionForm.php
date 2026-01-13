@@ -83,6 +83,33 @@ final class DemocraticTimeSessionForm
                     ])
                     ->columns(2)
                     ->columnSpan(2),
+
+                Section::make(__('democratic_time_session.sections.quorum_configuration'))
+                    ->description(__('democratic_time_session.help.quorum_preserved'))
+                    ->schema([
+                        TextInput::make('calculate_quorum_per_college_display')
+                            ->label(__('democratic_time_session.fields.calculate_quorum_per_college'))
+                            ->default(fn ($record) => $record?->calculate_quorum_per_college
+                                ? __('democratic_time_type.fields.calculate_quorum_per_college')
+                                : __('emargement.quorum.combined'))
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('quorum_percentage_display')
+                            ->label(__('democratic_time_session.fields.quorum_percentage'))
+                            ->default(fn ($record) => $record?->quorum_percentage ? $record->quorum_percentage.'%' : '-')
+                            ->disabled()
+                            ->dehydrated(false),
+
+                        TextInput::make('include_proxies_in_quorum_display')
+                            ->label(__('democratic_time_session.fields.include_proxies_in_quorum'))
+                            ->default(fn ($record) => $record?->include_proxies_in_quorum ? __('Oui') : __('Non'))
+                            ->disabled()
+                            ->dehydrated(false),
+                    ])
+                    ->columns(3)
+                    ->columnSpan(2)
+                    ->hidden(fn ($record) => ! $record),
             ]);
     }
 }

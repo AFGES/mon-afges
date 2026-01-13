@@ -23,6 +23,9 @@ final class DemocraticTimeSession extends Model
         'sign_in_closes_at',
         'auto_open_sign_in',
         'minutes_before_start',
+        'calculate_quorum_per_college',
+        'quorum_percentage',
+        'include_proxies_in_quorum',
     ];
 
     protected function casts(): array
@@ -32,6 +35,9 @@ final class DemocraticTimeSession extends Model
             'sign_in_closes_at' => 'datetime',
             'auto_open_sign_in' => 'boolean',
             'minutes_before_start' => 'integer',
+            'calculate_quorum_per_college' => 'boolean',
+            'quorum_percentage' => 'decimal:2',
+            'include_proxies_in_quorum' => 'boolean',
         ];
     }
 
@@ -111,11 +117,10 @@ final class DemocraticTimeSession extends Model
      */
     public function hasQuorum(?string $collegeId = null): bool
     {
-        $type = $this->democraticTimeType;
-
-        if (! $type) {
-            return false;
-        }
+        // Use session-level quorum settings if available, otherwise fall back to type
+        $calculatePerCollege = $this->calculate_quorum_per_college ?? $this->democraticTimeType?->calculate_quorum_per_college ?? false;
+        $quorumPercentage = $this->quorum_percentage ?? $this->democraticTimeType?->quorum_percentage ?? 50;
+        $includeProxies = $this->include_proxies_in_quorum ?? $this->democraticTimeType?->include_proxies_in_quorum ?? true;
 
         $totalEligible = $this->getTotalEligibleSeats($collegeId);
 
@@ -123,10 +128,10 @@ final class DemocraticTimeSession extends Model
             return false;
         }
 
-        $presentCount = $this->getPresentSeatsCount($collegeId, $type->include_proxies_in_quorum);
+        $presentCount = $this->getPresentSeatsCount($collegeId, $includeProxies);
         $attendancePercentage = ($presentCount / $totalEligible) * 100;
 
-        return $attendancePercentage >= $type->quorum_percentage;
+        return $attendancePercentage >= $quorumPercentage;
     }
 
     /**
@@ -134,16 +139,15 @@ final class DemocraticTimeSession extends Model
      */
     public function getQuorumStatus(): array
     {
-        $type = $this->democraticTimeType;
+        // Use session-level quorum settings if available, otherwise fall back to type
+        $calculatePerCollege = $this->calculate_quorum_per_college ?? $this->democraticTimeType?->calculate_quorum_per_college ?? false;
+        $quorumPercentage = $this->quorum_percentage ?? $this->democraticTimeType?->quorum_percentage ?? 50;
+        $includeProxies = $this->include_proxies_in_quorum ?? $this->democraticTimeType?->include_proxies_in_quorum ?? true;
 
-        if (! $type) {
-            return ['met' => false, 'details' => []];
-        }
-
-        if (! $type->calculate_quorum_per_college) {
+        if (! $calculatePerCollege) {
             // All colleges combined
             $totalEligible = $this->getTotalEligibleSeats();
-            $presentCount = $this->getPresentSeatsCount(null, $type->include_proxies_in_quorum);
+            $presentCount = $this->getPresentSeatsCount(null, $includeProxies);
             $percentage = $totalEligible > 0 ? ($presentCount / $totalEligible) * 100 : 0;
 
             return [
@@ -152,7 +156,7 @@ final class DemocraticTimeSession extends Model
                 'total_eligible' => $totalEligible,
                 'present_count' => $presentCount,
                 'percentage' => round($percentage, 2),
-                'required_percentage' => $type->quorum_percentage,
+                'required_percentage' => $quorumPercentage,
             ];
         }
 
@@ -163,7 +167,7 @@ final class DemocraticTimeSession extends Model
 
         foreach ($votingColleges as $college) {
             $totalEligible = $this->getTotalEligibleSeats($college->id);
-            $presentCount = $this->getPresentSeatsCount($college->id, $type->include_proxies_in_quorum);
+            $presentCount = $this->getPresentSeatsCount($college->id, $includeProxies);
             $percentage = $totalEligible > 0 ? ($presentCount / $totalEligible) * 100 : 0;
             $met = $this->hasQuorum($college->id);
 
@@ -173,7 +177,7 @@ final class DemocraticTimeSession extends Model
                 'total_eligible' => $totalEligible,
                 'present_count' => $presentCount,
                 'percentage' => round($percentage, 2),
-                'required_percentage' => $type->quorum_percentage,
+                'required_percentage' => $quorumPercentage,
                 'met' => $met,
             ];
 

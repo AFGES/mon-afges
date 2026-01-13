@@ -32,12 +32,14 @@ final class ProxiesRelationManager extends RelationManager
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScope(ApprovedScope::class))
             ->columns([
-                TextColumn::make('delegatorSeat.label')
+                TextColumn::make('delegatorSeat.id')
                     ->label(__('proxy.fields.delegator_seat'))
+                    ->formatStateUsing(fn ($record) => $record->delegatorSeat->label())
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('proxyHolderSeat.label')
+                TextColumn::make('proxyHolderSeat.id')
                     ->label(__('proxy.fields.proxy_holder_seat'))
+                    ->formatStateUsing(fn ($record) => $record->proxyHolderSeat->label())
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('approval_status')

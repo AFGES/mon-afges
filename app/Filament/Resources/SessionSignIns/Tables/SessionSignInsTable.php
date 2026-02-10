@@ -26,6 +26,7 @@ final class SessionSignInsTable
 
                 TextColumn::make('seat.label')
                     ->label(__('emargement.fields.seat'))
+                    ->getStateUsing(fn ($record) => $record->seat->label())
                     ->searchable()
                     ->sortable(),
 
@@ -65,6 +66,7 @@ final class SessionSignInsTable
 
                 TextColumn::make('signedInBySeat.label')
                     ->label(__('emargement.fields.signed_in_by_seat'))
+                    ->getStateUsing(fn ($record) => $record->signedInBySeat?->label())
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

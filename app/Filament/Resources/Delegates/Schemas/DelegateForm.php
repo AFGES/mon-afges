@@ -56,7 +56,13 @@ final class DelegateForm
                             ->required(),
                         Select::make('seat_id')
                             ->label(__('delegate.fields.seat'))
-                            ->relationship('seat')
+                            ->relationship(
+                                name: 'seat',
+                                modifyQueryUsing: fn ($query) => $query->with([
+                                    'collegeOrganization.college',
+                                    'delegates.user',
+                                ])
+                            )
                             ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                             ->searchable()
                             ->preload()

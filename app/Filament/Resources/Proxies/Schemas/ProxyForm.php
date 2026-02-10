@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Proxys\Schemas;
+namespace App\Filament\Resources\Proxies\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\Proxys;
+namespace App\Filament\Resources\Proxies;
 
-use App\Filament\Resources\Proxys\Pages\CreateProxy;
-use App\Filament\Resources\Proxys\Pages\EditProxy;
-use App\Filament\Resources\Proxys\Pages\ListProxys;
-use App\Filament\Resources\Proxys\Schemas\ProxyForm;
-use App\Filament\Resources\Proxys\Tables\ProxysTable;
+use App\Filament\Resources\Proxies\Pages\CreateProxy;
+use App\Filament\Resources\Proxies\Pages\EditProxy;
+use App\Filament\Resources\Proxies\Pages\ListProxies;
+use App\Filament\Resources\Proxies\Schemas\ProxyForm;
+use App\Filament\Resources\Proxies\Tables\ProxiesTable;
 use App\Models\Proxy;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -56,7 +56,7 @@ final class ProxyResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return ProxysTable::configure($table);
+        return ProxiesTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -69,7 +69,7 @@ final class ProxyResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProxys::route('/'),
+            'index' => ListProxies::route('/'),
             'create' => CreateProxy::route('/create'),
             'edit' => EditProxy::route('/{record}/edit'),
         ];

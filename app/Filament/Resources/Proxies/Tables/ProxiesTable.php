@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Proxys\Tables;
+namespace App\Filament\Resources\Proxies\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -8,7 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class ProxysTable
+class ProxiesTable
 {
     public static function configure(Table $table): Table
     {

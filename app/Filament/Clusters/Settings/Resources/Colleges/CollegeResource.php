@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Colleges;
+namespace App\Filament\Clusters\Settings\Resources\Colleges;
 
-use App\Filament\Resources\Colleges\Pages\CreateCollege;
-use App\Filament\Resources\Colleges\Pages\EditCollege;
-use App\Filament\Resources\Colleges\Pages\ListColleges;
-use App\Filament\Resources\Colleges\Schemas\CollegeForm;
-use App\Filament\Resources\Colleges\Tables\CollegesTable;
+use App\Filament\Clusters\Settings\Resources\Colleges\Pages\CreateCollege;
+use App\Filament\Clusters\Settings\Resources\Colleges\Pages\EditCollege;
+use App\Filament\Clusters\Settings\Resources\Colleges\Pages\ListColleges;
+use App\Filament\Clusters\Settings\Resources\Colleges\Schemas\CollegeForm;
+use App\Filament\Clusters\Settings\Resources\Colleges\Tables\CollegesTable;
+use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Models\College;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -20,10 +21,7 @@ class CollegeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('navigation.groups.democratic_moments');
-    }
+    protected static ?string $cluster = SettingsCluster::class;
 
     public static function getModelLabel(): string
     {

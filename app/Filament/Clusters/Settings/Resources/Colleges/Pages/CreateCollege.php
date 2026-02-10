@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Colleges\Pages;
+namespace App\Filament\Clusters\Settings\Resources\Colleges\Pages;
 
-use App\Filament\Resources\Colleges\CollegeResource;
+use App\Filament\Clusters\Settings\Resources\Colleges\CollegeResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateCollege extends CreateRecord

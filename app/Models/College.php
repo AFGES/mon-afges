@@ -20,6 +20,7 @@ final class College extends Model
         'can_vote',
         'max_seats_per_organization',
         'max_delegates_per_seat',
+        'require_same_college_for_proxy',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ final class College extends Model
             'can_vote' => 'boolean',
             'max_seats_per_organization' => 'integer',
             'max_delegates_per_seat' => 'integer',
+            'require_same_college_for_proxy' => 'boolean',
         ];
     }
 

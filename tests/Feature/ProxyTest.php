@@ -223,10 +223,10 @@ test('validation rule passes for seats from same college', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-test('validation rule fails for seats from different colleges', function () {
+test('validation rule fails for seats from different colleges when require_same_college_for_proxy is true', function () {
     $organization = Organization::factory()->create();
-    $college1 = College::factory()->create();
-    $college2 = College::factory()->create();
+    $college1 = College::factory()->create(['require_same_college_for_proxy' => true]);
+    $college2 = College::factory()->create(['require_same_college_for_proxy' => true]);
 
     $collegeOrg1 = CollegeOrganization::factory()->create([
         'organization_id' => $organization->id,
@@ -248,6 +248,58 @@ test('validation rule fails for seats from different colleges', function () {
     expect($validator->fails())->toBeTrue()
         ->and($validator->errors()->first('proxy_holder_seat_id'))
         ->toBe('Le siège mandataire doit appartenir au même collège que le siège délégateur.');
+});
+
+test('validation rule passes for cross-college proxy when require_same_college_for_proxy is false', function () {
+    $organization = Organization::factory()->create();
+    $college1 = College::factory()->create(['require_same_college_for_proxy' => false, 'can_vote' => true]);
+    $college2 = College::factory()->create(['require_same_college_for_proxy' => false, 'can_vote' => true]);
+
+    $collegeOrg1 = CollegeOrganization::factory()->create([
+        'organization_id' => $organization->id,
+        'college_id' => $college1->id,
+    ]);
+    $collegeOrg2 = CollegeOrganization::factory()->create([
+        'organization_id' => $organization->id,
+        'college_id' => $college2->id,
+    ]);
+
+    $seat1 = Seat::factory()->create(['college_organization_id' => $collegeOrg1->id]);
+    $seat2 = Seat::factory()->create(['college_organization_id' => $collegeOrg2->id]);
+
+    $validator = Validator::make(
+        ['proxy_holder_seat_id' => $seat2->id],
+        ['proxy_holder_seat_id' => [new ProxyDelegatesFromSameCollege($seat1->id)]]
+    );
+
+    expect($validator->passes())->toBeTrue();
+});
+
+test('validation rule fails for cross-college proxy when proxy holder college cannot vote', function () {
+    $organization = Organization::factory()->create();
+    $college1 = College::factory()->create(['require_same_college_for_proxy' => false, 'can_vote' => true]);
+    $college2 = College::factory()->create(['require_same_college_for_proxy' => false, 'can_vote' => false]);
+
+    $collegeOrg1 = CollegeOrganization::factory()->create([
+        'organization_id' => $organization->id,
+        'college_id' => $college1->id,
+    ]);
+    $collegeOrg2 = CollegeOrganization::factory()->create([
+        'organization_id' => $organization->id,
+        'college_id' => $college2->id,
+    ]);
+
+    $seat1 = Seat::factory()->create(['college_organization_id' => $collegeOrg1->id]);
+    $seat2 = Seat::factory()->create(['college_organization_id' => $collegeOrg2->id]);
+
+    $validator = Validator::make(
+        ['proxy_holder_seat_id' => $seat2->id],
+        ['proxy_holder_seat_id' => [new ProxyDelegatesFromSameCollege($seat1->id)]]
+    );
+
+    expect($validator->fails())->toBeTrue()
+        ->and($validator->errors()->first('proxy_holder_seat_id'))
+        ->toBe('Le siège mandataire doit appartenir à un collège délibérant.');
 });
 
 test('deleting session cascades to proxies', function () {

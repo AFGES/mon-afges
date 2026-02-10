@@ -94,13 +94,9 @@ class VolunteersTable
                     ->default(['current'])
                     ->query(function (Builder $query, array $data): Builder {
                         return match ($data['value'] ?? null) {
-                            'current' => $query->whereTodayOrBefore('started_at')
-                                ->where(function ($q) {
-                                    $q->whereTodayOrAfter('ended_at')
-                                        ->orWhereNull('ended_at');
-                                }),
-                            'old' => $query->whereBeforeToday('ended_at'),
-                            'future' => $query->whereAfterToday('started_at'),
+                            'current' => $query->currentlyActive(),
+                            'old' => $query->ended(),
+                            'future' => $query->notStarted(),
                             default => $query,
                         };
                     }),

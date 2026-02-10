@@ -5,9 +5,56 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 trait HasPeriod
 {
+    /**
+     * Scope a query to only include currently active records.
+     */
+    public function scopeCurrentlyActive(Builder $query): void
+    {
+        $query->whereTodayOrBefore('started_at')
+            ->where(function (Builder $query) {
+                $query->whereNull('ended_at')
+                    ->orWhereTodayOrAfter('ended_at');
+            });
+    }
+
+    /**
+     * Scope a query to only include records that have ended.
+     */
+    public function scopeEnded(Builder $query): void
+    {
+        $query->whereNotNull('ended_at')
+            ->where('ended_at', '<', now()->startOfDay());
+    }
+
+    /**
+     * Scope a query to only include records that have not started yet.
+     */
+    public function scopeNotStarted(Builder $query): void
+    {
+        $query->where('started_at', '>', now());
+    }
+
+    /**
+     * Scope a query to only include records that started on or before a given date.
+     */
+    public function scopeStartedBy(Builder $query, Carbon|string $date): void
+    {
+        $query->where('started_at', '<=', $date);
+    }
+
+    /**
+     * Scope a query to only include records that ended on or after a given date.
+     */
+    public function scopeEndedAfter(Builder $query, Carbon|string $date): void
+    {
+        $query->whereNotNull('ended_at')
+            ->where('ended_at', '>=', $date);
+    }
+
     public function isCurrentlyActive(): bool
     {
         $now = now();

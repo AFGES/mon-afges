@@ -73,7 +73,7 @@ final class DelegatesTable
                     ->options(ApprovalStatus::class)
                     ->default(function () {
                         $pendingCount = Delegate::withoutGlobalScopes()
-                            ->where('approval_status', ApprovalStatus::Pending)
+                            ->pending()
                             ->count();
 
                         return $pendingCount > 0

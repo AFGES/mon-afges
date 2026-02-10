@@ -108,7 +108,7 @@ test('can query pending proxies without global scope', function () {
     Proxy::factory()->rejected()->create();
 
     $pendingProxies = Proxy::withoutGlobalScopes()
-        ->where('approval_status', ApprovalStatus::Pending)
+        ->pending()
         ->get();
 
     expect($pendingProxies)->toHaveCount(1);

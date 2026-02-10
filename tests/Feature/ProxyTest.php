@@ -200,7 +200,10 @@ test('seats from different colleges can be detected', function () {
 
 test('validation rule passes for seats from same college', function () {
     $organization = Organization::factory()->create();
-    $college = College::factory()->create();
+    $college = College::factory()->create([
+        'can_vote' => true,
+        'require_same_college_for_proxy' => false,
+    ]);
     $collegeOrg = CollegeOrganization::factory()->create([
         'organization_id' => $organization->id,
         'college_id' => $college->id,

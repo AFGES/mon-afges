@@ -57,7 +57,7 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
             )
             ->line('['.__('delegate.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
             ->line(__('delegate.notifications.approval_requested.view_details', [
-                'url' => route('filament.root.resources.delegates.edit', $this->delegate),
+                'url' => route('filament.root.democratic-times.resources.delegates.edit', $this->delegate),
             ]))
             ->line(__('delegate.notifications.approval_requested.outro'));
     }

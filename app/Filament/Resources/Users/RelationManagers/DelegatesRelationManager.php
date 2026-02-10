@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Filament\Resources\Delegates\Schemas\DelegateForm;
-use App\Filament\Resources\Delegates\Tables\DelegatesTable;
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Schemas\DelegateForm;
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Tables\DelegatesTable;
 use App\Models\Scopes\ApprovedScope;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;

@@ -14,7 +14,7 @@ final class DelegateApprovalController extends Controller
         $delegate->approve();
 
         return redirect()
-            ->route('filament.root.resources.delegates.edit', $delegate)
+            ->route('filament.root.clusters.democratic-times.resources.delegates.edit', $delegate)
             ->with('success', __('delegate.notifications.approved.title'));
     }
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\Proxys\Pages;
+namespace App\Filament\Resources\Proxies\Pages;
 
-use App\Filament\Resources\Proxys\ProxyResource;
+use App\Filament\Resources\Proxies\ProxyResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-class ListProxys extends ListRecords
+class ListProxies extends ListRecords
 {
     protected static string $resource = ProxyResource::class;
 

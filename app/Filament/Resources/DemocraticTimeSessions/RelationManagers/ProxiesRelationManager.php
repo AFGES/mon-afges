@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\DemocraticTimeSessions\RelationManagers;
 
-use App\Filament\Resources\Proxys\Schemas\ProxyForm;
+use App\Filament\Resources\Proxies\Schemas\ProxyForm;
 use App\Models\Scopes\ApprovedScope;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;

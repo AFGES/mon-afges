@@ -45,7 +45,7 @@ final class ProxyApprovalNotification extends Notification implements ShouldQueu
                 'proxy_holder' => $this->proxy->proxyHolderSeat->label(),
                 'session' => $this->proxy->democraticTimeSession->democraticTimeType->name,
             ]))
-            ->action(__('proxy.notifications.approval_needed.action'), url('/admin/proxys'));
+            ->action(__('proxy.notifications.approval_needed.action'), url('/admin/proxies'));
     }
 
     /**

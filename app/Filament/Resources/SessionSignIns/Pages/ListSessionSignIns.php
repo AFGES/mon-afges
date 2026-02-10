@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\SessionSignIns\Pages;
 
 use App\Filament\Resources\SessionSignIns\SessionSignInResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListSessionSignIns extends ListRecords
 {
@@ -15,5 +18,16 @@ class ListSessionSignIns extends ListRecords
         return [
             CreateAction::make(),
         ];
+    }
+
+    protected function getTableQuery(): ?Builder
+    {
+        return parent::getTableQuery()
+            ->with([
+                'seat.collegeOrganization.college',
+                'seat.delegates.user',
+                'signedInBySeat.collegeOrganization.college',
+                'signedInBySeat.delegates.user',
+            ]);
     }
 }

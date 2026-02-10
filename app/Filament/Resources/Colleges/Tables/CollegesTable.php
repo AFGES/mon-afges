@@ -25,6 +25,10 @@ class CollegesTable
                     ->label(__('college.fields.can_vote'))
                     ->boolean()
                     ->sortable(),
+                IconColumn::make('require_same_college_for_proxy')
+                    ->label(__('college.fields.require_same_college_for_proxy'))
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('max_seats_per_organization')
                     ->label(__('college.fields.max_seats_per_organization'))
                     ->badge()

@@ -33,6 +33,11 @@ class CollegeForm
                     ->minValue(1)
                     ->helperText(__('college.helpers.max_delegates_per_seat'))
                     ->nullable(),
+                Toggle::make('require_same_college_for_proxy')
+                    ->label(__('college.fields.require_same_college_for_proxy'))
+                    ->helperText(__('college.helpers.require_same_college_for_proxy'))
+                    ->default(true)
+                    ->required(),
             ]);
     }
 }

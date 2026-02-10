@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules;
 
+use App\Models\College;
 use App\Models\Seat;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -33,8 +34,31 @@ class ProxyDelegatesFromSameCollege implements ValidationRule
         $delegatorCollegeId = $delegatorSeat->collegeOrganization->college_id;
         $proxyHolderCollegeId = $proxyHolderSeat->collegeOrganization->college_id;
 
-        if ($delegatorCollegeId !== $proxyHolderCollegeId) {
-            $fail('Le siège mandataire doit appartenir au même collège que le siège délégateur.');
+        // Get the delegator's college configuration
+        $delegatorCollege = College::find($delegatorCollegeId);
+
+        if (! $delegatorCollege) {
+            $fail('validation.exists')->translate();
+
+            return;
+        }
+
+        // If the college requires same college for proxy
+        if ($delegatorCollege->require_same_college_for_proxy) {
+            if ($delegatorCollegeId !== $proxyHolderCollegeId) {
+                $fail('Le siège mandataire doit appartenir au même collège que le siège délégateur.');
+
+                return;
+            }
+        } else {
+            // If cross-college proxies are allowed, verify the proxy holder college can vote
+            $proxyHolderCollege = College::find($proxyHolderCollegeId);
+
+            if (! $proxyHolderCollege || ! $proxyHolderCollege->can_vote) {
+                $fail('Le siège mandataire doit appartenir à un collège délibérant.');
+
+                return;
+            }
         }
     }
 }

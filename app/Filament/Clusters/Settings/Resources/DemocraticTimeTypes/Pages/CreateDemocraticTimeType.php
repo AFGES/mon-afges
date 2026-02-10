@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\DemocraticTimeTypes\Pages;
+namespace App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Pages;
 
-use App\Filament\Resources\DemocraticTimeTypes\DemocraticTimeTypeResource;
+use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\DemocraticTimeTypeResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateDemocraticTimeType extends CreateRecord

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\DemocraticTimeTypes\Schemas;
+namespace App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;

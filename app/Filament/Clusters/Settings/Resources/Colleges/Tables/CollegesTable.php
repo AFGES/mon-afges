@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Colleges\Tables;
+namespace App\Filament\Clusters\Settings\Resources\Colleges\Tables;
 
 use App\Models\College;
 use App\Models\Delegate;

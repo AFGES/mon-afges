@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\DemocraticTimeTypes;
+namespace App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes;
 
-use App\Filament\Resources\DemocraticTimeTypes\Pages\CreateDemocraticTimeType;
-use App\Filament\Resources\DemocraticTimeTypes\Pages\EditDemocraticTimeType;
-use App\Filament\Resources\DemocraticTimeTypes\Pages\ListDemocraticTimeTypes;
-use App\Filament\Resources\DemocraticTimeTypes\Schemas\DemocraticTimeTypeForm;
-use App\Filament\Resources\DemocraticTimeTypes\Tables\DemocraticTimeTypesTable;
+use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Pages\CreateDemocraticTimeType;
+use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Pages\EditDemocraticTimeType;
+use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Pages\ListDemocraticTimeTypes;
+use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Schemas\DemocraticTimeTypeForm;
+use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Tables\DemocraticTimeTypesTable;
+use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Models\DemocraticTimeType;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -26,10 +27,7 @@ final class DemocraticTimeTypeResource extends Resource
 
     protected static bool $hasTitleCaseModelLabel = false;
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('navigation.groups.democratic_moments');
-    }
+    protected static ?string $cluster = SettingsCluster::class;
 
     public static function getModelLabel(): string
     {

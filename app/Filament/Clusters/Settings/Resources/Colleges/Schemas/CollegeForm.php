@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Colleges\Schemas;
+namespace App\Filament\Clusters\Settings\Resources\Colleges\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;

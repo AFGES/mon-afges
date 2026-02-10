@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Resources\DemocraticTimeTypes\Tables;
+namespace App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

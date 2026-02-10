@@ -6,10 +6,61 @@ namespace App\Traits;
 
 use App\Enums\ApprovalStatus;
 use App\Notifications\ApprovalApprovedNotification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasApprovalStatus
 {
+    /**
+     * Scope a query to only include pending records.
+     */
+    public function scopePending(Builder $query): void
+    {
+        $query->where('approval_status', ApprovalStatus::Pending);
+    }
+
+    /**
+     * Scope a query to only include approved records.
+     */
+    public function scopeApproved(Builder $query): void
+    {
+        $query->where('approval_status', ApprovalStatus::Approved);
+    }
+
+    /**
+     * Scope a query to only include rejected records.
+     */
+    public function scopeRejected(Builder $query): void
+    {
+        $query->where('approval_status', ApprovalStatus::Rejected);
+    }
+
+    /**
+     * Scope a query to only include records with a specific approval status.
+     */
+    public function scopeWithApprovalStatus(Builder $query, ApprovalStatus $status): void
+    {
+        $query->where('approval_status', $status);
+    }
+
+    /**
+     * Scope a query to only include records approved by a specific user.
+     */
+    public function scopeApprovedBy(Builder $query, int|string $userId): void
+    {
+        $query->where('approved_by', $userId)
+            ->where('approval_status', ApprovalStatus::Approved);
+    }
+
+    /**
+     * Scope a query to only include records rejected by a specific user.
+     */
+    public function scopeRejectedBy(Builder $query, int|string $userId): void
+    {
+        $query->where('approved_by', $userId)
+            ->where('approval_status', ApprovalStatus::Rejected);
+    }
+
     public function approver(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'approved_by');
@@ -67,7 +118,7 @@ trait HasApprovalStatus
     public static function getNavigationBadge(): ?string
     {
         $count = self::withoutGlobalScopes()
-            ->where('approval_status', ApprovalStatus::Pending)
+            ->pending()
             ->count();
 
         return $count > 0 ? (string) $count : null;

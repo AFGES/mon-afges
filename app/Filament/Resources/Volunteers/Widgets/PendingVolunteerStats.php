@@ -18,7 +18,7 @@ final class PendingVolunteerStats extends StatsOverviewWidget
     protected function getStats(): array
     {
         $pendingCount = Volunteer::withoutGlobalScopes()
-            ->where('approval_status', ApprovalStatus::Pending)
+            ->pending()
             ->count();
 
         return [

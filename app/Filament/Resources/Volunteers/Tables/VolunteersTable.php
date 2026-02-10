@@ -76,7 +76,7 @@ class VolunteersTable
                     ->options(ApprovalStatus::class)
                     ->default(function () {
                         $pendingCount = Volunteer::withoutGlobalScopes()
-                            ->where('approval_status', ApprovalStatus::Pending)
+                            ->pending()
                             ->count();
 
                         return $pendingCount > 0

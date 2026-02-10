@@ -91,7 +91,7 @@ test('can query pending delegates without global scope', function () {
     Delegate::factory()->approved()->create(); // Approved
 
     $pendingDelegates = Delegate::withoutGlobalScopes()
-        ->where('approval_status', ApprovalStatus::Pending)
+        ->pending()
         ->get();
 
     expect($pendingDelegates)->toHaveCount(2);

@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Clusters\DemocraticTimes\Resources\Sessions\RelationManagers;
+namespace App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages;
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\SessionResource;
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Widgets\SessionQuorumStatusWidget;
 use App\Filament\Clusters\DemocraticTimes\Resources\SessionSignIns\Schemas\SessionSignInForm;
 use Filament\Actions\CreateAction;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -16,11 +18,18 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-final class SessionSignInsRelationManager extends RelationManager
+class ManageSessionSignIns extends ManageRelatedRecords
 {
+    protected static string $resource = SessionResource::class;
+
     protected static string $relationship = 'signIns';
 
-    public static function getTitle($ownerRecord, $livewire): string
+    public static function getNavigationLabel(): string
+    {
+        return __('emargement.plural');
+    }
+
+    public function getTitle(): string
     {
         return __('emargement.plural');
     }
@@ -30,59 +39,21 @@ final class SessionSignInsRelationManager extends RelationManager
         return SessionSignInForm::configure($schema);
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            SessionQuorumStatusWidget::make(['record' => $this->getOwnerRecord()]),
+        ];
+    }
+
     public function table(Table $table): Table
     {
-        $session = $this->getOwnerRecord();
-        $status = $session->getQuorumStatus();
-        $type = $session->democraticTimeType;
-
-        // Build description showing quorum status
-        $description = '';
-        if ($type) {
-            $description .= '<div class="text-sm">';
-            $calculationType = $type->calculate_quorum_per_college ? __('emargement.quorum.per_college') : __('emargement.quorum.combined');
-            $description .= '<div class="mb-2"><strong>'.__('emargement.quorum.calculation_type').':</strong> '.$calculationType.'</div>';
-            $description .= '<div class="mb-2"><strong>'.__('emargement.quorum.required_percentage').':</strong> '.$type->quorum_percentage.'%</div>';
-            $description .= '<div class="mb-2"><strong>'.__('emargement.quorum.includes_proxies').':</strong> '.($type->include_proxies_in_quorum ? __('common.yes') : __('common.no')).'</div>';
-
-            if ($status['type'] === 'combined') {
-                $color = $status['met'] ? 'success' : 'danger';
-                $statusText = $status['met'] ? __('emargement.quorum.met') : __('emargement.quorum.not_met');
-                $description .= '<div class="mt-3 p-3 rounded-lg bg-'.$color.'-50 dark:bg-'.$color.'-900/20">';
-                $description .= '<div class="font-semibold text-'.$color.'-800 dark:text-'.$color.'-200">'.$statusText.'</div>';
-                $description .= '<div class="mt-1 text-'.$color.'-700 dark:text-'.$color.'-300">';
-                $description .= sprintf('%d/%d (%s%%)', $status['present_count'], $status['total_eligible'], $status['percentage']);
-                $description .= '</div></div>';
-            } else {
-                $description .= '<div class="mt-3 space-y-2">';
-                foreach ($status['details'] as $detail) {
-                    $color = $detail['met'] ? 'success' : 'danger';
-                    $icon = $detail['met'] ? '✓' : '✗';
-                    $description .= '<div class="p-2 rounded bg-'.$color.'-50 dark:bg-'.$color.'-900/20">';
-                    $description .= '<span class="font-semibold text-'.$color.'-800 dark:text-'.$color.'-200">'.$icon.' '.$detail['college_name'].':</span> ';
-                    $description .= '<span class="text-'.$color.'-700 dark:text-'.$color.'-300">';
-                    $description .= sprintf('%d/%d (%s%%)', $detail['present_count'], $detail['total_eligible'], $detail['percentage']);
-                    $description .= '</span></div>';
-                }
-
-                $overallColor = $status['met'] ? 'success' : 'danger';
-                $overallText = $status['met'] ? __('emargement.quorum.met') : __('emargement.quorum.not_met');
-                $description .= '<div class="mt-2 p-3 rounded-lg bg-'.$overallColor.'-50 dark:bg-'.$overallColor.'-900/20">';
-                $description .= '<div class="font-bold text-'.$overallColor.'-800 dark:text-'.$overallColor.'-200">';
-                $description .= __('emargement.quorum.overall_status').': '.$overallText;
-                $description .= '</div></div>';
-                $description .= '</div>';
-            }
-            $description .= '</div>';
-        }
-
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->with([
                     'seat.collegeOrganization.college',
                     'seat.delegates.user',
                 ]))
-            ->description(fn () => new \Illuminate\Support\HtmlString($description))
             ->columns([
                 TextColumn::make('seat.id')
                     ->label(__('emargement.fields.seat'))

@@ -8,8 +8,8 @@ use App\Filament\Clusters\DemocraticTimes\DemocraticTimesCluster;
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\CreateSession;
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession;
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ListSessions;
-use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\RelationManagers\ProxiesRelationManager;
-use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\RelationManagers\SessionSignInsRelationManager;
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionProxies;
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionSignIns;
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Schemas\SessionForm;
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Tables\SessionsTable;
 use App\Models\DemocraticTimeSession;
@@ -49,20 +49,14 @@ final class SessionResource extends Resource
         return SessionsTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            ProxiesRelationManager::class,
-            SessionSignInsRelationManager::class,
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
             'index' => ListSessions::route('/'),
             'create' => CreateSession::route('/create'),
             'edit' => EditSession::route('/{record}/edit'),
+            'proxies' => ManageSessionProxies::route('/{record}/proxies'),
+            'sign-ins' => ManageSessionSignIns::route('/{record}/sign-ins'),
         ];
     }
 

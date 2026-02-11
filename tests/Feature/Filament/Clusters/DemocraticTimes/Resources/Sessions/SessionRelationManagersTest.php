@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\RelationManagers\ProxiesRelationManager;
-use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\RelationManagers\SessionSignInsRelationManager;
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionProxies;
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionSignIns;
 use App\Models\Delegate;
 use App\Models\DemocraticTimeSession;
 use App\Models\Proxy;
 use App\Models\Seat;
 use App\Models\SessionSignIn;
 use App\Models\User;
-use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     Role::firstOrCreate(['name' => 'super_admin']);
@@ -26,9 +26,8 @@ describe('ProxiesRelationManager', function () {
     it('can render the relation manager', function () {
         $session = DemocraticTimeSession::factory()->create();
 
-        Livewire::test(ProxiesRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionProxies::class, [
+            'record' => $session->getKey(),
         ])
             ->assertOk();
     });
@@ -38,9 +37,8 @@ describe('ProxiesRelationManager', function () {
         $proxies = Proxy::factory()->count(3)->for($session)->create();
         $otherSessionProxy = Proxy::factory()->create();
 
-        Livewire::test(ProxiesRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionProxies::class, [
+            'record' => $session->getKey(),
         ])
             ->assertCanSeeTableRecords($proxies)
             ->assertCanNotSeeTableRecords([$otherSessionProxy]);
@@ -66,9 +64,8 @@ describe('ProxiesRelationManager', function () {
 
         $startedAt = now()->toDateTimeString();
 
-        Livewire::test(ProxiesRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionProxies::class, [
+            'record' => $session->getKey(),
         ])
             ->callTableAction('create', data: [
                 'democratic_time_session_id' => $session->id,
@@ -90,9 +87,8 @@ describe('SessionSignInsRelationManager', function () {
     it('can render the relation manager', function () {
         $session = DemocraticTimeSession::factory()->create();
 
-        Livewire::test(SessionSignInsRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionSignIns::class, [
+            'record' => $session->getKey(),
         ])
             ->assertOk();
     });
@@ -102,9 +98,8 @@ describe('SessionSignInsRelationManager', function () {
         $signIns = SessionSignIn::factory()->count(3)->for($session)->create();
         $otherSessionSignIn = SessionSignIn::factory()->create();
 
-        Livewire::test(SessionSignInsRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionSignIns::class, [
+            'record' => $session->getKey(),
         ])
             ->assertCanSeeTableRecords($signIns)
             ->assertCanNotSeeTableRecords([$otherSessionSignIn]);
@@ -116,9 +111,8 @@ describe('SessionSignInsRelationManager', function () {
         $delegate = Delegate::factory()->for($seat)->approved()->create();
         $signedInAt = now()->toDateTimeString();
 
-        Livewire::test(SessionSignInsRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionSignIns::class, [
+            'record' => $session->getKey(),
         ])
             ->callTableAction('create', data: [
                 'democratic_time_session_id' => $session->id,
@@ -146,9 +140,8 @@ describe('SessionSignInsRelationManager', function () {
             'signed_out_at' => now(),
         ]);
 
-        Livewire::test(SessionSignInsRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionSignIns::class, [
+            'record' => $session->getKey(),
         ])
             ->filterTable('signed_in')
             ->assertCanSeeTableRecords([$signedIn])
@@ -166,9 +159,8 @@ describe('SessionSignInsRelationManager', function () {
             'signed_out_at' => now(),
         ]);
 
-        Livewire::test(SessionSignInsRelationManager::class, [
-            'ownerRecord' => $session,
-            'pageClass' => \App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\EditSession::class,
+        livewire(ManageSessionSignIns::class, [
+            'record' => $session->getKey(),
         ])
             ->filterTable('signed_out')
             ->assertCanSeeTableRecords([$signedOut])

@@ -66,6 +66,9 @@ return [
         'not_met' => 'Quorum non atteint',
     ],
 
+    'present' => 'Présent-e-s',
+    'absent' => 'Absent-e-s',
+
     'messages' => [
         'sign_in_opened' => 'L\'émargement a été ouvert.',
         'sign_in_closed' => 'L\'émargement a été fermé.',

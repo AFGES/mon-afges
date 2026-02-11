@@ -2,22 +2,30 @@
 
 declare(strict_types=1);
 
-namespace App\Filament\Clusters\DemocraticTimes\Resources\Sessions\RelationManagers;
+namespace App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages;
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Schemas\ProxyForm;
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\SessionResource;
 use App\Models\Scopes\ApprovedScope;
 use Filament\Actions\CreateAction;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-final class ProxiesRelationManager extends RelationManager
+class ManageSessionProxies extends ManageRelatedRecords
 {
+    protected static string $resource = SessionResource::class;
+
     protected static string $relationship = 'proxies';
 
-    public static function getTitle($ownerRecord, $livewire): string
+    public static function getNavigationLabel(): string
+    {
+        return __('proxy.plural');
+    }
+
+    public function getTitle(): string
     {
         return __('proxy.plural');
     }

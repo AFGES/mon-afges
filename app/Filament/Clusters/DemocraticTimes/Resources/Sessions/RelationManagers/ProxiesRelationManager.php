@@ -30,7 +30,14 @@ final class ProxiesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScope(ApprovedScope::class))
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->withoutGlobalScope(ApprovedScope::class)
+                ->with([
+                    'delegatorSeat.collegeOrganization.college',
+                    'delegatorSeat.delegates.user',
+                    'proxyHolderSeat.collegeOrganization.college',
+                    'proxyHolderSeat.delegates.user',
+                ]))
             ->columns([
                 TextColumn::make('delegatorSeat.id')
                     ->label(__('proxy.fields.delegator_seat'))

@@ -77,10 +77,16 @@ final class SessionSignInsRelationManager extends RelationManager
         }
 
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with([
+                    'seat.collegeOrganization.college',
+                    'seat.delegates.user',
+                ]))
             ->description(fn () => new \Illuminate\Support\HtmlString($description))
             ->columns([
-                TextColumn::make('seat.label')
+                TextColumn::make('seat.id')
                     ->label(__('emargement.fields.seat'))
+                    ->formatStateUsing(fn ($record) => $record->seat->label())
                     ->searchable()
                     ->sortable(),
 
@@ -121,7 +127,15 @@ final class SessionSignInsRelationManager extends RelationManager
             ->filters([
                 SelectFilter::make('seat_id')
                     ->label(__('emargement.fields.seat'))
-                    ->relationship('seat', fn ($record) => $record->label())
+                    ->relationship(
+                        name: 'seat',
+                        titleAttribute: 'id',
+                        modifyQueryUsing: fn (Builder $query) => $query->with([
+                            'collegeOrganization.college',
+                            'delegates.user',
+                        ])
+                    )
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->label())
                     ->searchable()
                     ->preload(),
 

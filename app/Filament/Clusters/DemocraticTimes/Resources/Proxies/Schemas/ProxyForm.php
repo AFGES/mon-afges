@@ -5,7 +5,7 @@ namespace App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Schemas;
 use App\Rules\ProxyDelegatesFromSameCollege;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Get;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ProxyForm

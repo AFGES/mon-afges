@@ -20,7 +20,6 @@
             <directory>app</directory>
         </include>
         <exclude>
-            <directory>app/Filament</directory>
             <directory>app/Policies</directory>
             <directory>app/Http/Controllers</directory>
             <file>app/Providers/TelescopeServiceProvider.php</file>

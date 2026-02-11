@@ -1,5 +1,6 @@
 {
     "$schema": "https://opencode.ai/config.json",
+    "model": "github-copilot/claude-sonnet-4.5",
     "mcp": {
         "laravel-boost": {
             "type": "local",
@@ -22,6 +23,11 @@
         "edit": "allow",
         "glob": "allow",
         "list": "allow",
-        "lsp": "allow"
+        "grep": "allow",
+        "lsp": "allow",
+        "codesearch": "allow",
+        "todowrite": "allow",
+        "todoread": "allow",
+        "laravel-boost_*": "allow"
     }
 }

@@ -12,7 +12,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class ProxyDelegatesFromSameCollege implements ValidationRule
 {
     public function __construct(
-        private readonly string $delegatorSeatId
+        private readonly ?string $delegatorSeatId
     ) {}
 
     /**
@@ -22,6 +22,11 @@ class ProxyDelegatesFromSameCollege implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        // If delegator seat ID is not set, skip validation (required rule will catch it)
+        if (! $this->delegatorSeatId) {
+            return;
+        }
+
         $delegatorSeat = Seat::find($this->delegatorSeatId);
         $proxyHolderSeat = Seat::find($value);
 

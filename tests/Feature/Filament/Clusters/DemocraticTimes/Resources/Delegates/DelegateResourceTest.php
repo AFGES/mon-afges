@@ -1,0 +1,378 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\CreateDelegate;
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\EditDelegate;
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\ListDelegates;
+use App\Models\Delegate;
+use App\Models\Organization;
+use App\Models\Seat;
+use App\Models\User;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Spatie\Permission\Models\Role;
+
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+use function Pest\Laravel\assertSoftDeleted;
+use function Pest\Livewire\livewire;
+
+beforeEach(function () {
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+    $this->actingAsUser = User::factory()->create();
+    $this->actingAsUser->assignRole('super_admin');
+    $this->actingAs($this->actingAsUser);
+});
+
+describe('ListDelegates', function () {
+    it('can load the page', function () {
+        livewire(ListDelegates::class)
+            ->assertOk();
+    });
+
+    it('can list delegates', function () {
+        $delegates = Delegate::factory()->count(5)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->assertCanSeeTableRecords($delegates);
+    });
+
+    it('can search delegates by user name', function () {
+        $delegates = Delegate::factory()->count(5)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->searchTable($delegates->first()->user->name)
+            ->assertCanSeeTableRecords($delegates->take(1))
+            ->assertCanNotSeeTableRecords($delegates->skip(1));
+    });
+
+    it('can search delegates by email', function () {
+        $delegates = Delegate::factory()->count(5)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->searchTable($delegates->first()->email)
+            ->assertCanSeeTableRecords($delegates->take(1))
+            ->assertCanNotSeeTableRecords($delegates->skip(1));
+    });
+
+    it('can search delegates by organization', function () {
+        $delegates = Delegate::factory()->count(5)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->searchTable($delegates->first()->organization->short_name)
+            ->assertCanSeeTableRecords($delegates->take(1))
+            ->assertCanNotSeeTableRecords($delegates->skip(1));
+    });
+
+    it('can sort delegates by user name', function () {
+        $delegates = Delegate::factory()->count(3)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->sortTable('user.name')
+            ->assertSuccessful()
+            ->sortTable('user.name', 'desc')
+            ->assertSuccessful();
+    });
+
+    it('can sort delegates by email', function () {
+        $delegates = Delegate::factory()->count(3)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->sortTable('email')
+            ->assertSuccessful()
+            ->sortTable('email', 'desc')
+            ->assertSuccessful();
+    });
+
+    it('can sort delegates by started_at', function () {
+        $delegates = Delegate::factory()->count(3)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->sortTable('started_at')
+            ->assertSuccessful()
+            ->sortTable('started_at', 'desc')
+            ->assertSuccessful();
+    });
+
+    it('can sort delegates by organization', function () {
+        $delegates = Delegate::factory()->count(3)->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->sortTable('organization.short_name')
+            ->assertSuccessful()
+            ->sortTable('organization.short_name', 'desc')
+            ->assertSuccessful();
+    });
+});
+
+describe('CreateDelegate', function () {
+    it('can load the page', function () {
+        livewire(CreateDelegate::class)
+            ->assertOk();
+    });
+
+    it('can create a delegate', function () {
+        $user = User::factory()->create();
+        $organization = Organization::factory()->create();
+        $seat = Seat::factory()->create();
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'ended_at' => today()->addYear()->format('Y-m-d'),
+                'user_id' => $user->id,
+                'email' => fake()->email(),
+                'organization_id' => $organization->id,
+                'seat_id' => $seat->id,
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertRedirect();
+
+        assertDatabaseHas(Delegate::class, [
+            'user_id' => $user->id,
+            'organization_id' => $organization->id,
+            'seat_id' => $seat->id,
+        ]);
+    });
+
+    it('can create a delegate with minimal data', function () {
+        $user = User::factory()->create();
+        $organization = Organization::factory()->create();
+        $seat = Seat::factory()->create();
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'user_id' => $user->id,
+                'email' => fake()->email(),
+                'organization_id' => $organization->id,
+                'seat_id' => $seat->id,
+            ])
+            ->call('create')
+            ->assertNotified()
+            ->assertRedirect();
+
+        assertDatabaseHas(Delegate::class, [
+            'user_id' => $user->id,
+            'organization_id' => $organization->id,
+            'seat_id' => $seat->id,
+        ]);
+    });
+
+    it('validates required fields', function (array $data, array $errors) {
+        $user = User::factory()->create();
+        $organization = Organization::factory()->create();
+        $seat = Seat::factory()->create();
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'user_id' => $user->id,
+                'email' => fake()->email(),
+                'organization_id' => $organization->id,
+                'seat_id' => $seat->id,
+                ...$data,
+            ])
+            ->call('create')
+            ->assertHasFormErrors($errors)
+            ->assertNotNotified()
+            ->assertNoRedirect();
+    })->with([
+        '`started_at` is required' => [['started_at' => null], ['started_at' => 'required']],
+        '`user_id` is required' => [['user_id' => null], ['user_id' => 'required']],
+        '`email` is required' => [['email' => null], ['email' => 'required']],
+        '`organization_id` is required' => [['organization_id' => null], ['organization_id' => 'required']],
+        '`seat_id` is required' => [['seat_id' => null], ['seat_id' => 'required']],
+    ]);
+
+    it('validates email format', function () {
+        $user = User::factory()->create();
+        $organization = Organization::factory()->create();
+        $seat = Seat::factory()->create();
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'user_id' => $user->id,
+                'email' => 'invalid-email',
+                'organization_id' => $organization->id,
+                'seat_id' => $seat->id,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['email' => 'email'])
+            ->assertNotNotified()
+            ->assertNoRedirect();
+    });
+
+    it('validates ended_at is after started_at', function () {
+        $user = User::factory()->create();
+        $organization = Organization::factory()->create();
+        $seat = Seat::factory()->create();
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'ended_at' => today()->subDay()->format('Y-m-d'),
+                'user_id' => $user->id,
+                'email' => fake()->email(),
+                'organization_id' => $organization->id,
+                'seat_id' => $seat->id,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['ended_at'])
+            ->assertNotNotified()
+            ->assertNoRedirect();
+    });
+});
+
+describe('EditDelegate', function () {
+    it('can load the page', function () {
+        $delegate = Delegate::factory()->approved()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->assertOk()
+            ->assertSchemaStateSet([
+                'started_at' => $delegate->started_at->format('Y-m-d'),
+                'user_id' => $delegate->user_id,
+                'email' => $delegate->email,
+                'organization_id' => $delegate->organization_id,
+                'seat_id' => $delegate->seat_id,
+            ]);
+    });
+
+    it('can update a delegate', function () {
+        $delegate = Delegate::factory()->approved()->create();
+        $newUser = User::factory()->create();
+        $newEmail = fake()->email();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm([
+                'user_id' => $newUser->id,
+                'email' => $newEmail,
+            ])
+            ->call('save')
+            ->assertNotified();
+
+        assertDatabaseHas(Delegate::class, [
+            'id' => $delegate->id,
+            'user_id' => $newUser->id,
+            'email' => $newEmail,
+        ]);
+    });
+
+    it('can update delegate dates', function () {
+        $delegate = Delegate::factory()->approved()->create();
+        $newStartedAt = today()->addMonth();
+        $newEndedAt = today()->addMonths(3);
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm([
+                'started_at' => $newStartedAt->format('Y-m-d'),
+                'ended_at' => $newEndedAt->format('Y-m-d'),
+            ])
+            ->call('save')
+            ->assertNotified();
+
+        $delegate->refresh();
+
+        expect($delegate->started_at->format('Y-m-d'))->toBe($newStartedAt->format('Y-m-d'));
+        expect($delegate->ended_at->format('Y-m-d'))->toBe($newEndedAt->format('Y-m-d'));
+    });
+
+    it('can update delegate organization and seat', function () {
+        $delegate = Delegate::factory()->approved()->create();
+        $newOrganization = Organization::factory()->create();
+        $newSeat = Seat::factory()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm([
+                'organization_id' => $newOrganization->id,
+                'seat_id' => $newSeat->id,
+            ])
+            ->call('save')
+            ->assertNotified();
+
+        assertDatabaseHas(Delegate::class, [
+            'id' => $delegate->id,
+            'organization_id' => $newOrganization->id,
+            'seat_id' => $newSeat->id,
+        ]);
+    });
+
+    it('validates the form data', function (array $data, array $errors) {
+        $delegate = Delegate::factory()->approved()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm($data)
+            ->call('save')
+            ->assertHasFormErrors($errors)
+            ->assertNotNotified();
+    })->with([
+        '`started_at` is required' => [['started_at' => null], ['started_at' => 'required']],
+        '`user_id` is required' => [['user_id' => null], ['user_id' => 'required']],
+        '`email` is required' => [['email' => null], ['email' => 'required']],
+        '`email` is a valid email' => [['email' => 'invalid-email'], ['email' => 'email']],
+        '`organization_id` is required' => [['organization_id' => null], ['organization_id' => 'required']],
+        '`seat_id` is required' => [['seat_id' => null], ['seat_id' => 'required']],
+    ]);
+
+    it('can soft delete a delegate', function () {
+        $delegate = Delegate::factory()->approved()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->callAction(DeleteAction::class)
+            ->assertNotified()
+            ->assertRedirect();
+
+        assertSoftDeleted(Delegate::class, [
+            'id' => $delegate->id,
+        ]);
+    });
+
+    it('can restore a soft deleted delegate', function () {
+        $delegate = Delegate::factory()->approved()->create();
+        $delegate->delete();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->callAction(RestoreAction::class)
+            ->assertNotified();
+
+        assertDatabaseHas(Delegate::class, [
+            'id' => $delegate->id,
+            'deleted_at' => null,
+        ]);
+    });
+
+    it('can force delete a delegate', function () {
+        $delegate = Delegate::factory()->approved()->create();
+        $delegate->delete();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->callAction(ForceDeleteAction::class)
+            ->assertNotified()
+            ->assertRedirect();
+
+        assertDatabaseMissing(Delegate::class, [
+            'id' => $delegate->id,
+        ]);
+    });
+});

@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Livewire\Profile\ManageVolunteers;
 use App\Models\User;
 use App\Models\Volunteer;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 test('user can terminate their approved volunteer mandate', function () {
     $user = User::factory()->create();
@@ -17,7 +17,7 @@ test('user can terminate their approved volunteer mandate', function () {
 
     expect($volunteer->ended_at)->toBeNull();
 
-    Livewire::test(ManageVolunteers::class)
+    livewire(ManageVolunteers::class)
         ->call('terminateVolunteer', $volunteer->id)
         ->assertNotified();
 
@@ -32,7 +32,7 @@ test('user cannot terminate another users volunteer mandate', function () {
 
     actingAs($user);
 
-    Livewire::test(ManageVolunteers::class)
+    livewire(ManageVolunteers::class)
         ->call('terminateVolunteer', $volunteer->id)
         ->assertNotified();
 
@@ -49,7 +49,7 @@ test('user cannot terminate pending volunteer mandate', function () {
 
     actingAs($user);
 
-    Livewire::test(ManageVolunteers::class)
+    livewire(ManageVolunteers::class)
         ->call('terminateVolunteer', $volunteer->id)
         ->assertNotified();
 
@@ -66,7 +66,7 @@ test('user cannot terminate already terminated volunteer mandate', function () {
 
     actingAs($user);
 
-    Livewire::test(ManageVolunteers::class)
+    livewire(ManageVolunteers::class)
         ->call('terminateVolunteer', $volunteer->id)
         ->assertNotified();
 
@@ -86,7 +86,7 @@ test('volunteer list displays ended date for terminated mandates', function () {
 
     actingAs($user);
 
-    $component = Livewire::test(ManageVolunteers::class);
+    $component = livewire(ManageVolunteers::class);
 
     $component->assertSee($activeVolunteer->organization->short_name);
     $component->assertSee($endedVolunteer->organization->short_name);

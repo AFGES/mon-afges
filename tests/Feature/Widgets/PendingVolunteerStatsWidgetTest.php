@@ -5,10 +5,10 @@ declare(strict_types=1);
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Models\User;
 use App\Models\Volunteer;
-use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     Permission::firstOrCreate(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
@@ -33,7 +33,7 @@ test('pending volunteer stats widget displays correct count', function () {
 
     actingAs($admin);
 
-    Livewire::test(PendingVolunteerStats::class)
+    livewire(PendingVolunteerStats::class)
         ->assertSee('3')
         ->assertSee(__('volunteer.stats.pending_approvals'));
 });
@@ -47,7 +47,7 @@ test('pending volunteer stats widget shows zero when no pending volunteers', fun
 
     actingAs($admin);
 
-    Livewire::test(PendingVolunteerStats::class)
+    livewire(PendingVolunteerStats::class)
         ->assertSee('0')
         ->assertSee(__('volunteer.stats.pending_approvals'));
 });
@@ -79,7 +79,7 @@ test('widget counts only pending volunteers not approved ones', function () {
 
     expect($pendingCount)->toBe(2);
 
-    Livewire::test(PendingVolunteerStats::class)
+    livewire(PendingVolunteerStats::class)
         ->assertSee('2');
 });
 

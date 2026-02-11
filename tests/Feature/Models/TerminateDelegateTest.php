@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Livewire\Profile\ManageDelegates;
 use App\Models\Delegate;
 use App\Models\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 test('user can terminate their approved delegate mandate', function () {
     $user = User::factory()->create();
@@ -20,7 +20,7 @@ test('user can terminate their approved delegate mandate', function () {
 
     expect($delegate->ended_at)->toBeNull();
 
-    Livewire::test(ManageDelegates::class)
+    livewire(ManageDelegates::class)
         ->call('terminateDelegate', $delegate->id)
         ->assertNotified();
 
@@ -38,7 +38,7 @@ test('user cannot terminate another users delegate mandate', function () {
 
     actingAs($user);
 
-    Livewire::test(ManageDelegates::class)
+    livewire(ManageDelegates::class)
         ->call('terminateDelegate', $delegate->id)
         ->assertNotified();
 
@@ -59,7 +59,7 @@ test('user cannot terminate pending delegate mandate', function () {
 
     actingAs($user);
 
-    Livewire::test(ManageDelegates::class)
+    livewire(ManageDelegates::class)
         ->call('terminateDelegate', $delegate->id)
         ->assertNotified();
 
@@ -76,7 +76,7 @@ test('user cannot terminate already terminated delegate mandate', function () {
 
     actingAs($user);
 
-    Livewire::test(ManageDelegates::class)
+    livewire(ManageDelegates::class)
         ->call('terminateDelegate', $delegate->id)
         ->assertNotified();
 
@@ -99,7 +99,7 @@ test('delegate list displays ended date for terminated mandates', function () {
 
     actingAs($user);
 
-    $component = Livewire::test(ManageDelegates::class);
+    $component = livewire(ManageDelegates::class);
 
     $component->assertSee($activeDelegate->organization->short_name);
     $component->assertSee($endedDelegate->organization->short_name);

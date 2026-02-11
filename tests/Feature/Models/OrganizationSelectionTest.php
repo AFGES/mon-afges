@@ -6,10 +6,10 @@ use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
 use Filament\Facades\Filament;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     Filament::setCurrentPanel('admin');
@@ -71,7 +71,7 @@ test('user can select organizations on the profile page', function () {
     $startDate1 = now()->subDays(7)->startOfDay();
     $startDate2 = now()->subDays(14)->startOfDay();
 
-    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
+    livewire(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -113,7 +113,7 @@ test('user must select at least one organization', function () {
 
     actingAs($user);
 
-    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
+    livewire(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [],
         ])
@@ -183,7 +183,7 @@ test('user can apply as delegate when selecting organizations', function () {
     $startDate = now()->subDays(7)->startOfDay();
 
     // First submit volunteer application
-    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
+    livewire(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -198,7 +198,7 @@ test('user can apply as delegate when selecting organizations', function () {
         ->assertHasNoFormErrors();
 
     // Then submit delegate application
-    Livewire::test(\App\Livewire\Profile\ManageDelegates::class)
+    livewire(\App\Livewire\Profile\ManageDelegates::class)
         ->fillForm([
             'applications' => [
                 [
@@ -256,7 +256,7 @@ test('user can apply to multiple organizations with different delegate options',
     $startDate2 = now()->subDays(14)->startOfDay();
 
     // Submit volunteer applications for both organizations
-    Livewire::test(\App\Livewire\Profile\ManageVolunteers::class)
+    livewire(\App\Livewire\Profile\ManageVolunteers::class)
         ->fillForm([
             'organizations' => [
                 [
@@ -274,7 +274,7 @@ test('user can apply to multiple organizations with different delegate options',
         ->assertHasNoFormErrors();
 
     // Submit delegate application for only organization1
-    Livewire::test(\App\Livewire\Profile\ManageDelegates::class)
+    livewire(\App\Livewire\Profile\ManageDelegates::class)
         ->fillForm([
             'applications' => [
                 [

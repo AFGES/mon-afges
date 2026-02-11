@@ -1,14 +1,16 @@
 {
     "agents": [
         "copilot",
-        "gemini"
+        "opencode"
     ],
-    "editors": [
-        "gemini",
-        "phpstorm",
-        "vscode"
-    ],
-    "guidelines": [
+    "guidelines": true,
+    "herd_mcp": false,
+    "mcp": true,
+    "packages": [
         "filament/filament"
+    ],
+    "sail": false,
+    "skills": [
+        "pest-testing"
     ]
 }

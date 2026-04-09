@@ -5,16 +5,25 @@
         "laravel-boost": {
             "type": "local",
             "enabled": true,
-            "command": ["php", "artisan", "boost:mcp"]
+            "command": [
+                "php",
+                "artisan",
+                "boost:mcp"
+            ]
         }
     },
     "lsp": {
         "devsense": {
-            "command": ["bunx", "devsense-php-ls"],
-            "initialization": {
-                "0": ""
-            },
-            "extensions": [".php"]
+            "command": [
+                "bunx",
+                "devsense-php-ls"
+            ],
+            "initialization": [
+                ""
+            ],
+            "extensions": [
+                ".php"
+            ]
         }
     },
     "permission": {

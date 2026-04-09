@@ -1,7 +1,7 @@
 {
     "agents": [
-        "copilot",
-        "opencode"
+        "opencode",
+        "copilot"
     ],
     "guidelines": true,
     "herd_mcp": false,
@@ -11,6 +11,7 @@
     ],
     "sail": false,
     "skills": [
-        "pest-testing"
+        "pest-testing",
+        "tailwindcss-development"
     ]
 }

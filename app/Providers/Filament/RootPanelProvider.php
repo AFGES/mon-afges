@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
+use App\Livewire\Profile\ManageDelegates;
+use App\Livewire\Profile\ManageVolunteers;
+use App\Models\SocialiteUser;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
@@ -20,7 +25,7 @@ use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -34,7 +39,7 @@ final class RootPanelProvider extends PanelProvider
             ->default()
             ->id('root')
             ->path('')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -46,7 +51,7 @@ final class RootPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                \App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats::class,
+                PendingVolunteerStats::class,
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
@@ -56,7 +61,7 @@ final class RootPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
@@ -67,8 +72,8 @@ final class RootPanelProvider extends PanelProvider
                 BreezyCore::make()
                     ->myProfile()
                     ->myProfileComponents([
-                        \App\Livewire\Profile\ManageVolunteers::class,
-                        \App\Livewire\Profile\ManageDelegates::class,
+                        ManageVolunteers::class,
+                        ManageDelegates::class,
                     ]),
             ])
             ->authMiddleware([
@@ -83,7 +88,7 @@ final class RootPanelProvider extends PanelProvider
                             ->icon('fab-google'),
                     ])
                     ->registration(true)
-                    ->socialiteUserModelClass(\App\Models\SocialiteUser::class)
+                    ->socialiteUserModelClass(SocialiteUser::class)
             )
             ->sidebarCollapsibleOnDesktop()
             ->topbar(false)

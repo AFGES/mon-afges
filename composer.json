@@ -10,14 +10,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
-        "bezhansalleh/filament-shield": "^4.0@beta",
-        "dutchcodingcompany/filament-socialite": "^3.0@beta",
-        "filament/filament": "^5.0",
+        "bezhansalleh/filament-shield": "^4.2",
+        "dutchcodingcompany/filament-socialite": "^3.2",
+        "filament/filament": "^5.5",
         "google/apiclient": "^2.0",
-        "jeffgreco13/filament-breezy": "^3.0",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1",
-        "owenvoke/blade-fontawesome": "^2.9",
+        "jeffgreco13/filament-breezy": "^3.2",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
+        "owenvoke/blade-fontawesome": "^3.2",
         "socialiteproviders/google": "^4.1"
     },
     "require-dev": {
@@ -32,7 +32,7 @@
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
         "pestphp/pest-plugin-livewire": "^4.1",
-        "recca0120/laravel-erd": "^0.4"
+        "recca0120/laravel-erd": "^0.6"
     },
     "autoload": {
         "psr-4": {

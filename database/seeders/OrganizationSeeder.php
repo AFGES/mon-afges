@@ -16,12 +16,6 @@ final class OrganizationSeeder extends Seeder
     {
         $organizations = [
             ['short_name' => 'AFGES', 'legal_name' => 'AFGES, les Étudiant-e-s d’Alsace', 'domain' => 'afges.org'],
-            ['short_name' => 'BDS', 'legal_name' => 'Bureau des Sports de l\'Université de Strasbourg'],
-            ['short_name' => 'BDA', 'legal_name' => 'Bureau des Arts de l\'Université de Strasbourg'],
-            ['short_name' => 'BDE', 'legal_name' => 'Bureau des Élèves de l\'Université de Strasbourg'],
-            ['short_name' => 'CROUS', 'legal_name' => 'Centre Régional des Œuvres Universitaires et Scolaires de Strasbourg'],
-            ['short_name' => 'AEIS', 'legal_name' => 'Association des Étudiants en Informatique de Strasbourg'],
-            ['short_name' => 'AEPS', 'legal_name' => 'Association des Étudiants en Pharmacie de Strasbourg'],
             ['short_name' => 'CEPhI', 'legal_name' => 'Comité des Etudiants en Pharmacie Industrielle de Strasbourg'],
             ['short_name' => 'OHJS', 'legal_name' => 'Orchestre d\'Harmonie des Jeunes de Strasbourg'],
             ['short_name' => 'AEKS', 'legal_name' => 'Amicale des Etudiants en Kinésithérapie de Strasbourg'],

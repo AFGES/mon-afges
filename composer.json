@@ -1,11 +1,11 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "afges/mon-afges",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "An app for manage democratic processes in AFGES",
     "keywords": [
-        "laravel",
-        "framework"
+        "democratic processes",
+        "non profit organization"
     ],
     "license": "MIT",
     "require": {
@@ -33,7 +33,8 @@
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
         "pestphp/pest-plugin-livewire": "^4.1",
-        "recca0120/laravel-erd": "^0.6"
+        "recca0120/laravel-erd": "^0.6",
+        "roave/security-advisories": "dev-latest"
     },
     "autoload": {
         "psr-4": {
@@ -48,6 +49,18 @@
         }
     },
     "scripts": {
+        "setup": [
+            "composer install",
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php artisan key:generate",
+            "@php artisan migrate --force",
+            "bun install",
+            "bun run build"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "bunx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"bun run dev\" --names=server,queue,logs,vite"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
@@ -63,18 +76,6 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('databaSetup bunse/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --graceful --ansi"
-        ],
-        "setup": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "composer install",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
-            "bun install",
-            "bun run build"
-        ],
-        "dev": [
-            "Composer\\Config::disableProcessTimeout",
-            "bunx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"bun run dev\" --names=server,queue,logs,vite"
         ],
         "test": [
             "@php artisan config:clear --ansi",

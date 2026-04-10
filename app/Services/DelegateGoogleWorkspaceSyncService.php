@@ -9,40 +9,11 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-class DelegateGoogleWorkspaceSyncService
+final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspaceSyncServiceInterface
 {
     public function __construct(
-        private ?GoogleWorkspaceService $googleWorkspaceService = null
+        private ?GoogleWorkspaceServiceInterface $googleWorkspaceService = null
     ) {}
-
-    /**
-     * Get or create the Google Workspace service instance.
-     */
-    private function getGoogleWorkspaceService(): ?GoogleWorkspaceService
-    {
-        if ($this->googleWorkspaceService !== null) {
-            return $this->googleWorkspaceService;
-        }
-
-        $serviceAccountJson = config('services.google.workspace.service_account_json');
-        $adminEmail = config('services.google.workspace.admin_email');
-        $delegateGroup = config('services.google.workspace.delegate_group');
-
-        // If any required config is missing, disable sync
-        if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
-            Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
-
-            return null;
-        }
-
-        $this->googleWorkspaceService = new GoogleWorkspaceService(
-            $serviceAccountJson,
-            $adminEmail,
-            $delegateGroup
-        );
-
-        return $this->googleWorkspaceService;
-    }
 
     /**
      * Check if a delegate should be synced to Google Workspace.
@@ -261,5 +232,34 @@ class DelegateGoogleWorkspaceSyncService
         }
 
         return $stats;
+    }
+
+    /**
+     * Get or create the Google Workspace service instance.
+     */
+    private function getGoogleWorkspaceService(): ?GoogleWorkspaceServiceInterface
+    {
+        if ($this->googleWorkspaceService !== null) {
+            return $this->googleWorkspaceService;
+        }
+
+        $serviceAccountJson = config('services.google.workspace.service_account_json');
+        $adminEmail = config('services.google.workspace.admin_email');
+        $delegateGroup = config('services.google.workspace.delegate_group');
+
+        // If any required config is missing, disable sync
+        if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
+            Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
+
+            return null;
+        }
+
+        $this->googleWorkspaceService = new GoogleWorkspaceService(
+            $serviceAccountJson,
+            $adminEmail,
+            $delegateGroup
+        );
+
+        return $this->googleWorkspaceService;
     }
 }

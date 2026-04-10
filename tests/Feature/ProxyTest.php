@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\College;
 use App\Models\CollegeOrganization;
 use App\Models\DemocraticTimeSession;

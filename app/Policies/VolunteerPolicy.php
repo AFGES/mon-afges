@@ -8,7 +8,7 @@ use App\Models\Volunteer;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class VolunteerPolicy
+final class VolunteerPolicy
 {
     use HandlesAuthorization;
 

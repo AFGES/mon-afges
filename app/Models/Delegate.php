@@ -28,23 +28,6 @@ final class Delegate extends Model implements MustVerifyEmail
 
     use HasUuids;
 
-    protected static function booted(): void
-    {
-        self::creating(function (Delegate $delegate) {
-            if (! $delegate->email && $delegate->user) {
-                $delegate->email = $delegate->user->email;
-            }
-
-            // Mark delegate email as verified if user's email is verified and matches
-            if ($delegate->user &&
-                $delegate->user->hasVerifiedEmail() &&
-                $delegate->email === $delegate->user->email &&
-                is_null($delegate->email_verified_at)) {
-                $delegate->email_verified_at = now();
-            }
-        });
-    }
-
     public $fillable = [
         'user_id',
         'organization_id',
@@ -65,6 +48,23 @@ final class Delegate extends Model implements MustVerifyEmail
     public function seat(): BelongsTo
     {
         return $this->belongsTo(Seat::class);
+    }
+
+    protected static function booted(): void
+    {
+        self::creating(function (Delegate $delegate) {
+            if (! $delegate->email && $delegate->user) {
+                $delegate->email = $delegate->user->email;
+            }
+
+            // Mark delegate email as verified if user's email is verified and matches
+            if ($delegate->user &&
+                $delegate->user->hasVerifiedEmail() &&
+                $delegate->email === $delegate->user->email &&
+                is_null($delegate->email_verified_at)) {
+                $delegate->email_verified_at = now();
+            }
+        });
     }
 
     protected function casts(): array

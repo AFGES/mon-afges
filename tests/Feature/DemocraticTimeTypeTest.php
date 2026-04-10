@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\DemocraticTimeType;
 
 test('democratic time type can be created with all required fields', function () {
@@ -68,7 +70,7 @@ test('multiple democratic time types can exist with different names', function (
 test('democratic time type has many sessions', function () {
     $type = DemocraticTimeType::factory()->create();
 
-    \App\Models\DemocraticTimeSession::factory()->count(3)->create(['democratic_time_type_id' => $type->id]);
+    App\Models\DemocraticTimeSession::factory()->count(3)->create(['democratic_time_type_id' => $type->id]);
 
     expect($type->sessions()->count())->toBe(3);
 });

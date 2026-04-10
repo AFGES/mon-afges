@@ -8,7 +8,7 @@ use App\Models\Delegate;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class DelegatePolicy
+final class DelegatePolicy
 {
     use HandlesAuthorization;
 

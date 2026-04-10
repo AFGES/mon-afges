@@ -18,7 +18,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class ManageSessionSignIns extends ManageRelatedRecords
+final class ManageSessionSignIns extends ManageRelatedRecords
 {
     protected static string $resource = SessionResource::class;
 
@@ -37,13 +37,6 @@ class ManageSessionSignIns extends ManageRelatedRecords
     public function form(Schema $schema): Schema
     {
         return SessionSignInForm::configure($schema);
-    }
-
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            SessionQuorumStatusWidget::make(['record' => $this->getOwnerRecord()]),
-        ];
     }
 
     public function table(Table $table): Table
@@ -122,5 +115,12 @@ class ManageSessionSignIns extends ManageRelatedRecords
             ->headerActions([
                 CreateAction::make(),
             ]);
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            SessionQuorumStatusWidget::make(['record' => $this->getOwnerRecord()]),
+        ];
     }
 }

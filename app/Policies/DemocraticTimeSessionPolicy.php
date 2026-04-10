@@ -8,7 +8,7 @@ use App\Models\DemocraticTimeSession;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class DemocraticTimeSessionPolicy
+final class DemocraticTimeSessionPolicy
 {
     use HandlesAuthorization;
 

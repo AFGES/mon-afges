@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Volunteers\Pages;
 
 use App\Filament\Resources\Volunteers\VolunteerResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-class ListVolunteers extends ListRecords
+final class ListVolunteers extends ListRecords
 {
     protected static string $resource = VolunteerResource::class;
 

@@ -6,7 +6,7 @@ namespace App\Observers;
 
 use App\Models\DemocraticTimeSession;
 
-class DemocraticTimeSessionObserver
+final class DemocraticTimeSessionObserver
 {
     /**
      * Handle the DemocraticTimeSession "creating" event.

@@ -6,7 +6,7 @@ namespace App\Observers;
 
 use App\Models\DemocraticTimeType;
 
-class DemocraticTimeTypeObserver
+final class DemocraticTimeTypeObserver
 {
     /**
      * Handle the DemocraticTimeType "updated" event.

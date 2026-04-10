@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Delegate;
 use App\Models\User;
 use App\Services\DelegateGoogleWorkspaceSyncService;
-use App\Services\GoogleWorkspaceService;
+use App\Services\GoogleWorkspaceServiceInterface;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
@@ -30,7 +32,7 @@ test('sync command shows active delegates', function () {
         'ended_at' => null,
     ]);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->with('delegate@afges.org')->andReturn(false);
         $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldReceive('addToGroup')->with('delegate@afges.org')->once()->andReturn(true);
@@ -53,7 +55,7 @@ test('sync command works in dry run mode', function () {
         'ended_at' => null,
     ]);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldNotReceive('addToGroup');
         $mock->shouldNotReceive('removeFromGroup');
@@ -77,7 +79,7 @@ test('sync command has proper signature and description', function () {
 });
 
 test('sync command displays summary table', function () {
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->andReturn(false);
     });
 
@@ -94,7 +96,7 @@ test('sync command identifies users to remove from group', function () {
     // Create a user who is not a delegate
     $nonDelegate = User::factory()->create(['email' => 'notdelegate@afges.org']);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')
             ->with('notdelegate@afges.org')
             ->andReturn(true);
@@ -124,7 +126,7 @@ test('sync command handles users already in group', function () {
         'ended_at' => null,
     ]);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class, function (MockInterface $mock) {
         // More specific expectation must come first
         $mock->shouldReceive('isInGroup')
             ->with('existing@afges.org')
@@ -153,7 +155,7 @@ test('sync command handles API failures gracefully', function () {
         'ended_at' => null,
     ]);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class, function (MockInterface $mock) {
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class, function (MockInterface $mock) {
         $mock->shouldReceive('isInGroup')->andReturn(false);
         $mock->shouldReceive('addToGroup')->with('delegate@afges.org')->once()->andReturn(false);
     });

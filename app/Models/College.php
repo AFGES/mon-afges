@@ -23,16 +23,6 @@ final class College extends Model
         'require_same_college_for_proxy',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'can_vote' => 'boolean',
-            'max_seats_per_organization' => 'integer',
-            'max_delegates_per_seat' => 'integer',
-            'require_same_college_for_proxy' => 'boolean',
-        ];
-    }
-
     public function delegates(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -54,5 +44,15 @@ final class College extends Model
             ->using(CollegeOrganization::class)
             ->withPivot(['seats', 'delegates_per_seat'])
             ->withTimestamps();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'can_vote' => 'boolean',
+            'max_seats_per_organization' => 'integer',
+            'max_delegates_per_seat' => 'integer',
+            'require_same_college_for_proxy' => 'boolean',
+        ];
     }
 }

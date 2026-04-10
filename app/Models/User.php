@@ -44,20 +44,6 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    final protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'magic_link_token_expires_at' => 'datetime',
-        ];
-    }
-
-    /**
      * Permission for access to the panel
      */
     final public function canAccessPanel(Panel $panel): bool
@@ -79,5 +65,19 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     public function delegates(): HasMany
     {
         return $this->hasMany(Delegate::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    final protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'magic_link_token_expires_at' => 'datetime',
+        ];
     }
 }

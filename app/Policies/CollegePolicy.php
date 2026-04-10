@@ -8,7 +8,7 @@ use App\Models\College;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class CollegePolicy
+final class CollegePolicy
 {
     use HandlesAuthorization;
 

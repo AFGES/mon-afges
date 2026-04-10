@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'label' => 'Séance de temps démocratique',
     'plural' => 'Séances de temps démocratique',

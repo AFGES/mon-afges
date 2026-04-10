@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Volunteers\Tables;
 
 use App\Enums\ApprovalStatus;
@@ -19,7 +21,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class VolunteersTable
+final class VolunteersTable
 {
     public static function configure(Table $table): Table
     {

@@ -7,7 +7,7 @@ namespace App\Policies;
 use App\Models\SessionSignIn;
 use App\Models\User as AuthUser;
 
-class SessionSignInPolicy
+final class SessionSignInPolicy
 {
     /**
      * Determine whether the user can view any models.

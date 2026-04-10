@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Delegate;
 use App\Models\User;
 use App\Observers\DelegateObserver;
 use App\Services\DelegateGoogleWorkspaceSyncService;
-use App\Services\GoogleWorkspaceService;
+use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
+use App\Services\GoogleWorkspaceServiceInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
@@ -18,8 +21,7 @@ test('delegate observer adds user to google workspace group when created', funct
     Config::set('services.google.workspace.admin_email', 'admin@afges.org');
     Config::set('services.google.workspace.delegate_group', 'test-mon@afges.org');
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
-    $mockSyncService = mock(DelegateGoogleWorkspaceSyncService::class, [$mockWorkspaceService])->makePartial();
+    $mockSyncService = mock(DelegateGoogleWorkspaceSyncServiceInterface::class);
     $mockSyncService->shouldReceive('addDelegate')
         ->once()
         ->andReturn(true);
@@ -51,8 +53,7 @@ test('delegate observer removes user from google workspace group when ended', fu
     $delegate->ended_at = now();
     $delegate->syncChanges(); // Mark as changed
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
-    $mockSyncService = mock(DelegateGoogleWorkspaceSyncService::class, [$mockWorkspaceService])->makePartial();
+    $mockSyncService = mock(DelegateGoogleWorkspaceSyncServiceInterface::class);
     $mockSyncService->shouldReceive('removeDelegate')
         ->once()
         ->andReturn(true);
@@ -75,8 +76,7 @@ test('delegate observer removes user from google workspace group when deleted', 
         'ended_at' => null,
     ]);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
-    $mockSyncService = mock(DelegateGoogleWorkspaceSyncService::class, [$mockWorkspaceService])->makePartial();
+    $mockSyncService = mock(DelegateGoogleWorkspaceSyncServiceInterface::class);
     $mockSyncService->shouldReceive('removeDelegate')
         ->once()
         ->andReturn(true);
@@ -100,8 +100,7 @@ test('delegate observer re-adds user to google workspace group when restored', f
         'ended_at' => null,
     ]);
 
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
-    $mockSyncService = mock(DelegateGoogleWorkspaceSyncService::class, [$mockWorkspaceService])->makePartial();
+    $mockSyncService = mock(DelegateGoogleWorkspaceSyncServiceInterface::class);
     $mockSyncService->shouldReceive('addDelegate')
         ->once()
         ->andReturn(true);
@@ -204,7 +203,7 @@ test('delegate sync skips adding email when already in use by other active deleg
     ]);
 
     // Mock workspace service but not the sync service - let real implementation run
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class);
     $mockWorkspaceService->shouldNotReceive('addToGroup'); // Should NOT be called
 
     $syncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
@@ -256,7 +255,7 @@ test('delegate sync skips removing email when still in use by other active deleg
     ]);
 
     // Mock workspace service but not the sync service - let real implementation run
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class);
     $mockWorkspaceService->shouldNotReceive('removeFromGroup'); // Should NOT be called
 
     $syncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
@@ -291,13 +290,15 @@ test('delegate sync removes email when last active delegate is deleted', functio
     ]);
 
     // Mock service SHOULD be called since this is the last delegate with this email
-    $mockWorkspaceService = mock(GoogleWorkspaceService::class)->makePartial();
-    $mockSyncService = mock(DelegateGoogleWorkspaceSyncService::class, [$mockWorkspaceService])->makePartial();
-    $mockSyncService->shouldReceive('removeDelegate')
+    $mockWorkspaceService = mock(GoogleWorkspaceServiceInterface::class);
+    $mockWorkspaceService->shouldReceive('removeFromGroup')
         ->once()
+        ->with('unique@afges.org')
         ->andReturn(true);
 
-    $observer = new DelegateObserver($mockSyncService);
+    $syncService = new DelegateGoogleWorkspaceSyncService($mockWorkspaceService);
+
+    $observer = new DelegateObserver($syncService);
 
     // Delete delegate - should remove from group
     $observer->deleted($delegate);

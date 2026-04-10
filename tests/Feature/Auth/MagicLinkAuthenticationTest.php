@@ -49,7 +49,7 @@ test('user can authenticate with valid magic link token', function () {
         'email' => 'test@afges.org',
     ]);
 
-    $token = \Illuminate\Support\Str::random(64);
+    $token = Illuminate\Support\Str::random(64);
     $user->update([
         'magic_link_token' => Hash::make($token),
         'magic_link_token_expires_at' => now()->addMinutes(15),
@@ -79,7 +79,7 @@ test('user cannot authenticate with invalid token', function () {
         'email' => 'test@afges.org',
     ]);
 
-    $token = \Illuminate\Support\Str::random(64);
+    $token = Illuminate\Support\Str::random(64);
     $user->update([
         'magic_link_token' => Hash::make($token),
         'magic_link_token_expires_at' => now()->addMinutes(15),
@@ -105,7 +105,7 @@ test('user cannot authenticate with expired token', function () {
         'email' => 'test@afges.org',
     ]);
 
-    $token = \Illuminate\Support\Str::random(64);
+    $token = Illuminate\Support\Str::random(64);
     $user->update([
         'magic_link_token' => Hash::make($token),
         'magic_link_token_expires_at' => now()->subMinutes(1), // Expired
@@ -131,7 +131,7 @@ test('magic link verification requires valid signature', function () {
         'email' => 'test@afges.org',
     ]);
 
-    $token = \Illuminate\Support\Str::random(64);
+    $token = Illuminate\Support\Str::random(64);
     $user->update([
         'magic_link_token' => Hash::make($token),
         'magic_link_token_expires_at' => now()->addMinutes(15),
@@ -152,7 +152,7 @@ test('magic link token is cleared after successful authentication', function () 
         'email' => 'test@afges.org',
     ]);
 
-    $token = \Illuminate\Support\Str::random(64);
+    $token = Illuminate\Support\Str::random(64);
     $user->update([
         'magic_link_token' => Hash::make($token),
         'magic_link_token_expires_at' => now()->addMinutes(15),
@@ -179,7 +179,7 @@ test('same magic link cannot be used twice', function () {
         'email' => 'test@afges.org',
     ]);
 
-    $token = \Illuminate\Support\Str::random(64);
+    $token = Illuminate\Support\Str::random(64);
     $user->update([
         'magic_link_token' => Hash::make($token),
         'magic_link_token_expires_at' => now()->addMinutes(15),

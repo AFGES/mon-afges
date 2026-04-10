@@ -8,13 +8,8 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 
-class RejectAction extends Action
+final class RejectAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'reject';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -43,5 +38,10 @@ class RejectAction extends Action
                     ->body(__('approval.notifications.rejected.body'))
                     ->send();
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'reject';
     }
 }

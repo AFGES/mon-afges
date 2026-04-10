@@ -8,13 +8,8 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 
-class BulkApproveAction extends Action
+final class BulkApproveAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'bulkApprove';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -42,5 +37,10 @@ class BulkApproveAction extends Action
                     ->body(__('approval.notifications.bulk_approved.body', ['count' => $count]))
                     ->send();
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'bulkApprove';
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Organizations\Schemas;
 
 use App\Models\College;
+use Exception;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -186,7 +187,7 @@ final class OrganizationForm
                                         ->body(__('organization.notifications.seats_updated.body'))
                                         ->success()
                                         ->send();
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     \Filament\Notifications\Notification::make()
                                         ->title(__('organization.notifications.seats_update_failed.title'))
                                         ->body($e->getMessage())

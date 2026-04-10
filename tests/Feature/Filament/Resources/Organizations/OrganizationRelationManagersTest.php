@@ -27,7 +27,7 @@ describe('DelegatesRelationManager', function () {
 
         Livewire::test(DelegatesRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->assertOk();
     });
@@ -39,7 +39,7 @@ describe('DelegatesRelationManager', function () {
 
         Livewire::test(DelegatesRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->assertCanSeeTableRecords($delegates)
             ->assertCanNotSeeTableRecords([$otherOrgDelegate]);
@@ -52,7 +52,7 @@ describe('DelegatesRelationManager', function () {
 
         Livewire::test(DelegatesRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->callTableAction('create', data: [
                 'user_id' => $user->id,
@@ -76,7 +76,7 @@ describe('DelegatesRelationManager', function () {
 
         Livewire::test(DelegatesRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->callTableAction('edit', $delegate, data: [
                 'email' => $newEmail,
@@ -96,7 +96,7 @@ describe('VolunteersRelationManager', function () {
 
         Livewire::test(VolunteersRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->assertOk();
     });
@@ -108,7 +108,7 @@ describe('VolunteersRelationManager', function () {
 
         Livewire::test(VolunteersRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->assertCanSeeTableRecords($volunteers)
             ->assertCanNotSeeTableRecords([$otherOrgVolunteer]);
@@ -120,7 +120,7 @@ describe('VolunteersRelationManager', function () {
 
         Livewire::test(VolunteersRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->callTableAction('create', data: [
                 'user_id' => $user->id,
@@ -143,7 +143,7 @@ describe('VolunteersRelationManager', function () {
 
         Livewire::test(VolunteersRelationManager::class, [
             'ownerRecord' => $organization,
-            'pageClass' => \App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
         ])
             ->callTableAction('edit', $volunteer, data: [
                 'position_title' => $newPositionTitle,

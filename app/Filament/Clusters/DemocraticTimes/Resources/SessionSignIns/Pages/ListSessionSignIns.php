@@ -9,7 +9,7 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
-class ListSessionSignIns extends ListRecords
+final class ListSessionSignIns extends ListRecords
 {
     protected static string $resource = SessionSignInResource::class;
 

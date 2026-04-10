@@ -8,27 +8,14 @@ use App\Models\Delegate;
 use App\Models\User;
 use App\Notifications\DelegateApprovalRequested;
 use App\Services\DelegateGoogleWorkspaceSyncService;
+use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use Illuminate\Support\Facades\Notification;
 
 final class DelegateObserver
 {
     public function __construct(
-        private ?DelegateGoogleWorkspaceSyncService $syncService = null
+        private ?DelegateGoogleWorkspaceSyncServiceInterface $syncService = null
     ) {}
-
-    /**
-     * Get or create the sync service instance.
-     */
-    private function getSyncService(): DelegateGoogleWorkspaceSyncService
-    {
-        if ($this->syncService !== null) {
-            return $this->syncService;
-        }
-
-        $this->syncService = new DelegateGoogleWorkspaceSyncService;
-
-        return $this->syncService;
-    }
 
     /**
      * Handle the Delegate "created" event.
@@ -64,6 +51,20 @@ final class DelegateObserver
     public function restored(Delegate $delegate): void
     {
         $this->addToGroup($delegate);
+    }
+
+    /**
+     * Get or create the sync service instance.
+     */
+    private function getSyncService(): DelegateGoogleWorkspaceSyncServiceInterface
+    {
+        if ($this->syncService !== null) {
+            return $this->syncService;
+        }
+
+        $this->syncService = new DelegateGoogleWorkspaceSyncService;
+
+        return $this->syncService;
     }
 
     /**

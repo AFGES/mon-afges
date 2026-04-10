@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Volunteers;
 
 use App\Filament\Resources\Volunteers\Pages\CreateVolunteer;
@@ -17,7 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class VolunteerResource extends Resource
+final class VolunteerResource extends Resource
 {
     protected static ?string $model = Volunteer::class;
 

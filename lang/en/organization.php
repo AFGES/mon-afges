@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // lang/en/organization.php
 
 return [

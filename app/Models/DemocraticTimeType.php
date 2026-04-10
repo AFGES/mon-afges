@@ -23,6 +23,11 @@ final class DemocraticTimeType extends Model
         'include_proxies_in_quorum',
     ];
 
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(DemocraticTimeSession::class);
+    }
+
     protected function casts(): array
     {
         return [
@@ -31,10 +36,5 @@ final class DemocraticTimeType extends Model
             'quorum_percentage' => 'decimal:2',
             'include_proxies_in_quorum' => 'boolean',
         ];
-    }
-
-    public function sessions(): HasMany
-    {
-        return $this->hasMany(DemocraticTimeSession::class);
     }
 }

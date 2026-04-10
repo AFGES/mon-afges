@@ -141,8 +141,8 @@ it('has proper casts for dates', function () {
         'ended_at' => now()->addDays(5),
     ]);
 
-    expect($delegate->started_at)->toBeInstanceOf(\Carbon\Carbon::class);
-    expect($delegate->ended_at)->toBeInstanceOf(\Carbon\Carbon::class);
+    expect($delegate->started_at)->toBeInstanceOf(Carbon\Carbon::class);
+    expect($delegate->ended_at)->toBeInstanceOf(Carbon\Carbon::class);
 });
 
 it('currentlyActive scope filters active records', function () {

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Models\Organization;
 use App\Models\User;
 use Filament\Auth\Events\Registered;
 
-class AssignsOrganizationRegistrationListener
+final class AssignsOrganizationRegistrationListener
 {
     public function __construct() {}
 

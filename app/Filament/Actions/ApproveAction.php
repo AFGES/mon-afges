@@ -7,13 +7,8 @@ namespace App\Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 
-class ApproveAction extends Action
+final class ApproveAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'approve';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -35,5 +30,10 @@ class ApproveAction extends Action
                     ->body(__('approval.notifications.approved.body'))
                     ->send();
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'approve';
     }
 }

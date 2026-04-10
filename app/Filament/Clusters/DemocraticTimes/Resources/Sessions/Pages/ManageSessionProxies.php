@@ -14,7 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class ManageSessionProxies extends ManageRelatedRecords
+final class ManageSessionProxies extends ManageRelatedRecords
 {
     protected static string $resource = SessionResource::class;
 

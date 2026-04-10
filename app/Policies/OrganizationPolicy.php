@@ -8,7 +8,7 @@ use App\Models\Organization;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class OrganizationPolicy
+final class OrganizationPolicy
 {
     use HandlesAuthorization;
 

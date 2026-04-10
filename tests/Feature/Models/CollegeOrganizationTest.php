@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\College;
 use App\Models\CollegeOrganization;
 use App\Models\Organization;
@@ -117,7 +119,7 @@ test('college organization pivot data persists correctly', function () {
         $college->id => ['delegates_per_seat' => 4, 'seats' => 7],
     ]);
 
-    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+    $collegeOrg = CollegeOrganization::where('college_id', $college->id)
         ->where('organization_id', $organization->id)
         ->first();
 

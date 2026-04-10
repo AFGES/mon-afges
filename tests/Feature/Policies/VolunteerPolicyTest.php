@@ -30,7 +30,7 @@ test('volunteer policy denies terminating pending mandate', function () {
     $user = User::factory()->create();
     $volunteer = Volunteer::factory()->create([
         'user_id' => $user->id,
-        'approval_status' => \App\Enums\ApprovalStatus::Pending,
+        'approval_status' => App\Enums\ApprovalStatus::Pending,
         'ended_at' => null,
     ]);
 

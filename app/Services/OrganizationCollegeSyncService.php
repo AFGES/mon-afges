@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\CollegeOrganization;
 use App\Models\Organization;
 use App\Models\Seat;
+use Exception;
 
 final class OrganizationCollegeSyncService
 {
@@ -15,7 +16,7 @@ final class OrganizationCollegeSyncService
      *
      * @param  array<int, array{delegates_per_seat: int, seats: int}>  $collegesData
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function sync(Organization $organization, array $collegesData): void
     {
@@ -33,7 +34,7 @@ final class OrganizationCollegeSyncService
      *
      * @param  array{delegates_per_seat: int, seats?: int}  $data
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function syncCollege(Organization $organization, string $collegeId, array $data): void
     {
@@ -60,7 +61,7 @@ final class OrganizationCollegeSyncService
     /**
      * Adjust the number of seats for a college organization.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function adjustSeats(CollegeOrganization $collegeOrg, int $desiredSeats): void
     {
@@ -92,7 +93,7 @@ final class OrganizationCollegeSyncService
     /**
      * Remove empty seats from a college organization.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     private function removeSeats(CollegeOrganization $collegeOrg, int $count): void
     {
@@ -110,7 +111,7 @@ final class OrganizationCollegeSyncService
                 'requested' => $count,
             ]);
 
-            throw new \Exception($message);
+            throw new Exception($message);
         }
 
         foreach ($emptySeats as $seat) {

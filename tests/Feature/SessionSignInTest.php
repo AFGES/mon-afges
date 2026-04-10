@@ -173,7 +173,7 @@ test('sign-in is unique per seat per delegate per session', function () {
     ]);
 
     // Try to create duplicate for same delegate
-    $this->expectException(\Illuminate\Database\QueryException::class);
+    $this->expectException(Illuminate\Database\QueryException::class);
 
     SessionSignIn::create([
         'democratic_time_session_id' => $session->id,
@@ -444,7 +444,7 @@ test('delegate relationship is required when creating sign-in', function () {
     ]);
 
     // Try to create without delegate_id
-    $this->expectException(\Illuminate\Database\QueryException::class);
+    $this->expectException(Illuminate\Database\QueryException::class);
 
     SessionSignIn::create([
         'democratic_time_session_id' => $session->id,

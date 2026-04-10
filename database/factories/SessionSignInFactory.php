@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SessionSignIn>
  */
-class SessionSignInFactory extends Factory
+final class SessionSignInFactory extends Factory
 {
     /**
      * Define the model's default state.

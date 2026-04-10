@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\DemocraticTimeType;
 use Illuminate\Database\Seeder;
 
-class DemocraticTimeTypeSeeder extends Seeder
+final class DemocraticTimeTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.

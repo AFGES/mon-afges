@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\ApprovalStatus;
 use App\Models\Scopes\ApprovedScope;
 use App\Traits\HasApprovalStatus;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,8 +23,6 @@ final class Proxy extends Model
     use HasFactory;
     use HasUuids;
 
-    protected $table = 'proxies';
-
     public $fillable = [
         'delegator_seat_id',
         'proxy_holder_seat_id',
@@ -36,15 +35,7 @@ final class Proxy extends Model
         'rejection_reason',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'started_at' => 'datetime',
-            'ended_at' => 'datetime',
-            'approval_status' => ApprovalStatus::class,
-            'approved_at' => 'datetime',
-        ];
-    }
+    protected $table = 'proxies';
 
     /**
      * The seat whose holder is giving their proxy (cannot be present).
@@ -70,7 +61,7 @@ final class Proxy extends Model
     /**
      * Check if the proxy is active at a given time.
      */
-    public function isActiveAt(?\DateTimeInterface $time = null): bool
+    public function isActiveAt(?DateTimeInterface $time = null): bool
     {
         $time = $time ?? now();
 
@@ -111,5 +102,15 @@ final class Proxy extends Model
                 $delegate->user->notify(new \App\Notifications\ProxyApprovedNotification($this));
             }
         }
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'approval_status' => ApprovalStatus::class,
+            'approved_at' => 'datetime',
+        ];
     }
 }

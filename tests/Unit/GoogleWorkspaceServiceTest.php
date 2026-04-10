@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Services\GoogleWorkspaceService;
 use Illuminate\Support\Facades\Log;
 

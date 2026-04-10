@@ -21,13 +21,6 @@ final class Seat extends Model
         'seat_number',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'seat_number' => 'integer',
-        ];
-    }
-
     public function collegeOrganization(): BelongsTo
     {
         return $this->belongsTo(CollegeOrganization::class);
@@ -65,7 +58,7 @@ final class Seat extends Model
     /**
      * Check if this seat belongs to the same college as another seat.
      */
-    public function isSameCollegeAs(Seat $otherSeat): bool
+    public function isSameCollegeAs(self $otherSeat): bool
     {
         $thisCollegeId = $this->collegeOrganization?->college_id;
         $otherCollegeId = $otherSeat->collegeOrganization?->college_id;
@@ -118,5 +111,12 @@ final class Seat extends Model
             $college->name,
             $delegateNames ?: 'Vide'
         );
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'seat_number' => 'integer',
+        ];
     }
 }

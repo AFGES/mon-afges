@@ -48,18 +48,20 @@ describe('ProxiesRelationManager', function () {
         $session = DemocraticTimeSession::factory()->create();
 
         // Create seats from the same college (required by validation rule)
-        $college = \App\Models\College::factory()->create();
-        $organization = \App\Models\Organization::factory()->create();
-        $collegeOrganization = \App\Models\CollegeOrganization::factory()->create([
+        $college = App\Models\College::factory()->create();
+        $organization = App\Models\Organization::factory()->create();
+        $collegeOrganization = App\Models\CollegeOrganization::factory()->create([
             'college_id' => $college->id,
             'organization_id' => $organization->id,
         ]);
 
         $delegatorSeat = Seat::factory()->create([
             'college_organization_id' => $collegeOrganization->id,
+            'seat_number' => 1,
         ]);
         $proxyHolderSeat = Seat::factory()->create([
             'college_organization_id' => $collegeOrganization->id,
+            'seat_number' => 2,
         ]);
 
         $startedAt = now()->toDateTimeString();

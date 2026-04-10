@@ -95,7 +95,7 @@ final class Login extends BaseLogin
     /**
      * Add magic link toggle button after the form.
      */
-    public function content(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public function content(Schema $schema): Schema
     {
         return parent::content($schema)
             ->components([

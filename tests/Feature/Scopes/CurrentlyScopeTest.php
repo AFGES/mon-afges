@@ -74,7 +74,7 @@ it('can be bypassed with withoutGlobalScope', function () {
         'ended_at' => now()->subDays(5),
     ]);
 
-    $allDelegates = Delegate::withoutGlobalScope(\App\Models\Scopes\CurrentlyScope::class)->get();
+    $allDelegates = Delegate::withoutGlobalScope(App\Models\Scopes\CurrentlyScope::class)->get();
 
     expect($allDelegates)->toHaveCount(2);
 });

@@ -7,7 +7,7 @@ namespace App\Filament\Schemas\Components;
 use Closure;
 use Filament\Forms\Components\Field;
 
-class ApprovalField extends Field
+final class ApprovalField extends Field
 {
     protected string $view = 'filament.schemas.components.approval-field';
 

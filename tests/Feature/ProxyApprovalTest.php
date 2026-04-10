@@ -136,7 +136,7 @@ test('cannot reject an already rejected proxy', function () {
 test('notification is sent to approvers when proxy is created', function () {
     Notification::fake();
 
-    $permission = \Spatie\Permission\Models\Permission::create(['name' => 'Update:Proxy']);
+    $permission = Spatie\Permission\Models\Permission::create(['name' => 'Update:Proxy']);
     $approver = User::factory()->create();
     $approver->givePermissionTo($permission);
 

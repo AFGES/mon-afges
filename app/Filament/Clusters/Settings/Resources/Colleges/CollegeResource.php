@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Clusters\Settings\Resources\Colleges;
 
 use App\Filament\Clusters\Settings\Resources\Colleges\Pages\CreateCollege;
@@ -15,7 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
-class CollegeResource extends Resource
+final class CollegeResource extends Resource
 {
     protected static ?string $model = College::class;
 

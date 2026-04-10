@@ -17,9 +17,9 @@ use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
 final class ManageDelegates extends MyProfileComponent
 {
-    protected string $view = 'livewire.profile.manage-delegates';
-
     public array $data = [];
+
+    protected string $view = 'livewire.profile.manage-delegates';
 
     public static function getSort(): int
     {

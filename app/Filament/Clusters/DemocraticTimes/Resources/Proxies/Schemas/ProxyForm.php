@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Schemas;
 
 use App\Rules\ProxyDelegatesFromSameCollege;
@@ -8,7 +10,7 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
-class ProxyForm
+final class ProxyForm
 {
     public static function configure(Schema $schema): Schema
     {

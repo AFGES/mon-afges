@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Exception;
 use Google\Client as GoogleClient;
 use Google\Service\Directory;
 use Google\Service\Directory\Member;
 use Illuminate\Support\Facades\Log;
 
-class GoogleWorkspaceService
+final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
 {
     private ?Directory $service = null;
 
@@ -18,25 +19,6 @@ class GoogleWorkspaceService
         private readonly string $adminEmail,
         private readonly string $delegateGroup
     ) {}
-
-    /**
-     * Get or initialize the Google Directory service.
-     */
-    private function getService(): Directory
-    {
-        if ($this->service !== null) {
-            return $this->service;
-        }
-
-        $client = new GoogleClient;
-        $client->setAuthConfig(json_decode($this->serviceAccountJson, true));
-        $client->setSubject($this->adminEmail);
-        $client->addScope(Directory::ADMIN_DIRECTORY_GROUP_MEMBER);
-
-        $this->service = new Directory($client);
-
-        return $this->service;
-    }
 
     /**
      * Add a user to the delegate group.
@@ -74,7 +56,7 @@ class GoogleWorkspaceService
             ]);
 
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Unexpected error adding user to Google Workspace delegate group', [
                 'email' => $email,
                 'group' => $this->delegateGroup,
@@ -117,7 +99,7 @@ class GoogleWorkspaceService
             ]);
 
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Unexpected error removing user from Google Workspace delegate group', [
                 'email' => $email,
                 'group' => $this->delegateGroup,
@@ -149,7 +131,7 @@ class GoogleWorkspaceService
             ]);
 
             return false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Unexpected error checking Google Workspace delegate group membership', [
                 'email' => $email,
                 'group' => $this->delegateGroup,
@@ -158,5 +140,24 @@ class GoogleWorkspaceService
 
             return false;
         }
+    }
+
+    /**
+     * Get or initialize the Google Directory service.
+     */
+    private function getService(): Directory
+    {
+        if ($this->service !== null) {
+            return $this->service;
+        }
+
+        $client = new GoogleClient;
+        $client->setAuthConfig(json_decode($this->serviceAccountJson, true));
+        $client->setSubject($this->adminEmail);
+        $client->addScope(Directory::ADMIN_DIRECTORY_GROUP_MEMBER);
+
+        $this->service = new Directory($client);
+
+        return $this->service;
     }
 }

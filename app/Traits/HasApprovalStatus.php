@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasApprovalStatus
 {
+    public static function getNavigationBadge(): ?string
+    {
+        $count = self::withoutGlobalScopes()
+            ->pending()
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
     /**
      * Scope a query to only include pending records.
      */
@@ -113,15 +122,6 @@ trait HasApprovalStatus
         ]);
 
         return true;
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        $count = self::withoutGlobalScopes()
-            ->pending()
-            ->count();
-
-        return $count > 0 ? (string) $count : null;
     }
 
     public function initializeHasApprovalStatus(): void

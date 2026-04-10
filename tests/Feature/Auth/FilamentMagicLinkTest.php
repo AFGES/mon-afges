@@ -14,7 +14,7 @@ test('filament login page displays magic link toggle button', function () {
 });
 
 test('filament login page can toggle between password and magic link forms', function () {
-    $component = livewire(\App\Filament\Pages\Auth\Login::class);
+    $component = livewire(App\Filament\Pages\Auth\Login::class);
 
     // Initial state - showing magic link form
     expect($component->showMagicLinkForm)->toBeTrue();
@@ -33,7 +33,7 @@ test('filament login sends magic link when in magic link mode', function () {
         'email' => 'test@afges.org',
     ]);
 
-    livewire(\App\Filament\Pages\Auth\Login::class)
+    livewire(App\Filament\Pages\Auth\Login::class)
         ->set('showMagicLinkForm', true)
         ->set('data.email', 'test@afges.org')
         ->call('authenticate');
@@ -54,7 +54,7 @@ test('filament login authenticates normally when not in magic link mode', functi
         'password' => 'password',
     ]);
 
-    livewire(\App\Filament\Pages\Auth\Login::class)
+    livewire(App\Filament\Pages\Auth\Login::class)
         ->set('showMagicLinkForm', false)
         ->set('data.email', 'test@afges.org')
         ->set('data.password', 'password')

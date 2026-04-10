@@ -15,9 +15,9 @@ final class CollegeOrganization extends Pivot
     /** @use HasFactory<\Database\Factories\CollegeOrganizationFactory> */
     use HasFactory, HasUuids;
 
-    protected $table = 'college_organization';
-
     public $incrementing = false;
+
+    protected $table = 'college_organization';
 
     protected $keyType = 'string';
 
@@ -26,13 +26,6 @@ final class CollegeOrganization extends Pivot
         'organization_id',
         'delegates_per_seat',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'delegates_per_seat' => 'integer',
-        ];
-    }
 
     /**
      * Get the number of seats (count of seat records).
@@ -63,5 +56,12 @@ final class CollegeOrganization extends Pivot
     public function getTotalDelegatePositionsAttribute(): int
     {
         return $this->seats * $this->delegates_per_seat;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'delegates_per_seat' => 'integer',
+        ];
     }
 }

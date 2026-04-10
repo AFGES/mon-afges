@@ -9,13 +9,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 
-class BulkRejectAction extends Action
+final class BulkRejectAction extends Action
 {
-    public static function getDefaultName(): ?string
-    {
-        return 'bulkReject';
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -49,5 +44,10 @@ class BulkRejectAction extends Action
                     ->body(__('approval.notifications.bulk_rejected.body', ['count' => $count]))
                     ->send();
             });
+    }
+
+    public static function getDefaultName(): ?string
+    {
+        return 'bulkReject';
     }
 }

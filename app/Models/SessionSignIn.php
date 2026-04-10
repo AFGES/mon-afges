@@ -23,14 +23,6 @@ final class SessionSignIn extends Model
         'signed_out_at',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'signed_in_at' => 'datetime',
-            'signed_out_at' => 'datetime',
-        ];
-    }
-
     public function democraticTimeSession(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeSession::class);
@@ -86,5 +78,13 @@ final class SessionSignIn extends Model
     public function isProxySignIn(): bool
     {
         return $this->signed_in_by_seat_id !== null && $this->signed_in_by_seat_id !== $this->seat_id;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'signed_in_at' => 'datetime',
+            'signed_out_at' => 'datetime',
+        ];
     }
 }

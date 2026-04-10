@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\College;
 use App\Models\Organization;
 
@@ -19,7 +21,7 @@ test('organization can be created with college associations', function () {
 
     expect($organization->colleges)->toHaveCount(2);
 
-    $collegeOrg1 = \App\Models\CollegeOrganization::where('college_id', $college1->id)
+    $collegeOrg1 = App\Models\CollegeOrganization::where('college_id', $college1->id)
         ->where('organization_id', $organization->id)
         ->first();
 
@@ -40,7 +42,7 @@ test('organization respects college max seats per organization', function () {
         $college->id => ['delegates_per_seat' => 1, 'seats' => 3],
     ]);
 
-    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+    $collegeOrg = App\Models\CollegeOrganization::where('college_id', $college->id)
         ->where('organization_id', $organization->id)
         ->first();
 
@@ -61,7 +63,7 @@ test('organization respects college max delegates per seat', function () {
         $college->id => ['delegates_per_seat' => 2, 'seats' => 2],
     ]);
 
-    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+    $collegeOrg = App\Models\CollegeOrganization::where('college_id', $college->id)
         ->where('organization_id', $organization->id)
         ->first();
 
@@ -78,7 +80,7 @@ test('organization can update college associations', function () {
         $college->id => ['delegates_per_seat' => 1, 'seats' => 2],
     ]);
 
-    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+    $collegeOrg = App\Models\CollegeOrganization::where('college_id', $college->id)
         ->where('organization_id', $organization->id)
         ->first();
 
@@ -89,7 +91,7 @@ test('organization can update college associations', function () {
         $college->id => ['delegates_per_seat' => 2, 'seats' => 4],
     ]);
 
-    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+    $collegeOrg = App\Models\CollegeOrganization::where('college_id', $college->id)
         ->where('organization_id', $organization->id)
         ->first();
 

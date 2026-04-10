@@ -16,9 +16,9 @@ use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
 final class ManageVolunteers extends MyProfileComponent
 {
-    protected string $view = 'livewire.profile.manage-volunteers';
-
     public array $data = [];
+
+    protected string $view = 'livewire.profile.manage-volunteers';
 
     public static function getSort(): int
     {

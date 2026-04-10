@@ -153,8 +153,8 @@ it('rejectedBy scope filters records rejected by specific user', function () {
 });
 
 it('scopes can be combined with other query constraints', function () {
-    $org1 = \App\Models\Organization::factory()->create();
-    $org2 = \App\Models\Organization::factory()->create();
+    $org1 = App\Models\Organization::factory()->create();
+    $org2 = App\Models\Organization::factory()->create();
 
     $pending = Volunteer::factory()->create([
         'organization_id' => $org1->id,
@@ -265,7 +265,7 @@ it('scopes work with pagination', function () {
 });
 
 it('scopes work with aggregations', function () {
-    $org = \App\Models\Organization::factory()->create();
+    $org = App\Models\Organization::factory()->create();
 
     Volunteer::factory()->count(5)->approved()->create(['organization_id' => $org->id]);
     Volunteer::factory()->count(3)->create([
@@ -294,7 +294,7 @@ it('scopes work with soft deletes', function () {
     expect($resultsWithoutScopes)->toHaveCount(2);
 
     // With only ApprovedScope removed, soft deletes still work
-    $results = Volunteer::withoutGlobalScope(\App\Models\Scopes\ApprovedScope::class)
+    $results = Volunteer::withoutGlobalScope(App\Models\Scopes\ApprovedScope::class)
         ->approved()
         ->get();
 

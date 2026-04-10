@@ -260,7 +260,7 @@ describe('EditSessionSignIn', function () {
         $updated = $sessionSignIn->fresh();
 
         expect($updated->signed_out_at)
-            ->toBeInstanceOf(\Illuminate\Support\Carbon::class)
+            ->toBeInstanceOf(Illuminate\Support\Carbon::class)
             ->format('Y-m-d H:i')->toBe($newSignedOutAt->format('Y-m-d H:i'));
     });
 

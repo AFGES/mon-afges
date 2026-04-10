@@ -28,19 +28,6 @@ final class DemocraticTimeSession extends Model
         'include_proxies_in_quorum',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'sign_in_opens_at' => 'datetime',
-            'sign_in_closes_at' => 'datetime',
-            'auto_open_sign_in' => 'boolean',
-            'minutes_before_start' => 'integer',
-            'calculate_quorum_per_college' => 'boolean',
-            'quorum_percentage' => 'decimal:2',
-            'include_proxies_in_quorum' => 'boolean',
-        ];
-    }
-
     public function democraticTimeType(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeType::class);
@@ -297,5 +284,18 @@ final class DemocraticTimeSession extends Model
         ]);
 
         return true;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'sign_in_opens_at' => 'datetime',
+            'sign_in_closes_at' => 'datetime',
+            'auto_open_sign_in' => 'boolean',
+            'minutes_before_start' => 'integer',
+            'calculate_quorum_per_college' => 'boolean',
+            'quorum_percentage' => 'decimal:2',
+            'include_proxies_in_quorum' => 'boolean',
+        ];
     }
 }

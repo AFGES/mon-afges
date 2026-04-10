@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\DemocraticTimeSession;
 use App\Models\DemocraticTimeType;
 
@@ -29,8 +31,8 @@ test('democratic time session belongs to democratic time type', function () {
 test('democratic time session dates are cast to datetime', function () {
     $session = DemocraticTimeSession::factory()->create();
 
-    expect($session->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
-        ->and($session->ended_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+    expect($session->started_at)->toBeInstanceOf(Illuminate\Support\Carbon::class)
+        ->and($session->ended_at)->toBeInstanceOf(Illuminate\Support\Carbon::class);
 });
 
 test('democratic time session can be updated', function () {

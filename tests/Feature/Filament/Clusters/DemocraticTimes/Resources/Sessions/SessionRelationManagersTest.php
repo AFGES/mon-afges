@@ -57,11 +57,9 @@ describe('ProxiesRelationManager', function () {
 
         $delegatorSeat = Seat::factory()->create([
             'college_organization_id' => $collegeOrganization->id,
-            'seat_number' => 1,
         ]);
         $proxyHolderSeat = Seat::factory()->create([
             'college_organization_id' => $collegeOrganization->id,
-            'seat_number' => 2,
         ]);
 
         $startedAt = now()->toDateTimeString();

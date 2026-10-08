@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\CollegeOrganization;
+use App\Models\Seat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Seat>
+ * @extends Factory<Seat>
  */
 final class SeatFactory extends Factory
 {
@@ -19,8 +21,8 @@ final class SeatFactory extends Factory
     public function definition(): array
     {
         return [
-            'college_organization_id' => \App\Models\CollegeOrganization::factory(),
-            'seat_number' => fake()->numberBetween(1, 10),
+            'college_organization_id' => CollegeOrganization::factory(),
+            'seat_number' => fake()->unique()->numberBetween(1, 10),
         ];
     }
 }

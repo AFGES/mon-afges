@@ -1,17 +1,27 @@
 {
     "agents": [
-        "opencode",
-        "copilot"
+        "claude_code",
+        "zed"
     ],
+    "cloud": false,
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
+    "nightwatch": false,
     "packages": [
-        "filament/filament"
+        "filament/filament",
+        "filament/blueprint"
     ],
     "sail": false,
     "skills": [
-        "pest-testing",
-        "tailwindcss-development"
+        "infer-conventions",
+        "laravel-best-practices",
+        "testing-best-practices",
+        "socialite-development",
+        "telescope-debugging",
+        "tailwindcss-development",
+        "filament-development",
+        "filament-security-audit",
+        "planning-filament",
+        "reviewing-filament-plans"
     ]
 }

@@ -2,7 +2,8 @@
 {
 	"name": "Mon AFGES",
 	"dockerComposeFile": [
-		"../compose.yml"
+		"../compose.yml",
+		"compose.podman.yml"
 	],
 	"service": "laravel.test",
 	"workspaceFolder": "/var/www/html",

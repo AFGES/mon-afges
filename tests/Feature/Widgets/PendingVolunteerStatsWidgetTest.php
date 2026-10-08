@@ -12,10 +12,12 @@ use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     Permission::firstOrCreate(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
+    Permission::firstOrCreate(['name' => 'View:PendingVolunteerStats', 'guard_name' => 'web']);
 });
 
 test('pending volunteer stats widget displays correct count', function () {
     $admin = User::factory()->create();
+    $admin->givePermissionTo('View:PendingVolunteerStats');
 
     // Create some pending volunteers
     Volunteer::withoutGlobalScopes()->create(
@@ -40,6 +42,7 @@ test('pending volunteer stats widget displays correct count', function () {
 
 test('pending volunteer stats widget shows zero when no pending volunteers', function () {
     $admin = User::factory()->create();
+    $admin->givePermissionTo('View:PendingVolunteerStats');
 
     // Create only approved volunteers
     Volunteer::factory()->approved()->create();
@@ -54,6 +57,7 @@ test('pending volunteer stats widget shows zero when no pending volunteers', fun
 
 test('widget counts only pending volunteers not approved ones', function () {
     $admin = User::factory()->create();
+    $admin->givePermissionTo('View:PendingVolunteerStats');
 
     // Create 2 pending volunteers
     Volunteer::withoutGlobalScopes()->create(

@@ -26,9 +26,7 @@ final class SessionSignInsTable
 
                 TextColumn::make('seat.label')
                     ->label(__('emargement.fields.seat'))
-                    ->getStateUsing(fn ($record) => $record->seat->label())
-                    ->searchable()
-                    ->sortable(),
+                    ->getStateUsing(fn ($record) => $record->seat->label()),
 
                 TextColumn::make('delegate.email')
                     ->label(__('emargement.fields.delegate'))

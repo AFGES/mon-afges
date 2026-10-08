@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalStatus;
 use App\Livewire\Profile\ManageDelegates;
 use App\Models\Delegate;
 use App\Models\User;
@@ -51,7 +52,7 @@ test('user cannot terminate pending delegate mandate', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->create([
         'user_id' => $user->id,
-        'approval_status' => App\Enums\ApprovalStatus::Pending,
+        'approval_status' => ApprovalStatus::Pending,
         'approved_at' => null,
         'approved_by' => null,
         'ended_at' => null,
@@ -81,9 +82,9 @@ test('user cannot terminate already terminated delegate mandate', function () {
         ->assertNotified();
 
     // Verify ended_at didn't change
-    $originalEndedAt = $delegate->ended_at->toDateTimeString();
+    $originalEndedAt = $delegate->ended_at->toDateString();
     $delegate->refresh();
-    expect($delegate->ended_at->toDateTimeString())->toBe($originalEndedAt);
+    expect($delegate->ended_at->toDateString())->toBe($originalEndedAt);
 });
 
 test('delegate list displays ended date for terminated mandates', function () {

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionProxies;
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionSignIns;
+use App\Models\College;
+use App\Models\CollegeOrganization;
 use App\Models\Delegate;
 use App\Models\DemocraticTimeSession;
+use App\Models\Organization;
 use App\Models\Proxy;
 use App\Models\Seat;
 use App\Models\SessionSignIn;
@@ -48,9 +51,9 @@ describe('ProxiesRelationManager', function () {
         $session = DemocraticTimeSession::factory()->create();
 
         // Create seats from the same college (required by validation rule)
-        $college = App\Models\College::factory()->create();
-        $organization = App\Models\Organization::factory()->create();
-        $collegeOrganization = App\Models\CollegeOrganization::factory()->create([
+        $college = College::factory()->create(['require_same_college_for_proxy' => true]);
+        $organization = Organization::factory()->create();
+        $collegeOrganization = CollegeOrganization::factory()->create([
             'college_id' => $college->id,
             'organization_id' => $organization->id,
         ]);

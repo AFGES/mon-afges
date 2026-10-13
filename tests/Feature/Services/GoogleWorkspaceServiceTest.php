@@ -3,68 +3,202 @@
 declare(strict_types=1);
 
 use App\Services\GoogleWorkspaceService;
+use Google\Client;
+use Google\Service\Directory;
+use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Log;
 
-test('google workspace service can be instantiated', function () {
-    $service = new GoogleWorkspaceService(
+/**
+ * @param  array<int, Response|Throwable>  $queue
+ * @param  array<int, array<string, mixed>>  $history
+ */
+function googleWorkspaceServiceReplying(array $queue, array &$history = []): GoogleWorkspaceService
+{
+    $stack = HandlerStack::create(new MockHandler($queue));
+    $stack->push(Middleware::history($history));
+
+    $client = new Client;
+    $client->setHttpClient(new GuzzleClient(['handler' => $stack]));
+
+    return new GoogleWorkspaceService(
         '{"type":"service_account"}',
         'admin@afges.org',
-        'test-mon@afges.org'
+        'test-mon@afges.org',
+        new Directory($client),
     );
+}
 
-    expect($service)->toBeInstanceOf(GoogleWorkspaceService::class);
+function googleErrorResponse(int $status, string $message): Response
+{
+    return new Response($status, ['Content-Type' => 'application/json'], json_encode([
+        'error' => ['code' => $status, 'message' => $message],
+    ]));
+}
+
+function googleMemberResponse(): Response
+{
+    return new Response(200, ['Content-Type' => 'application/json'], json_encode([
+        'email' => 'delegate@afges.org',
+        'role' => 'MEMBER',
+    ]));
+}
+
+beforeEach(function () {
+    Log::spy();
 });
 
-test('google workspace service handles api errors gracefully when adding to group', function () {
-    Log::shouldReceive('error')->once();
+describe('addToGroup', function () {
+    it('inserts the email as a group member', function () {
+        $history = [];
+        $service = googleWorkspaceServiceReplying([googleMemberResponse()], $history);
 
-    $serviceAccountJson = json_encode([
-        'type' => 'service_account',
-        'project_id' => 'test-project',
-        'private_key_id' => 'test-key-id',
-        'private_key' => '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7W\n-----END PRIVATE KEY-----\n',
-        'client_email' => 'test@test-project.iam.gserviceaccount.com',
-        'client_id' => '123456789',
-        'auth_uri' => 'https://accounts.google.com/o/oauth2/auth',
-        'token_uri' => 'https://oauth2.googleapis.com/token',
-        'auth_provider_x509_cert_url' => 'https://www.googleapis.com/oauth2/v1/certs',
-    ]);
+        $result = $service->addToGroup('delegate@afges.org');
 
-    $service = new GoogleWorkspaceService(
-        $serviceAccountJson,
-        'admin@afges.org',
-        'test-mon@afges.org'
-    );
+        /** @var Request $request */
+        $request = $history[0]['request'];
+        expect($result)->toBeTrue()
+            ->and($request->getMethod())->toBe('POST')
+            ->and($request->getUri()->getPath())->toEndWith('/groups/test-mon%40afges.org/members')
+            ->and(json_decode((string) $request->getBody(), true))->toBe([
+                'email' => 'delegate@afges.org',
+                'role' => 'MEMBER',
+            ]);
+    });
 
-    // This will fail because we don't have real credentials, but should handle gracefully
-    $result = $service->addToGroup('test@example.com');
+    it('treats a 409 conflict as success because the user is already a member', function () {
+        $service = googleWorkspaceServiceReplying([googleErrorResponse(409, 'Member already exists.')]);
 
-    expect($result)->toBeFalse();
+        $result = $service->addToGroup('delegate@afges.org');
+
+        expect($result)->toBeTrue();
+        Log::shouldNotHaveReceived('error');
+    });
+
+    it('returns false and logs an error when the API rejects the request', function () {
+        $service = googleWorkspaceServiceReplying([googleErrorResponse(500, 'Backend Error')]);
+
+        $result = $service->addToGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => $message === 'Failed to add user to Google Workspace delegate group'
+                && $context['email'] === 'delegate@afges.org'
+                && $context['group'] === 'test-mon@afges.org');
+    });
+
+    it('returns false and logs an error when the connection fails', function () {
+        $service = googleWorkspaceServiceReplying([
+            new ConnectException('Connection refused', new Request('POST', 'https://admin.googleapis.com')),
+        ]);
+
+        $result = $service->addToGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message): bool => $message === 'Unexpected error adding user to Google Workspace delegate group');
+    });
 });
 
-test('google workspace service handles api errors gracefully when removing from group', function () {
-    Log::shouldReceive('error')->once();
+describe('removeFromGroup', function () {
+    it('deletes the group member', function () {
+        $history = [];
+        $service = googleWorkspaceServiceReplying([new Response(204)], $history);
 
-    $serviceAccountJson = json_encode([
-        'type' => 'service_account',
-        'project_id' => 'test-project',
-        'private_key_id' => 'test-key-id',
-        'private_key' => '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7W\n-----END PRIVATE KEY-----\n',
-        'client_email' => 'test@test-project.iam.gserviceaccount.com',
-        'client_id' => '123456789',
-        'auth_uri' => 'https://accounts.google.com/o/oauth2/auth',
-        'token_uri' => 'https://oauth2.googleapis.com/token',
-        'auth_provider_x509_cert_url' => 'https://www.googleapis.com/oauth2/v1/certs',
-    ]);
+        $result = $service->removeFromGroup('delegate@afges.org');
 
-    $service = new GoogleWorkspaceService(
-        $serviceAccountJson,
-        'admin@afges.org',
-        'test-mon@afges.org'
-    );
+        /** @var Request $request */
+        $request = $history[0]['request'];
+        expect($result)->toBeTrue()
+            ->and($request->getMethod())->toBe('DELETE')
+            ->and($request->getUri()->getPath())->toEndWith('/groups/test-mon%40afges.org/members/delegate%40afges.org');
+    });
 
-    // This will fail because we don't have real credentials, but should handle gracefully
-    $result = $service->removeFromGroup('test@example.com');
+    it('treats a 404 as success because the user is not a member', function () {
+        $service = googleWorkspaceServiceReplying([googleErrorResponse(404, 'Resource Not Found: memberKey')]);
 
-    expect($result)->toBeFalse();
+        $result = $service->removeFromGroup('delegate@afges.org');
+
+        expect($result)->toBeTrue();
+        Log::shouldNotHaveReceived('error');
+    });
+
+    it('returns false and logs an error when the API rejects the request', function () {
+        $service = googleWorkspaceServiceReplying([googleErrorResponse(403, 'Not Authorized')]);
+
+        $result = $service->removeFromGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message): bool => $message === 'Failed to remove user from Google Workspace delegate group');
+    });
+
+    it('returns false and logs an error when the connection fails', function () {
+        $service = googleWorkspaceServiceReplying([
+            new ConnectException('Connection refused', new Request('DELETE', 'https://admin.googleapis.com')),
+        ]);
+
+        $result = $service->removeFromGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message): bool => $message === 'Unexpected error removing user from Google Workspace delegate group');
+    });
+});
+
+describe('isInGroup', function () {
+    it('returns true when the member exists', function () {
+        $history = [];
+        $service = googleWorkspaceServiceReplying([googleMemberResponse()], $history);
+
+        $result = $service->isInGroup('delegate@afges.org');
+
+        /** @var Request $request */
+        $request = $history[0]['request'];
+        expect($result)->toBeTrue()
+            ->and($request->getMethod())->toBe('GET')
+            ->and($request->getUri()->getPath())->toEndWith('/groups/test-mon%40afges.org/members/delegate%40afges.org');
+    });
+
+    it('returns false without logging an error when the member is not found', function () {
+        $service = googleWorkspaceServiceReplying([googleErrorResponse(404, 'Resource Not Found: memberKey')]);
+
+        $result = $service->isInGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldNotHaveReceived('error');
+    });
+
+    it('returns false and logs an error when the API fails', function () {
+        $service = googleWorkspaceServiceReplying([googleErrorResponse(500, 'Backend Error')]);
+
+        $result = $service->isInGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message): bool => $message === 'Failed to check Google Workspace delegate group membership');
+    });
+
+    it('returns false and logs an error when the connection fails', function () {
+        $service = googleWorkspaceServiceReplying([
+            new ConnectException('Connection refused', new Request('GET', 'https://admin.googleapis.com')),
+        ]);
+
+        $result = $service->isInGroup('delegate@afges.org');
+
+        expect($result)->toBeFalse();
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message): bool => $message === 'Unexpected error checking Google Workspace delegate group membership');
+    });
 });

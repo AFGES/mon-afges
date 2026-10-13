@@ -13,12 +13,11 @@ use Illuminate\Support\Facades\Log;
 
 final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
 {
-    private ?Directory $service = null;
-
     public function __construct(
         private readonly string $serviceAccountJson,
         private readonly string $adminEmail,
-        private readonly string $delegateGroup
+        private readonly string $delegateGroup,
+        private ?Directory $service = null
     ) {}
 
     /**

@@ -7,7 +7,6 @@ namespace App\Observers;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Notifications\DelegateApprovalRequestedNotification;
-use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
@@ -15,7 +14,7 @@ use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 final class DelegateObserver
 {
     public function __construct(
-        private ?DelegateGoogleWorkspaceSyncServiceInterface $syncService = null
+        private DelegateGoogleWorkspaceSyncServiceInterface $syncService
     ) {}
 
     public function created(Delegate $delegate): void
@@ -48,20 +47,6 @@ final class DelegateObserver
     }
 
     /**
-     * Get or create the sync service instance.
-     */
-    private function getSyncService(): DelegateGoogleWorkspaceSyncServiceInterface
-    {
-        if ($this->syncService !== null) {
-            return $this->syncService;
-        }
-
-        $this->syncService = new DelegateGoogleWorkspaceSyncService;
-
-        return $this->syncService;
-    }
-
-    /**
      * Notify users with approval permissions about the new delegate application.
      */
     private function notifyApprovers(Delegate $delegate): void
@@ -84,7 +69,7 @@ final class DelegateObserver
      */
     private function addToGroup(Delegate $delegate): void
     {
-        $this->getSyncService()->addDelegate($delegate);
+        $this->syncService->addDelegate($delegate);
     }
 
     /**
@@ -92,6 +77,6 @@ final class DelegateObserver
      */
     private function removeFromGroup(Delegate $delegate): void
     {
-        $this->getSyncService()->removeDelegate($delegate);
+        $this->syncService->removeDelegate($delegate);
     }
 }

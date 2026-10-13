@@ -18,6 +18,11 @@ use App\Observers\DemocraticTimeSessionObserver;
 use App\Observers\DemocraticTimeTypeObserver;
 use App\Observers\ProxyObserver;
 use App\Observers\VolunteerObserver;
+use App\Services\DelegateGoogleWorkspaceSyncService;
+use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
+use App\Services\GoogleWorkspaceService;
+use App\Services\GoogleWorkspaceServiceInterface;
+use App\Services\UnconfiguredGoogleWorkspaceService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Event;
@@ -33,6 +38,19 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->bind(GoogleWorkspaceServiceInterface::class, function (): GoogleWorkspaceServiceInterface {
+            $serviceAccountJson = config('services.google.workspace.service_account_json');
+            $adminEmail = config('services.google.workspace.admin_email');
+            $delegateGroup = config('services.google.workspace.delegate_group');
+
+            if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
+                return new UnconfiguredGoogleWorkspaceService;
+            }
+
+            return new GoogleWorkspaceService($serviceAccountJson, $adminEmail, $delegateGroup);
+        });
+        $this->app->bind(DelegateGoogleWorkspaceSyncServiceInterface::class, DelegateGoogleWorkspaceSyncService::class);
+
         if ($this->app->environment('local') && class_exists(LaravelTelescopeServiceProvider::class)) {
             $this->app->register(LaravelTelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);

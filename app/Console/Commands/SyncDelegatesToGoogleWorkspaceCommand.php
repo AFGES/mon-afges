@@ -25,7 +25,7 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
      */
     protected $description = 'Sync delegates to Google Workspace group, removing users who are no longer delegates';
 
-    public function handle(): int
+    public function handle(DelegateGoogleWorkspaceSyncService $syncService): int
     {
         $serviceAccountJson = config('services.google.workspace.service_account_json');
         $adminEmail = config('services.google.workspace.admin_email');
@@ -42,11 +42,6 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
         if ($isDryRun) {
             $this->info('Running in dry-run mode - no changes will be made');
         }
-
-        // Use bound mock if available, otherwise create new service
-        $syncService = app()->bound(DelegateGoogleWorkspaceSyncService::class)
-            ? app(DelegateGoogleWorkspaceSyncService::class)
-            : new DelegateGoogleWorkspaceSyncService;
 
         $activeDelegateEmails = $syncService->getActiveDelegateEmails();
 

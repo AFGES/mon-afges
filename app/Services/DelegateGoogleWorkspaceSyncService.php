@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspaceSyncServiceInterface
 {
     public function __construct(
-        private ?GoogleWorkspaceServiceInterface $googleWorkspaceService = null
+        private GoogleWorkspaceServiceInterface $googleWorkspaceService
     ) {}
 
     /**
@@ -51,12 +51,6 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function addDelegate(Delegate $delegate): bool
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return false;
-        }
-
         if (! $this->shouldSync($delegate)) {
             Log::warning('Cannot sync delegate to Google Workspace: requirements not met', [
                 'delegate_id' => $delegate->id,
@@ -79,7 +73,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
             return true; // Return true as this isn't really a failure
         }
 
-        return $service->addToGroup($delegate->email);
+        return $this->googleWorkspaceService->addToGroup($delegate->email);
     }
 
     /**
@@ -87,12 +81,6 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function removeDelegate(Delegate $delegate): bool
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return false;
-        }
-
         if (! $delegate->email) {
             Log::warning('Cannot remove delegate from Google Workspace: email missing', [
                 'delegate_id' => $delegate->id,
@@ -111,7 +99,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
             return true; // Return true as this isn't really a failure
         }
 
-        return $service->removeFromGroup($delegate->email);
+        return $this->googleWorkspaceService->removeFromGroup($delegate->email);
     }
 
     /**
@@ -132,13 +120,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function isInGroup(string $email): bool
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return false;
-        }
-
-        return $service->isInGroup($email);
+        return $this->googleWorkspaceService->isInGroup($email);
     }
 
     /**
@@ -146,13 +128,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function addToGroup(string $email): bool
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return false;
-        }
-
-        return $service->addToGroup($email);
+        return $this->googleWorkspaceService->addToGroup($email);
     }
 
     /**
@@ -160,13 +136,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function removeFromGroup(string $email): bool
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return false;
-        }
-
-        return $service->removeFromGroup($email);
+        return $this->googleWorkspaceService->removeFromGroup($email);
     }
 
     /**
@@ -183,18 +153,6 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function syncAll(bool $dryRun = false): array
     {
-        $service = $this->getGoogleWorkspaceService();
-
-        if ($service === null) {
-            return [
-                'already_in_group' => 0,
-                'added' => 0,
-                'removed' => 0,
-                'failed_to_add' => 0,
-                'failed_to_remove' => 0,
-            ];
-        }
-
         $activeDelegateEmails = $this->getActiveDelegateEmails();
 
         $stats = [
@@ -207,7 +165,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
 
         // Ensure active delegates are in the group
         foreach ($activeDelegateEmails as $email) {
-            if ($service->isInGroup($email)) {
+            if ($this->googleWorkspaceService->isInGroup($email)) {
                 $stats['already_in_group']++;
 
                 continue;
@@ -219,7 +177,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
                 continue;
             }
 
-            if ($service->addToGroup($email)) {
+            if ($this->googleWorkspaceService->addToGroup($email)) {
                 $stats['added']++;
 
                 continue;
@@ -236,7 +194,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
                 continue;
             }
 
-            if (! $service->isInGroup($email)) {
+            if (! $this->googleWorkspaceService->isInGroup($email)) {
                 continue;
             }
 
@@ -246,7 +204,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
                 continue;
             }
 
-            if ($service->removeFromGroup($email)) {
+            if ($this->googleWorkspaceService->removeFromGroup($email)) {
                 $stats['removed']++;
 
                 continue;
@@ -256,34 +214,5 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         }
 
         return $stats;
-    }
-
-    /**
-     * Get or create the Google Workspace service instance.
-     */
-    private function getGoogleWorkspaceService(): ?GoogleWorkspaceServiceInterface
-    {
-        if ($this->googleWorkspaceService !== null) {
-            return $this->googleWorkspaceService;
-        }
-
-        $serviceAccountJson = config('services.google.workspace.service_account_json');
-        $adminEmail = config('services.google.workspace.admin_email');
-        $delegateGroup = config('services.google.workspace.delegate_group');
-
-        // If any required config is missing, disable sync
-        if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
-            Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
-
-            return null;
-        }
-
-        $this->googleWorkspaceService = new GoogleWorkspaceService(
-            $serviceAccountJson,
-            $adminEmail,
-            $delegateGroup
-        );
-
-        return $this->googleWorkspaceService;
     }
 }

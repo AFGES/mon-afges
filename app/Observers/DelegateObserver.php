@@ -6,7 +6,7 @@ namespace App\Observers;
 
 use App\Models\Delegate;
 use App\Models\User;
-use App\Notifications\DelegateApprovalRequested;
+use App\Notifications\DelegateApprovalRequestedNotification;
 use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use Illuminate\Support\Facades\Notification;
@@ -73,7 +73,7 @@ final class DelegateObserver
                 return;
             }
 
-            Notification::send($approvers, new DelegateApprovalRequested($delegate));
+            Notification::send($approvers, new DelegateApprovalRequestedNotification($delegate));
         } catch (PermissionDoesNotExist) {
             // Permission doesn't exist yet, skip notification
         }

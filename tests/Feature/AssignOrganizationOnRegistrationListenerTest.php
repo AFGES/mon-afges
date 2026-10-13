@@ -6,7 +6,7 @@ use App\Enums\ApprovalStatus;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
-use App\Notifications\VolunteerApprovalRequested;
+use App\Notifications\VolunteerApprovalRequestedNotification;
 use Filament\Auth\Events\Registered;
 use Illuminate\Support\Facades\Notification;
 
@@ -48,7 +48,7 @@ it('does not notify approvers', function () {
 
     registerUser('jane@afges.org');
 
-    Notification::assertNotSentTo(User::all(), VolunteerApprovalRequested::class);
+    Notification::assertNotSentTo(User::all(), VolunteerApprovalRequestedNotification::class);
 });
 
 it('creates nothing when no organization matches', function () {

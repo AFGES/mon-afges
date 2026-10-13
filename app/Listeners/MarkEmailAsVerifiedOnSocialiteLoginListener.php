@@ -10,7 +10,7 @@ use DutchCodingCompany\FilamentSocialite\Events\Registered;
 use DutchCodingCompany\FilamentSocialite\Events\SocialiteUserConnected;
 use Illuminate\Contracts\Auth\Authenticatable;
 
-final class MarkEmailAsVerifiedOnSocialiteLogin
+final class MarkEmailAsVerifiedOnSocialiteLoginListener
 {
     public function handleLogin(Login $event): void
     {

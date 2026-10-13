@@ -6,7 +6,7 @@ namespace App\Observers;
 
 use App\Models\User;
 use App\Models\Volunteer;
-use App\Notifications\VolunteerApprovalRequested;
+use App\Notifications\VolunteerApprovalRequestedNotification;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
@@ -29,7 +29,7 @@ final class VolunteerObserver
                 return;
             }
 
-            Notification::send($approvers, new VolunteerApprovalRequested($volunteer));
+            Notification::send($approvers, new VolunteerApprovalRequestedNotification($volunteer));
         } catch (PermissionDoesNotExist) {
             // Permission doesn't exist yet, skip notification
         }

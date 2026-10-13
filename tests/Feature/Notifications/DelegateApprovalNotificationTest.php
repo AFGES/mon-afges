@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
 use App\Models\User;
-use App\Notifications\DelegateApprovalRequested;
+use App\Notifications\DelegateApprovalRequestedNotification;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -24,7 +24,7 @@ test('notification is sent to approvers when delegate is created', function () {
 
     Notification::assertSentTo(
         [$approver],
-        DelegateApprovalRequested::class,
+        DelegateApprovalRequestedNotification::class,
         function ($notification, $channels) use ($delegate) {
             return $notification->delegate->id === $delegate->id;
         }
@@ -46,7 +46,7 @@ test('notification is sent to multiple approvers', function () {
 
     $delegate = Delegate::factory()->create();
 
-    Notification::assertSentTo([$approver1, $approver2], DelegateApprovalRequested::class);
+    Notification::assertSentTo([$approver1, $approver2], DelegateApprovalRequestedNotification::class);
 });
 
 test('notification email contains correct delegate information', function () {
@@ -57,7 +57,7 @@ test('notification email contains correct delegate information', function () {
 
     Notification::assertSentTo(
         [$approver],
-        DelegateApprovalRequested::class,
+        DelegateApprovalRequestedNotification::class,
         function ($notification) use ($delegate) {
             $mailMessage = $notification->toMail($delegate->user);
 
@@ -73,7 +73,7 @@ test('notification is queued for background processing', function () {
 
     $delegate = Delegate::factory()->create();
 
-    Notification::assertSentTo($approver, DelegateApprovalRequested::class);
+    Notification::assertSentTo($approver, DelegateApprovalRequestedNotification::class);
 });
 
 test('notification includes action link to approve delegate', function () {
@@ -84,7 +84,7 @@ test('notification includes action link to approve delegate', function () {
 
     Notification::assertSentTo(
         [$approver],
-        DelegateApprovalRequested::class,
+        DelegateApprovalRequestedNotification::class,
         function ($notification) use ($delegate) {
             $mailMessage = $notification->toMail($delegate->user);
 
@@ -99,7 +99,7 @@ test('notification includes action link to approve delegate', function () {
 test('notification details link points to the delegate edit page', function () {
     $delegate = Delegate::factory()->create();
 
-    $mailMessage = (new DelegateApprovalRequested($delegate))->toMail($delegate->user);
+    $mailMessage = (new DelegateApprovalRequestedNotification($delegate))->toMail($delegate->user);
 
     $expectedUrl = DelegateResource::getUrl('edit', ['record' => $delegate]);
 

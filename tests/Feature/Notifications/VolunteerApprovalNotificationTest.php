@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Filament\Resources\Volunteers\VolunteerResource;
 use App\Models\User;
 use App\Models\Volunteer;
-use App\Notifications\VolunteerApprovalRequested;
+use App\Notifications\VolunteerApprovalRequestedNotification;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -24,7 +24,7 @@ test('notification is sent to approvers when volunteer is created', function () 
 
     Notification::assertSentTo(
         [$approver],
-        VolunteerApprovalRequested::class,
+        VolunteerApprovalRequestedNotification::class,
         function ($notification, $channels) use ($volunteer) {
             return $notification->volunteer->id === $volunteer->id;
         }
@@ -46,7 +46,7 @@ test('notification is sent to multiple approvers', function () {
 
     $volunteer = Volunteer::factory()->create();
 
-    Notification::assertSentTo([$approver1, $approver2], VolunteerApprovalRequested::class);
+    Notification::assertSentTo([$approver1, $approver2], VolunteerApprovalRequestedNotification::class);
 });
 
 test('notification email contains correct volunteer information', function () {
@@ -57,7 +57,7 @@ test('notification email contains correct volunteer information', function () {
 
     Notification::assertSentTo(
         [$approver],
-        VolunteerApprovalRequested::class,
+        VolunteerApprovalRequestedNotification::class,
         function ($notification) use ($volunteer) {
             $mailMessage = $notification->toMail($volunteer->user);
 
@@ -74,7 +74,7 @@ test('notification is queued for background processing', function () {
 
     $volunteer = Volunteer::factory()->create();
 
-    Notification::assertSentTo($approver, VolunteerApprovalRequested::class);
+    Notification::assertSentTo($approver, VolunteerApprovalRequestedNotification::class);
 });
 
 test('notification includes action link to approve volunteer', function () {
@@ -85,7 +85,7 @@ test('notification includes action link to approve volunteer', function () {
 
     Notification::assertSentTo(
         [$approver],
-        VolunteerApprovalRequested::class,
+        VolunteerApprovalRequestedNotification::class,
         function ($notification) use ($volunteer) {
             $mailMessage = $notification->toMail($volunteer->user);
 
@@ -100,7 +100,7 @@ test('notification includes action link to approve volunteer', function () {
 test('notification details link points to the volunteer edit page', function () {
     $volunteer = Volunteer::factory()->create();
 
-    $mailMessage = (new VolunteerApprovalRequested($volunteer))->toMail($volunteer->user);
+    $mailMessage = (new VolunteerApprovalRequestedNotification($volunteer))->toMail($volunteer->user);
 
     expect(collect($mailMessage->outroLines)->implode(' '))
         ->toContain(VolunteerResource::getUrl('edit', ['record' => $volunteer]));

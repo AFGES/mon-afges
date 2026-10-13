@@ -33,8 +33,5 @@ arch()->preset()->security();
 arch()->preset()->laravel()
     ->ignoring('App\Providers\Filament\RootPanelProvider')
     ->ignoring('App\Providers\AppServiceProvider')
-    ->ignoring('App\Http\Controllers\DelegateApprovalController')
-    ->ignoring('App\Http\Controllers\VolunteerApprovalController')
-    ->ignoring('App\Http\Controllers\Auth\MagicLinkController')
-    ->ignoring('App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin');
+    ->ignoring('App\Listeners\MarkEmailAsVerifiedOnSocialiteLoginListener');
 // arch()->preset()->strict();

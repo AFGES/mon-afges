@@ -11,7 +11,7 @@ use App\Models\Volunteer;
 use Filament\Auth\Events\Registered;
 use Illuminate\Support\Str;
 
-final class AssignsOrganizationRegistrationListener
+final class AssignOrganizationOnRegistrationListener
 {
     /**
      * Link a newly registered user to the organization owning their email domain.

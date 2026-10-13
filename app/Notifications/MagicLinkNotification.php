@@ -32,7 +32,7 @@ final class MagicLinkNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $url = URL::temporarySignedRoute(
-            'magic-link.verify',
+            'magicLink.verify',
             now()->addMinutes($this->expiresInMinutes),
             [
                 'email' => $notifiable->email,

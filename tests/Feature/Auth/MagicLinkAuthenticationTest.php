@@ -15,7 +15,7 @@ test('user can request a magic link', function () {
         'email' => 'test@afges.org',
     ]);
 
-    $response = $this->post(route('magic-link.request'), [
+    $response = $this->post(route('magicLink.request'), [
         'email' => 'test@afges.org',
     ]);
 
@@ -34,7 +34,7 @@ test('user can request a magic link', function () {
 test('requesting magic link for non-existent user returns success without sending', function () {
     Notification::fake();
 
-    $response = $this->post(route('magic-link.request'), [
+    $response = $this->post(route('magicLink.request'), [
         'email' => 'nonexistent@afges.org',
     ]);
 
@@ -56,7 +56,7 @@ test('user can authenticate with valid magic link token', function () {
     ]);
 
     $url = URL::temporarySignedRoute(
-        'magic-link.verify',
+        'magicLink.verify',
         now()->addMinutes(15),
         [
             'email' => $user->email,
@@ -86,7 +86,7 @@ test('user cannot authenticate with invalid token', function () {
     ]);
 
     $url = URL::temporarySignedRoute(
-        'magic-link.verify',
+        'magicLink.verify',
         now()->addMinutes(15),
         [
             'email' => $user->email,
@@ -112,7 +112,7 @@ test('user cannot authenticate with expired token', function () {
     ]);
 
     $url = URL::temporarySignedRoute(
-        'magic-link.verify',
+        'magicLink.verify',
         now()->addMinutes(15),
         [
             'email' => $user->email,
@@ -138,7 +138,7 @@ test('magic link verification requires valid signature', function () {
     ]);
 
     // Create URL without signature
-    $response = $this->get(route('magic-link.verify', [
+    $response = $this->get(route('magicLink.verify', [
         'email' => $user->email,
         'token' => $token,
     ]));
@@ -159,7 +159,7 @@ test('magic link token is cleared after successful authentication', function () 
     ]);
 
     $url = URL::temporarySignedRoute(
-        'magic-link.verify',
+        'magicLink.verify',
         now()->addMinutes(15),
         [
             'email' => $user->email,
@@ -186,7 +186,7 @@ test('same magic link cannot be used twice', function () {
     ]);
 
     $url = URL::temporarySignedRoute(
-        'magic-link.verify',
+        'magicLink.verify',
         now()->addMinutes(15),
         [
             'email' => $user->email,

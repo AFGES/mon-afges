@@ -12,7 +12,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-final class VolunteerApprovalRequested extends Notification implements ShouldQueue
+final class VolunteerApprovalRequestedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Auth\MagicLinkController;
-use App\Http\Controllers\DelegateApprovalController;
-use App\Http\Controllers\VolunteerApprovalController;
+use App\Http\Controllers\ApproveDelegateController;
+use App\Http\Controllers\ApproveVolunteerController;
+use App\Http\Controllers\Auth\MagicLinkLoginsController;
+use App\Http\Controllers\Auth\MagicLinksController;
+use App\Http\Controllers\RejectDelegateController;
+use App\Http\Controllers\RejectVolunteerController;
 use App\Models\Delegate;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
@@ -13,13 +16,13 @@ use Illuminate\Support\Facades\Route;
 
 // Magic Link Authentication Routes
 Route::middleware('guest')->group(function () {
-    Route::post('/magic-link/request', [MagicLinkController::class, 'request'])
-        ->name('magic-link.request');
+    Route::post('/magic-link/request', [MagicLinksController::class, 'store'])
+        ->name('magicLink.request');
 });
 
-Route::get('/magic-link/verify', [MagicLinkController::class, 'verify'])
+Route::get('/magic-link/verify', [MagicLinkLoginsController::class, 'show'])
     ->middleware('signed')
-    ->name('magic-link.verify');
+    ->name('magicLink.verify');
 
 // Pending or not-yet-current records are hidden by global scopes, so bind without them (soft deletes still apply).
 Route::bind('volunteer', fn (string $value): Volunteer => Volunteer::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])->findOrFail($value));
@@ -28,16 +31,16 @@ Route::bind('delegate', fn (string $value): Delegate => Delegate::withoutGlobalS
 // Volunteer Approval Routes (signed URLs)
 Route::middleware(['auth', 'signed'])->group(function () {
     Route::prefix('/volunteers/{volunteer}')->can('update', 'volunteer')->group(function () {
-        Route::get('/approve', [VolunteerApprovalController::class, 'approve'])
+        Route::get('/approve', ApproveVolunteerController::class)
             ->name('volunteers.approve');
-        Route::get('/reject', [VolunteerApprovalController::class, 'reject'])
+        Route::get('/reject', RejectVolunteerController::class)
             ->name('volunteers.reject');
     });
 
     Route::prefix('/delegates/{delegate}')->can('update', 'delegate')->group(function () {
-        Route::get('/approve', [DelegateApprovalController::class, 'approve'])
+        Route::get('/approve', ApproveDelegateController::class)
             ->name('delegates.approve');
-        Route::get('/reject', [DelegateApprovalController::class, 'reject'])
+        Route::get('/reject', RejectDelegateController::class)
             ->name('delegates.reject');
     });
 });

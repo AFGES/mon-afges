@@ -10,10 +10,12 @@ use App\Models\DemocraticTimeSession;
 use App\Models\Seat;
 use App\Models\SessionSignIn;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 
 function actingAsSuperAdminForSessionSignInResource(): User
@@ -100,25 +102,26 @@ describe('ListSessionSignIns', function () {
             ->assertCanNotSeeTableRecords([$signIn2]);
     });
 
-    it('can filter session sign-ins by signed in status', function () {
+    it('can filter session sign-ins by signed in status', function (string $filterValue, string $visibleSignIn, string $hiddenSignIn) {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
-        $signedIn = SessionSignIn::factory()->create(['signed_out_at' => null]);
-        $signedOut = SessionSignIn::factory()->create([
-            'signed_in_at' => now()->subHours(2),
-            'signed_out_at' => now()->subHour(),
-        ]);
-
-        livewire(ListSessionSignIns::class)
-            ->filterTable('is_signed_in', 'yes')
-            ->assertCanSeeTableRecords([$signedIn])
-            ->assertCanNotSeeTableRecords([$signedOut]);
+        $signIns = [
+            'signed in' => SessionSignIn::factory()->create(['signed_out_at' => null]),
+            'signed out' => SessionSignIn::factory()->create([
+                'signed_in_at' => now()->subHours(2),
+                'signed_out_at' => now()->subHour(),
+            ]),
+        ];
 
         livewire(ListSessionSignIns::class)
-            ->filterTable('is_signed_in', 'no')
-            ->assertCanSeeTableRecords([$signedOut])
-            ->assertCanNotSeeTableRecords([$signedIn]);
-    });
+            ->filterTable('is_signed_in', $filterValue)
+            ->assertCanSeeTableRecords([$signIns[$visibleSignIn]])
+            ->assertCanNotSeeTableRecords([$signIns[$hiddenSignIn]]);
+    })->with([
+        'yes keeps signed in records' => ['yes', 'signed in', 'signed out'],
+        'no keeps signed out records' => ['no', 'signed out', 'signed in'],
+    ]);
 });
 
 describe('CreateSessionSignIn', function () {
@@ -131,6 +134,7 @@ describe('CreateSessionSignIn', function () {
 
     it('can create a session sign-in', function () {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
@@ -152,11 +156,13 @@ describe('CreateSessionSignIn', function () {
             'democratic_time_session_id' => $session->id,
             'seat_id' => $seat->id,
             'delegate_id' => $delegate->id,
+            'signed_in_at' => $signedInAt->toDateTimeString(),
         ]);
     });
 
     it('can create a session sign-in with proxy', function () {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
@@ -186,6 +192,7 @@ describe('CreateSessionSignIn', function () {
 
     it('can create a session sign-in with sign out time', function () {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
@@ -224,7 +231,7 @@ describe('CreateSessionSignIn', function () {
                 'democratic_time_session_id' => $session->id,
                 'seat_id' => $seat->id,
                 'delegate_id' => $delegate->id,
-                'signed_in_at' => now()->format('Y-m-d H:i:s'),
+                'signed_in_at' => '2026-01-01 10:00:00',
                 ...$data,
             ])
             ->call('create')
@@ -249,7 +256,7 @@ describe('CreateSessionSignIn', function () {
             ['signed_in_at' => 'required'],
         ],
         '`signed_out_at` must be after `signed_in_at`' => [
-            ['signed_in_at' => now()->format('Y-m-d H:i:s'), 'signed_out_at' => now()->subHour()->format('Y-m-d H:i:s')],
+            ['signed_in_at' => '2026-01-01 10:00:00', 'signed_out_at' => '2026-01-01 09:00:00'],
             ['signed_out_at' => 'after'],
         ],
     ]);
@@ -274,6 +281,7 @@ describe('EditSessionSignIn', function () {
 
     it('can update a session sign-in', function () {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_at' => now()->subHours(2),
@@ -289,11 +297,7 @@ describe('EditSessionSignIn', function () {
             ->call('save')
             ->assertNotified();
 
-        $updated = $sessionSignIn->fresh();
-
-        expect($updated->signed_out_at)
-            ->toBeInstanceOf(Illuminate\Support\Carbon::class)
-            ->format('Y-m-d H:i')->toBe($newSignedOutAt->format('Y-m-d H:i'));
+        expect($sessionSignIn->fresh()->signed_out_at)->toEqual($newSignedOutAt);
     });
 
     it('can update session sign-in to add proxy seat', function () {
@@ -322,6 +326,7 @@ describe('EditSessionSignIn', function () {
 
     it('can update session sign-in to remove sign out time', function () {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_at' => now()->subHours(2),
@@ -345,6 +350,7 @@ describe('EditSessionSignIn', function () {
 
     it('validates that signed_out_at is after signed_in_at', function () {
         actingAsSuperAdminForSessionSignInResource();
+        $this->travelTo('2026-01-15 12:00:00');
 
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_at' => now(),
@@ -357,7 +363,12 @@ describe('EditSessionSignIn', function () {
                 'signed_out_at' => now()->subHour()->format('Y-m-d H:i:s'),
             ])
             ->call('save')
-            ->assertHasFormErrors(['signed_out_at' => 'after'])
+            ->assertHasFormErrors(['signed_out_at' => [
+                __('validation.after', [
+                    'attribute' => Str::lower(__('emargement.fields.signed_out_at')),
+                    'date' => Str::lower(__('emargement.fields.signed_in_at')),
+                ]),
+            ]])
             ->assertNotNotified();
     });
 
@@ -372,6 +383,6 @@ describe('EditSessionSignIn', function () {
             ->callAction('delete')
             ->assertNotified();
 
-        expect(SessionSignIn::find($sessionSignIn->id))->toBeNull();
+        assertModelMissing($sessionSignIn);
     });
 });

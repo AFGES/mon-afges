@@ -46,6 +46,20 @@ describe('ListVolunteers', function () {
             ->assertCanSeeTableRecords($volunteers);
     });
 
+    it('lists pending volunteers although they are not approved', function () {
+        actingAsSuperAdminForVolunteerResource();
+
+        $pendingVolunteer = Volunteer::factory()->pending()->create();
+        $approvedVolunteer = Volunteer::factory()->approved()->create();
+
+        livewire(ListVolunteers::class)
+            ->assertCanSeeTableRecords([$pendingVolunteer])
+            ->assertCanNotSeeTableRecords([$approvedVolunteer])
+            ->filterTable('approval_status', ['approved'])
+            ->assertCanSeeTableRecords([$approvedVolunteer])
+            ->assertCanNotSeeTableRecords([$pendingVolunteer]);
+    });
+
     it('can search volunteers', function () {
         actingAsSuperAdminForVolunteerResource();
 

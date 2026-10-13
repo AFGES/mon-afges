@@ -49,6 +49,20 @@ describe('ListDelegates', function () {
             ->assertCanSeeTableRecords($delegates);
     });
 
+    it('lists pending delegates although they are not approved', function () {
+        actingAsSuperAdminForDelegateResource();
+
+        $pendingDelegate = Delegate::factory()->pending()->create();
+        $approvedDelegate = Delegate::factory()->approved()->create();
+
+        livewire(ListDelegates::class)
+            ->assertCanSeeTableRecords([$pendingDelegate])
+            ->assertCanNotSeeTableRecords([$approvedDelegate])
+            ->filterTable('approval_status', ['approved'])
+            ->assertCanSeeTableRecords([$approvedDelegate])
+            ->assertCanNotSeeTableRecords([$pendingDelegate]);
+    });
+
     it('can search delegates by user name', function () {
         actingAsSuperAdminForDelegateResource();
 
@@ -82,52 +96,63 @@ describe('ListDelegates', function () {
             ->assertCanNotSeeTableRecords($delegates->skip(1));
     });
 
-    it('can sort delegates by user name', function () {
+    it('sorts delegates by user name', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(3)->approved()->create();
+        $organization = Organization::factory()->create();
+        $bravo = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['name' => 'Bravo']))->create(['ended_at' => null]);
+        $charlie = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['name' => 'Charlie']))->create(['ended_at' => null]);
+        $alpha = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['name' => 'Alpha']))->create(['ended_at' => null]);
 
         livewire(ListDelegates::class)
             ->sortTable('user.name')
-            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$alpha, $bravo, $charlie], inOrder: true)
             ->sortTable('user.name', 'desc')
-            ->assertSuccessful();
+            ->assertCanSeeTableRecords([$charlie, $bravo, $alpha], inOrder: true);
     });
 
-    it('can sort delegates by email', function () {
+    it('sorts delegates by email', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(3)->approved()->create();
+        $organization = Organization::factory()->create();
+        $bravo = Delegate::factory()->approved()->for($organization)->create(['email' => 'bravo@example.org', 'ended_at' => null]);
+        $charlie = Delegate::factory()->approved()->for($organization)->create(['email' => 'charlie@example.org', 'ended_at' => null]);
+        $alpha = Delegate::factory()->approved()->for($organization)->create(['email' => 'alpha@example.org', 'ended_at' => null]);
 
         livewire(ListDelegates::class)
             ->sortTable('email')
-            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$alpha, $bravo, $charlie], inOrder: true)
             ->sortTable('email', 'desc')
-            ->assertSuccessful();
+            ->assertCanSeeTableRecords([$charlie, $bravo, $alpha], inOrder: true);
     });
 
-    it('can sort delegates by started_at', function () {
+    it('sorts delegates by started_at', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(3)->approved()->create();
+        $this->travelTo('2026-06-15 10:00:00');
+        $organization = Organization::factory()->create();
+        $middle = Delegate::factory()->approved()->for($organization)->create(['started_at' => '2026-03-01', 'ended_at' => null]);
+        $latest = Delegate::factory()->approved()->for($organization)->create(['started_at' => '2026-05-01', 'ended_at' => null]);
+        $earliest = Delegate::factory()->approved()->for($organization)->create(['started_at' => '2026-01-01', 'ended_at' => null]);
 
         livewire(ListDelegates::class)
             ->sortTable('started_at')
-            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$earliest, $middle, $latest], inOrder: true)
             ->sortTable('started_at', 'desc')
-            ->assertSuccessful();
+            ->assertCanSeeTableRecords([$latest, $middle, $earliest], inOrder: true);
     });
 
-    it('can sort delegates by organization', function () {
+    it('sorts delegates by organization name ascending within the organization grouping', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(3)->approved()->create();
+        $bravoOrganization = Organization::factory()->create(['short_name' => 'Bravo', 'legal_name' => 'Bravo legal']);
+        $alphaOrganization = Organization::factory()->create(['short_name' => 'Alpha', 'legal_name' => 'Alpha legal']);
+        $bravo = Delegate::factory()->approved()->for($bravoOrganization)->create(['ended_at' => null]);
+        $alpha = Delegate::factory()->approved()->for($alphaOrganization)->create(['ended_at' => null]);
 
         livewire(ListDelegates::class)
             ->sortTable('organization.short_name')
-            ->assertSuccessful()
-            ->sortTable('organization.short_name', 'desc')
-            ->assertSuccessful();
+            ->assertCanSeeTableRecords([$alpha, $bravo], inOrder: true);
     });
 });
 

@@ -11,10 +11,12 @@ use App\Models\DemocraticTimeSession;
 use App\Models\Proxy;
 use App\Models\Seat;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 
 function actingAsSuperAdminForProxyResource(): User
@@ -52,10 +54,16 @@ describe('ListProxies', function () {
         $college = College::factory()->create(['name' => 'Test College']);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
         $seat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id]);
-        $proxy = Proxy::factory()->approved()->create(['delegator_seat_id' => $seat->id]);
+        $proxyHolderSeat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id]);
+        $proxy = Proxy::factory()->approved()->create([
+            'delegator_seat_id' => $seat->id,
+            'proxy_holder_seat_id' => $proxyHolderSeat->id,
+        ]);
 
         livewire(ListProxies::class)
-            ->assertCanSeeTableRecords([$proxy]);
+            ->assertCanSeeTableRecords([$proxy])
+            ->assertTableColumnStateSet('delegatorSeat.label', $seat->label(), $proxy)
+            ->assertTableColumnStateSet('proxyHolderSeat.label', $proxyHolderSeat->label(), $proxy);
     });
 });
 
@@ -69,6 +77,7 @@ describe('CreateProxy', function () {
 
     it('can create a proxy with valid data', function () {
         actingAsSuperAdminForProxyResource();
+        $this->freezeSecond();
 
         $college = College::factory()->create([
             'can_vote' => true,
@@ -95,6 +104,8 @@ describe('CreateProxy', function () {
             'delegator_seat_id' => $delegatorSeat->id,
             'proxy_holder_seat_id' => $proxyHolderSeat->id,
             'democratic_time_session_id' => $session->id,
+            'started_at' => now(),
+            'ended_at' => now()->addHours(2),
         ]);
     });
 
@@ -142,7 +153,9 @@ describe('CreateProxy', function () {
                 'democratic_time_session_id' => $session->id,
             ])
             ->call('create')
-            ->assertHasFormErrors(['delegator_seat_id' => 'required'])
+            ->assertHasFormErrors(['delegator_seat_id' => [
+                __('validation.required', ['attribute' => Str::lower(__('proxy.fields.delegator_seat'))]),
+            ]])
             ->assertNotNotified()
             ->assertNoRedirect();
     });
@@ -211,7 +224,7 @@ describe('CreateProxy', function () {
                 'democratic_time_session_id' => $session->id,
             ])
             ->call('create')
-            ->assertHasFormErrors(['proxy_holder_seat_id'])
+            ->assertHasFormErrors(['proxy_holder_seat_id' => [__('proxy.validation.same_college')]])
             ->assertNotNotified()
             ->assertNoRedirect();
     });
@@ -272,7 +285,7 @@ describe('CreateProxy', function () {
                 'democratic_time_session_id' => $session->id,
             ])
             ->call('create')
-            ->assertHasFormErrors(['proxy_holder_seat_id'])
+            ->assertHasFormErrors(['proxy_holder_seat_id' => ['Le siège mandataire doit appartenir à un collège délibérant.']])
             ->assertNotNotified()
             ->assertNoRedirect();
     });
@@ -326,6 +339,7 @@ describe('EditProxy', function () {
 
     it('can update proxy start and end times', function () {
         actingAsSuperAdminForProxyResource();
+        $this->freezeSecond();
 
         $college = College::factory()->create(['can_vote' => true]);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
@@ -356,10 +370,8 @@ describe('EditProxy', function () {
 
         $proxy->refresh();
 
-        expect($proxy->started_at)->not->toBeNull();
-        expect($proxy->ended_at)->not->toBeNull();
-        expect($proxy->started_at->format('Y-m-d H:i'))->toBe($newStartTime->format('Y-m-d H:i'));
-        expect($proxy->ended_at->format('Y-m-d H:i'))->toBe($newEndTime->format('Y-m-d H:i'));
+        expect($proxy->started_at)->toEqual($newStartTime)
+            ->and($proxy->ended_at)->toEqual($newEndTime);
     });
 
     it('can delete a proxy', function () {
@@ -373,7 +385,7 @@ describe('EditProxy', function () {
             ->callAction('delete')
             ->assertNotified();
 
-        expect(Proxy::withoutGlobalScopes()->find($proxy->id))->toBeNull();
+        assertModelMissing($proxy);
     });
 
     it('validates same college rule when updating proxy holder seat', function () {
@@ -404,7 +416,7 @@ describe('EditProxy', function () {
                 'proxy_holder_seat_id' => $newProxyHolderSeat->id,
             ])
             ->call('save')
-            ->assertHasFormErrors(['proxy_holder_seat_id'])
+            ->assertHasFormErrors(['proxy_holder_seat_id' => [__('proxy.validation.same_college')]])
             ->assertNotNotified();
     });
 

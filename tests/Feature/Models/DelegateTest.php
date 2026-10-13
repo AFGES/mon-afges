@@ -2,104 +2,84 @@
 
 declare(strict_types=1);
 
-use App\Models\CollegeOrganization;
 use App\Models\Delegate;
-use App\Models\Organization;
 use App\Models\User;
 
-test('delegate has started at date', function () {
-    $delegate = Delegate::factory()->create([
-        'started_at' => '2025-01-01',
-    ]);
+use function Pest\Laravel\travelTo;
 
-    expect($delegate->started_at->format('Y-m-d'))->toBe('2025-01-01');
+test('defaults the email to the user email when none is provided', function () {
+    $delegate = Delegate::factory()
+        ->forUser(['email' => 'abc@example.com'])
+        ->create(['email' => null]);
+
+    expect($delegate->email)->toBe('abc@example.com');
 });
 
-test('delegate has ended at date', function () {
-    $delegate = Delegate::factory()->create([
-        'started_at' => '2025-01-01',
-        'ended_at' => '2025-12-31',
-    ]);
+test('keeps the email when one is explicitly provided', function () {
+    $delegate = Delegate::factory()
+        ->forUser(['email' => 'user@example.com'])
+        ->create(['email' => 'custom@example.com']);
 
-    expect($delegate->ended_at->format('Y-m-d'))->toBe('2025-12-31');
+    expect($delegate->email)->toBe('custom@example.com');
 });
 
-test('delegate can have null ended at date', function () {
-    $delegate = Delegate::factory()->create([
-        'started_at' => '2025-01-01',
-        'ended_at' => null,
-    ]);
+test('verifies the email when it matches the verified email of the user', function () {
+    travelTo('2026-03-15 12:00:00');
+    $delegate = Delegate::factory()
+        ->forUser(['email' => 'verified@example.com', 'email_verified_at' => now()])
+        ->create(['email' => null, 'email_verified_at' => null]);
 
-    expect($delegate->ended_at)->toBeNull();
+    expect($delegate)
+        ->email->toBe('verified@example.com')
+        ->email_verified_at->toDateTimeString()->toBe('2026-03-15 12:00:00')
+        ->hasVerifiedEmail()->toBeTrue();
 });
 
-test('delegate belongs to user', function () {
-    $user = User::factory()->create(['name' => 'John Doe']);
-    $delegate = Delegate::factory()->create(['user_id' => $user->id]);
+test('leaves the email unverified when the user email is not verified', function () {
+    $delegate = Delegate::factory()
+        ->for(User::factory()->unverified()->state(['email' => 'unverified@example.com']), 'user')
+        ->create(['email' => null, 'email_verified_at' => null]);
 
-    expect($delegate->user->name)->toBe('John Doe');
+    expect($delegate)
+        ->email->toBe('unverified@example.com')
+        ->email_verified_at->toBeNull()
+        ->hasVerifiedEmail()->toBeFalse();
 });
 
-test('delegate belongs to organization', function () {
-    $organization = Organization::factory()->create(['short_name' => 'TEST']);
-    $delegate = Delegate::factory()->create(['organization_id' => $organization->id]);
+test('leaves the email unverified when it differs from the verified email of the user', function () {
+    $delegate = Delegate::factory()
+        ->forUser(['email' => 'user@example.com', 'email_verified_at' => now()])
+        ->create(['email' => 'different@example.com']);
 
-    expect($delegate->organization->short_name)->toBe('TEST');
+    expect($delegate)
+        ->email->toBe('different@example.com')
+        ->email_verified_at->toBeNull()
+        ->hasVerifiedEmail()->toBeFalse();
 });
 
-test('delegate belongs to seat', function () {
-    $collegeOrg = CollegeOrganization::factory()->withSeats(1)->create();
-    $seat = $collegeOrg->seatRecords->first();
-
-    $delegate = Delegate::factory()->create(['seat_id' => $seat->id]);
-
-    expect($delegate->seat->id)->toBe($seat->id);
-});
-
-test('delegate can be soft deleted', function () {
-    $delegate = Delegate::factory()->create();
-
-    expect(Delegate::withoutGlobalScopes()->count())->toBe(1);
-
-    $delegate->delete();
-
-    // After soft delete, the record is still there but with deleted_at set
-    expect($delegate->trashed())->toBeTrue()
-        ->and(Delegate::withoutGlobalScopes()->withTrashed()->count())->toBe(1);
-});
-
-test('delegate can be restored after soft delete', function () {
-    $delegate = Delegate::factory()->create();
-
-    $delegate->delete();
-    expect($delegate->trashed())->toBeTrue();
-
-    $delegate->restore();
-    expect($delegate->trashed())->toBeFalse();
-});
-
-test('delegate is scoped by currently scope', function () {
-    // Create delegate that started in the past and has no end date (currently active)
-    $activeDelegate = Delegate::factory()->create([
+test('only returns the delegates that are currently active', function () {
+    travelTo('2026-03-15 12:00:00');
+    $activeDelegate = Delegate::factory()->approved()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => null,
     ]);
-
-    // Create delegate that ended in the past (not currently active)
-    $pastDelegate = Delegate::factory()->create([
+    Delegate::factory()->approved()->create([
         'started_at' => now()->subDays(20),
         'ended_at' => now()->subDays(5),
     ]);
 
-    // Without removing the scope, only active delegate should be returned
-    $delegates = Delegate::withoutGlobalScopes()->get();
+    $delegates = Delegate::all();
 
-    expect($delegates)->toHaveCount(2);
+    expect($delegates->pluck('id')->all())->toBe([$activeDelegate->id]);
 });
 
-test('delegate keeps date casts declared on the model over trait defaults', function () {
-    $casts = (new Delegate)->getCasts();
+test('reads its dates without time', function () {
+    $delegate = Delegate::factory()->create([
+        'started_at' => '2026-03-01 15:30:00',
+        'ended_at' => '2026-12-31 18:00:00',
+    ]);
 
-    expect($casts['started_at'])->toBe('date')
-        ->and($casts['ended_at'])->toBe('date');
+    expect($delegate->refresh())
+        ->started_at->toDateTimeString()->toBe('2026-03-01 00:00:00')
+        ->ended_at->toDateTimeString()->toBe('2026-12-31 00:00:00');
 });

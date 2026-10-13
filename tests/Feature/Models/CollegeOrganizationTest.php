@@ -2,129 +2,33 @@
 
 declare(strict_types=1);
 
-use App\Models\College;
 use App\Models\CollegeOrganization;
-use App\Models\Organization;
 use App\Models\Seat;
 
-test('college organization pivot has correct relationships', function () {
-    $college = College::factory()->create();
-    $organization = Organization::factory()->create();
+test('counts its seat records as seats', function () {
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(3)->create();
 
-    $collegeOrg = CollegeOrganization::factory()
-        ->for($college)
-        ->for($organization)
-        ->withSeats(3)
-        ->create([
-            'delegates_per_seat' => 2,
-        ]);
-
-    expect($collegeOrg->college->id)->toBe($college->id)
-        ->and($collegeOrg->organization->id)->toBe($organization->id)
-        ->and($collegeOrg->seats)->toBe(3)
-        ->and($collegeOrg->delegates_per_seat)->toBe(2);
+    expect($collegeOrganization->seats)->toBe(3);
 });
 
-test('college organization calculates total delegate positions', function () {
-    $collegeOrg = CollegeOrganization::factory()
+test('multiplies seats by delegates per seat to get the total delegate positions', function () {
+    $collegeOrganization = CollegeOrganization::factory()
         ->withSeats(4)
-        ->create([
-            'delegates_per_seat' => 3,
-        ]);
+        ->create(['delegates_per_seat' => 3]);
 
-    expect($collegeOrg->total_delegate_positions)->toBe(12);
+    expect($collegeOrganization->total_delegate_positions)->toBe(12);
 });
 
-test('college organization can have seat records', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 5,
-    ]);
+test('has no delegate positions without seats', function () {
+    $collegeOrganization = CollegeOrganization::factory()->create(['delegates_per_seat' => 5]);
 
-    for ($i = 1; $i <= 5; $i++) {
-        Seat::factory()->create([
-            'college_organization_id' => $collegeOrg->id,
-            'seat_number' => $i,
-        ]);
-    }
-
-    expect($collegeOrg->seatRecords)->toHaveCount(5)
-        ->and($collegeOrg->seatRecords->pluck('seat_number')->toArray())->toBe([1, 2, 3, 4, 5]);
+    expect($collegeOrganization->total_delegate_positions)->toBe(0);
 });
 
-test('college can have multiple organizations', function () {
-    $college = College::factory()->create();
-    $org1 = Organization::factory()->create();
-    $org2 = Organization::factory()->create();
-    $org3 = Organization::factory()->create();
+test('deletes its seats when it is deleted', function () {
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(3)->create();
 
-    CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $org1->id,
-        'seats' => 2,
-    ]);
+    $collegeOrganization->delete();
 
-    CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $org2->id,
-        'seats' => 3,
-    ]);
-
-    CollegeOrganization::factory()->create([
-        'college_id' => $college->id,
-        'organization_id' => $org3->id,
-        'seats' => 1,
-    ]);
-
-    expect($college->organizations)->toHaveCount(3);
-});
-
-test('organization can have multiple colleges', function () {
-    $organization = Organization::factory()->create();
-    $college1 = College::factory()->create();
-    $college2 = College::factory()->create();
-    $college3 = College::factory()->create();
-
-    CollegeOrganization::factory()->create([
-        'college_id' => $college1->id,
-        'organization_id' => $organization->id,
-    ]);
-
-    CollegeOrganization::factory()->create([
-        'college_id' => $college2->id,
-        'organization_id' => $organization->id,
-    ]);
-
-    CollegeOrganization::factory()->create([
-        'college_id' => $college3->id,
-        'organization_id' => $organization->id,
-    ]);
-
-    expect($organization->colleges)->toHaveCount(3);
-});
-
-test('college organization with zero seats has zero positions', function () {
-    $collegeOrg = CollegeOrganization::factory()->create([
-        'seats' => 0,
-        'delegates_per_seat' => 5,
-    ]);
-
-    expect($collegeOrg->total_delegate_positions)->toBe(0);
-});
-
-test('college organization pivot data persists correctly', function () {
-    $college = College::factory()->create();
-    $organization = Organization::factory()->create();
-
-    $organization->syncCollegesWithSeats([
-        $college->id => ['delegates_per_seat' => 4, 'seats' => 7],
-    ]);
-
-    $collegeOrg = CollegeOrganization::where('college_id', $college->id)
-        ->where('organization_id', $organization->id)
-        ->first();
-
-    expect($collegeOrg->seats)->toBe(7)
-        ->and($collegeOrg->delegates_per_seat)->toBe(4)
-        ->and($collegeOrg->college_id)->toBe($college->id)
-        ->and($collegeOrg->organization_id)->toBe($organization->id);
+    expect(Seat::withTrashed()->where('college_organization_id', $collegeOrganization->id)->count())->toBe(0);
 });

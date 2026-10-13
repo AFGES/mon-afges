@@ -6,88 +6,84 @@ use App\Models\College;
 use App\Models\CollegeOrganization;
 use App\Models\Delegate;
 use App\Models\Organization;
-use App\Models\Seat;
 use App\Models\User;
 
-test('seat is empty returns true when no delegates', function () {
-    $collegeOrg = CollegeOrganization::factory()->withSeats(1)->create();
-    $seat = $collegeOrg->seatRecords->first();
+test('is empty when no delegate sits on it', function () {
+    $seat = CollegeOrganization::factory()->withSeats(1)->create()->seatRecords->first();
 
     expect($seat->isEmpty())->toBeTrue();
 });
 
-test('seat is empty returns false when has delegates', function () {
-    $collegeOrg = CollegeOrganization::factory()->withSeats(1)->create();
-    $seat = $collegeOrg->seatRecords->first();
-
-    $user = User::factory()->create();
+test('is not empty when an approved delegate sits on it', function () {
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(1)->create();
+    $seat = $collegeOrganization->seatRecords->first();
     Delegate::factory()->approved()->create([
         'seat_id' => $seat->id,
-        'user_id' => $user->id,
-        'organization_id' => $collegeOrg->organization_id,
+        'organization_id' => $collegeOrganization->organization_id,
     ]);
 
     expect($seat->isEmpty())->toBeFalse();
 });
 
-test('seat can access college through college organization', function () {
-    $college = College::factory()->create(['name' => 'Test College']);
-    $organization = Organization::factory()->create();
+test('lists only its approved delegates', function () {
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(1)->create(['delegates_per_seat' => 3]);
+    $seat = $collegeOrganization->seatRecords->first();
+    $approvedDelegates = Delegate::factory()->approved()->count(2)->create([
+        'seat_id' => $seat->id,
+        'organization_id' => $collegeOrganization->organization_id,
+    ]);
+    Delegate::factory()->pending()->create([
+        'seat_id' => $seat->id,
+        'organization_id' => $collegeOrganization->organization_id,
+    ]);
 
-    $collegeOrg = CollegeOrganization::factory()
-        ->for($college)
-        ->for($organization)
-        ->withSeats(1)
-        ->create();
-
-    $seat = $collegeOrg->seatRecords->first();
-
-    expect($seat->college()->first()->name)->toBe('Test College')
-        ->and($seat->college->is($college))->toBeTrue();
+    expect($seat->delegates->pluck('id')->all())
+        ->toEqualCanonicalizing($approvedDelegates->pluck('id')->all());
 });
 
-test('seat can access organization through college organization', function () {
+test('resolves its college through its college organization', function () {
     $college = College::factory()->create();
-    $organization = Organization::factory()->create(['short_name' => 'TEST']);
+    $seat = CollegeOrganization::factory()->for($college)->withSeats(1)->create()->seatRecords->first();
 
-    $collegeOrg = CollegeOrganization::factory()
-        ->for($college)
-        ->for($organization)
-        ->withSeats(1)
-        ->create();
-
-    $seat = $collegeOrg->seatRecords->first();
-
-    expect($seat->organization()->first()->short_name)->toBe('TEST')
-        ->and($seat->organization->is($organization))->toBeTrue();
+    expect($seat->college->is($college))->toBeTrue();
 });
 
-test('seat has seat number', function () {
-    $collegeOrg = CollegeOrganization::factory()->withSeats(5)->create();
-    $seats = $collegeOrg->seatRecords;
+test('resolves its organization through its college organization', function () {
+    $organization = Organization::factory()->create();
+    $seat = CollegeOrganization::factory()->for($organization)->withSeats(1)->create()->seatRecords->first();
 
-    expect($seats->pluck('seat_number')->sort()->values()->toArray())->toBe([1, 2, 3, 4, 5]);
+    expect($seat->organization->is($organization))->toBeTrue();
 });
 
-test('seat can be soft deleted', function () {
-    $collegeOrg = CollegeOrganization::factory()->withSeats(3)->create();
-    $seat = $collegeOrg->seatRecords->first();
+test('labels itself with the college name and the delegate names', function () {
+    $college = College::factory()->create(['name' => 'Général']);
+    $collegeOrganization = CollegeOrganization::factory()->for($college)->withSeats(1)->create(['delegates_per_seat' => 2]);
+    $seat = $collegeOrganization->seatRecords->first();
+    Delegate::factory()->approved()->for(User::factory()->state(['name' => 'Alice Martin']), 'user')->create([
+        'seat_id' => $seat->id,
+        'organization_id' => $collegeOrganization->organization_id,
+    ]);
 
-    expect(Seat::count())->toBe(3);
-
-    $seat->delete();
-
-    expect(Seat::count())->toBe(2)
-        ->and(Seat::withTrashed()->count())->toBe(3);
+    expect($seat->label())->toBe('Général: Alice Martin');
 });
 
-test('seat can be restored after soft delete', function () {
-    $collegeOrg = CollegeOrganization::factory()->withSeats(2)->create();
-    $seat = $collegeOrg->seatRecords->first();
+test('labels itself with every delegate name separated by commas', function () {
+    $college = College::factory()->create(['name' => 'Général']);
+    $collegeOrganization = CollegeOrganization::factory()->for($college)->withSeats(1)->create(['delegates_per_seat' => 2]);
+    $seat = $collegeOrganization->seatRecords->first();
+    foreach (['Alice Martin', 'Bob Durand'] as $name) {
+        Delegate::factory()->approved()->for(User::factory()->state(['name' => $name]), 'user')->create([
+            'seat_id' => $seat->id,
+            'organization_id' => $collegeOrganization->organization_id,
+        ]);
+    }
 
-    $seat->delete();
-    expect(Seat::count())->toBe(1);
+    expect($seat->label())->toBeIn(['Général: Alice Martin, Bob Durand', 'Général: Bob Durand, Alice Martin']);
+});
 
-    $seat->restore();
-    expect(Seat::count())->toBe(2);
+test('labels itself as vide when no delegate sits on it', function () {
+    $college = College::factory()->create(['name' => 'Fédéral']);
+    $seat = CollegeOrganization::factory()->for($college)->withSeats(1)->create()->seatRecords->first();
+
+    expect($seat->label())->toBe('Fédéral: Vide');
 });

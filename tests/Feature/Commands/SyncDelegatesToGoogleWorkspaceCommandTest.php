@@ -16,6 +16,13 @@ beforeEach(function () {
     ]);
 });
 
+function activeDelegateWithEmail(string $email): Delegate
+{
+    return Delegate::withoutEvents(
+        fn (): Delegate => Delegate::factory()->approved()->verified()->create(['email' => $email, 'ended_at' => null])
+    );
+}
+
 function mockedGoogleWorkspaceForCommand(): MockInterface
 {
     return test()->mock(GoogleWorkspaceServiceInterface::class);
@@ -46,7 +53,7 @@ it('fails without calling Google when the configuration is incomplete', function
 
 it('adds active delegates missing from the group', function () {
     Log::spy();
-    Delegate::factory()->approved()->verified()->create(['email' => 'delegate@afges.org', 'ended_at' => null]);
+    activeDelegateWithEmail('delegate@afges.org');
     $google = mockedGoogleWorkspaceForCommand();
     $google->shouldReceive('isInGroup')->andReturnFalse();
     $google->shouldReceive('addToGroup')->once()->with('delegate@afges.org')->andReturnTrue();
@@ -65,7 +72,7 @@ it('adds active delegates missing from the group', function () {
 });
 
 it('leaves active delegates that are already in the group', function () {
-    Delegate::factory()->approved()->verified()->create(['email' => 'existing@afges.org', 'ended_at' => null]);
+    activeDelegateWithEmail('existing@afges.org');
     $google = mockedGoogleWorkspaceForCommand();
     $google->shouldReceive('isInGroup')->with('existing@afges.org')->andReturnTrue();
     $google->shouldReceive('isInGroup')->andReturnFalse();
@@ -78,7 +85,7 @@ it('leaves active delegates that are already in the group', function () {
 });
 
 it('reports delegates that could not be added', function () {
-    Delegate::factory()->approved()->verified()->create(['email' => 'delegate@afges.org', 'ended_at' => null]);
+    activeDelegateWithEmail('delegate@afges.org');
     $google = mockedGoogleWorkspaceForCommand();
     $google->shouldReceive('isInGroup')->andReturnFalse();
     $google->shouldReceive('addToGroup')->once()->with('delegate@afges.org')->andReturnFalse();
@@ -114,7 +121,7 @@ it('reports users who could not be removed', function () {
 });
 
 it('reports the planned changes without applying them in dry-run mode', function () {
-    Delegate::factory()->approved()->verified()->create(['email' => 'delegate@afges.org', 'ended_at' => null]);
+    activeDelegateWithEmail('delegate@afges.org');
     User::factory()->create(['email' => 'notdelegate@afges.org']);
     $google = mockedGoogleWorkspaceForCommand();
     $google->shouldReceive('isInGroup')->with('notdelegate@afges.org')->andReturnTrue();

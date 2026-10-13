@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Traits\HasPeriod;
+use Database\Factories\DemocraticTimeSessionFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +15,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class DemocraticTimeSession extends Model
 {
-    /** @use HasFactory<\Database\Factories\DemocraticTimeSessionFactory> */
-    use HasFactory, HasPeriod, HasUuids;
+    /** @use HasFactory<DemocraticTimeSessionFactory> */
+    use HasFactory;
 
-    public $fillable = [
+    use HasPeriod;
+    use HasUuids;
+
+    /** @var list<string> */
+    protected $fillable = [
         'democratic_time_type_id',
         'location',
         'sign_in_opens_at',
@@ -28,16 +34,19 @@ final class DemocraticTimeSession extends Model
         'include_proxies_in_quorum',
     ];
 
+    /** @return BelongsTo<DemocraticTimeType, $this> */
     public function democraticTimeType(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeType::class);
     }
 
+    /** @return HasMany<Proxy, $this> */
     public function proxies(): HasMany
     {
         return $this->hasMany(Proxy::class);
     }
 
+    /** @return HasMany<SessionSignIn, $this> */
     public function signIns(): HasMany
     {
         return $this->hasMany(SessionSignIn::class);
@@ -49,12 +58,12 @@ final class DemocraticTimeSession extends Model
     public function getTotalEligibleSeats(?string $collegeId = null): int
     {
         $query = Seat::query()
-            ->whereHas('collegeOrganization.college', function ($q) {
+            ->whereHas('collegeOrganization.college', function (Builder $q): void {
                 $q->where('can_vote', true);
             });
 
         if ($collegeId) {
-            $query->whereHas('collegeOrganization', function ($q) use ($collegeId) {
+            $query->whereHas('collegeOrganization', function (Builder $q) use ($collegeId): void {
                 $q->where('college_id', $collegeId);
             });
         }
@@ -74,7 +83,7 @@ final class DemocraticTimeSession extends Model
             ->distinct();
 
         if ($collegeId) {
-            $query->whereHas('seat.collegeOrganization', function ($q) use ($collegeId) {
+            $query->whereHas('seat.collegeOrganization', function (Builder $q) use ($collegeId): void {
                 $q->where('college_id', $collegeId);
             });
         }
@@ -91,7 +100,7 @@ final class DemocraticTimeSession extends Model
             ->distinct();
 
         if ($collegeId) {
-            $proxyQuery->whereHas('delegatorSeat.collegeOrganization', function ($q) use ($collegeId) {
+            $proxyQuery->whereHas('delegatorSeat.collegeOrganization', function (Builder $q) use ($collegeId): void {
                 $q->where('college_id', $collegeId);
             });
         }
@@ -123,6 +132,8 @@ final class DemocraticTimeSession extends Model
 
     /**
      * Get quorum status for all voting colleges.
+     *
+     * @return array{met: bool, type: string, total_eligible?: int, present_count?: int, percentage?: float|int, required_percentage?: mixed, details?: list<array{college_id: string, college_name: string, total_eligible: int, present_count: int, percentage: float|int, required_percentage: mixed, met: bool}>}
      */
     public function getQuorumStatus(): array
     {
@@ -208,7 +219,7 @@ final class DemocraticTimeSession extends Model
     public function openSignIn(): bool
     {
         if ($this->sign_in_opens_at !== null) {
-            return false; // Already opened
+            return false;
         }
 
         $this->update([
@@ -225,7 +236,7 @@ final class DemocraticTimeSession extends Model
     public function closeSignIn(): bool
     {
         if ($this->sign_in_closes_at !== null) {
-            return false; // Already closed
+            return false;
         }
 
         $closeTime = $this->ended_at ?? now();
@@ -286,6 +297,7 @@ final class DemocraticTimeSession extends Model
         return true;
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Organizations\Tables;
 
+use App\Models\Delegate;
 use App\Models\Seat;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -47,7 +48,7 @@ final class OrganizationsTable
                 TextColumn::make('total_delegates')
                     ->label(__('organization.fields.total_delegates'))
                     ->state(function ($record): int {
-                        return \App\Models\Delegate::query()
+                        return Delegate::query()
                             ->join('seats', 'delegates.seat_id', '=', 'seats.id')
                             ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
                             ->where('college_organization.organization_id', $record->id)

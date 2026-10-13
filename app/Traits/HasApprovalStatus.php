@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Enums\ApprovalStatus;
+use App\Models\User;
 use App\Notifications\ApprovalApprovedNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +23,8 @@ trait HasApprovalStatus
 
     /**
      * Scope a query to only include pending records.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopePending(Builder $query): void
     {
@@ -30,6 +33,8 @@ trait HasApprovalStatus
 
     /**
      * Scope a query to only include approved records.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeApproved(Builder $query): void
     {
@@ -38,6 +43,8 @@ trait HasApprovalStatus
 
     /**
      * Scope a query to only include rejected records.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeRejected(Builder $query): void
     {
@@ -46,6 +53,8 @@ trait HasApprovalStatus
 
     /**
      * Scope a query to only include records with a specific approval status.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeWithApprovalStatus(Builder $query, ApprovalStatus $status): void
     {
@@ -54,6 +63,8 @@ trait HasApprovalStatus
 
     /**
      * Scope a query to only include records approved by a specific user.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeApprovedBy(Builder $query, int|string $userId): void
     {
@@ -63,6 +74,8 @@ trait HasApprovalStatus
 
     /**
      * Scope a query to only include records rejected by a specific user.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeRejectedBy(Builder $query, int|string $userId): void
     {
@@ -70,9 +83,10 @@ trait HasApprovalStatus
             ->where('approval_status', ApprovalStatus::Rejected);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function approver(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function isPending(): bool
@@ -154,8 +168,6 @@ trait HasApprovalStatus
     /**
      * Get the notifiable user for approval notifications.
      * Override this method if the model has a different relationship name.
-     *
-     * @return object|null An object that uses the Notifiable trait
      */
     protected function getApprovalNotifiable(): ?object
     {

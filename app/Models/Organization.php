@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Services\OrganizationCollegeSyncService;
+use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,15 +15,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class Organization extends Model
 {
-    /** @use HasFactory<\Database\Factories\OrganizationFactory> */
-    use HasFactory, HasUuids, SoftDeletes;
+    /** @use HasFactory<OrganizationFactory> */
+    use HasFactory;
 
-    public $fillable = [
+    use HasUuids;
+    use SoftDeletes;
+
+    /** @var list<string> */
+    protected $fillable = [
         'short_name',
         'legal_name',
         'domain',
     ];
 
+    /** @return BelongsToMany<College, $this, CollegeOrganization> */
     public function colleges(): BelongsToMany
     {
         return $this->belongsToMany(College::class)
@@ -30,11 +37,13 @@ final class Organization extends Model
             ->withTimestamps();
     }
 
+    /** @return HasMany<Delegate, $this> */
     public function delegates(): HasMany
     {
         return $this->hasMany(Delegate::class);
     }
 
+    /** @return HasMany<Volunteer, $this> */
     public function volunteers(): HasMany
     {
         return $this->hasMany(Volunteer::class);
@@ -47,6 +56,6 @@ final class Organization extends Model
      */
     public function syncCollegesWithSeats(array $collegesData): void
     {
-        app(\App\Services\OrganizationCollegeSyncService::class)->sync($this, $collegesData);
+        app(OrganizationCollegeSyncService::class)->sync($this, $collegesData);
     }
 }

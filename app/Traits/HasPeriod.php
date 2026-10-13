@@ -11,11 +11,13 @@ trait HasPeriod
 {
     /**
      * Scope a query to only include currently active records.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeCurrentlyActive(Builder $query): void
     {
         $query->whereTodayOrBefore('started_at')
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query->whereNull('ended_at')
                     ->orWhereTodayOrAfter('ended_at');
             });
@@ -23,6 +25,8 @@ trait HasPeriod
 
     /**
      * Scope a query to only include records that have ended.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeEnded(Builder $query): void
     {
@@ -32,6 +36,8 @@ trait HasPeriod
 
     /**
      * Scope a query to only include records that have not started yet.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeNotStarted(Builder $query): void
     {
@@ -40,6 +46,8 @@ trait HasPeriod
 
     /**
      * Scope a query to only include records that started on or before a given date.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeStartedBy(Builder $query, Carbon|string $date): void
     {
@@ -48,6 +56,8 @@ trait HasPeriod
 
     /**
      * Scope a query to only include records that ended on or after a given date.
+     *
+     * @param  Builder<static>  $query
      */
     public function scopeEndedAfter(Builder $query, Carbon|string $date): void
     {

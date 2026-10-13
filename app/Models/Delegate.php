@@ -9,6 +9,7 @@ use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
 use App\Traits\HasPeriod;
+use Database\Factories\DelegateFactory;
 use Illuminate\Auth\MustVerifyEmail as AuthMustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
@@ -21,30 +22,37 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
 final class Delegate extends Model implements MustVerifyEmail
 {
-    use AuthMustVerifyEmail, HasApprovalStatus, HasPeriod, SoftDeletes;
+    use AuthMustVerifyEmail;
+    use HasApprovalStatus;
 
-    /** @use HasFactory<\Database\Factories\DelegateFactory> */
+    /** @use HasFactory<DelegateFactory> */
     use HasFactory;
 
+    use HasPeriod;
     use HasUuids;
+    use SoftDeletes;
 
-    public $fillable = [
+    /** @var list<string> */
+    protected $fillable = [
         'user_id',
         'organization_id',
         'seat_id',
         'email',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Organization, $this> */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /** @return BelongsTo<Seat, $this> */
     public function seat(): BelongsTo
     {
         return $this->belongsTo(Seat::class);
@@ -52,7 +60,7 @@ final class Delegate extends Model implements MustVerifyEmail
 
     protected static function booted(): void
     {
-        self::creating(function (Delegate $delegate) {
+        self::creating(function (Delegate $delegate): void {
             if (! $delegate->email && $delegate->user) {
                 $delegate->email = $delegate->user->email;
             }
@@ -67,6 +75,7 @@ final class Delegate extends Model implements MustVerifyEmail
         });
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

@@ -11,10 +11,15 @@ use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 final class UserResource extends Resource
 {
@@ -34,6 +39,9 @@ final class UserResource extends Resource
         return UsersTable::configure($table);
     }
 
+    /**
+     * @return array<class-string<RelationManager>|RelationGroup|RelationManagerConfiguration>
+     */
     public static function getRelations(): array
     {
         return [
@@ -42,6 +50,9 @@ final class UserResource extends Resource
         ];
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [
@@ -61,7 +72,10 @@ final class UserResource extends Resource
         return ['name', 'email'];
     }
 
-    public static function getGlobalSearchResultDetails($record): array
+    /**
+     * @return array<string, string>
+     */
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             __('user.email') => $record->email,

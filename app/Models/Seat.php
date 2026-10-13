@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\SeatFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,19 +15,25 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class Seat extends Model
 {
-    /** @use HasFactory<\Database\Factories\SeatFactory> */
-    use HasFactory, HasUuids, SoftDeletes;
+    /** @use HasFactory<SeatFactory> */
+    use HasFactory;
 
+    use HasUuids;
+    use SoftDeletes;
+
+    /** @var list<string> */
     protected $fillable = [
         'college_organization_id',
         'seat_number',
     ];
 
+    /** @return BelongsTo<CollegeOrganization, $this> */
     public function collegeOrganization(): BelongsTo
     {
         return $this->belongsTo(CollegeOrganization::class);
     }
 
+    /** @return HasMany<Delegate, $this> */
     public function delegates(): HasMany
     {
         return $this->hasMany(Delegate::class);
@@ -34,6 +41,8 @@ final class Seat extends Model
 
     /**
      * Proxies where this seat's holder is giving their proxy to another seat.
+     *
+     * @return HasMany<Proxy, $this>
      */
     public function proxiesGiven(): HasMany
     {
@@ -42,15 +51,15 @@ final class Seat extends Model
 
     /**
      * Proxies where this seat's holder is receiving proxy from another seat.
+     *
+     * @return HasMany<Proxy, $this>
      */
     public function proxiesReceived(): HasMany
     {
         return $this->hasMany(Proxy::class, 'proxy_holder_seat_id');
     }
 
-    /**
-     * Session sign-ins for this seat.
-     */
+    /** @return HasMany<SessionSignIn, $this> */
     public function signIns(): HasMany
     {
         return $this->hasMany(SessionSignIn::class);
@@ -111,22 +120,15 @@ final class Seat extends Model
 
     /**
      * Get the label for the seat.
-     * Format: "Short Name Org (College Name): Delegate1, Delegate2, ..."
+     * Format: "College Name: Delegate1, Delegate2, ..." ("Vide" when there are no delegates).
      */
     public function label(): string
     {
-        // $organization = $this->collegeOrganization->organization;
         $college = $this->collegeOrganization->college;
         $delegates = $this->delegates()->with('user')->get();
 
-        $delegateNames = $delegates->map(fn ($delegate) => $delegate->user->name)->join(', ');
+        $delegateNames = $delegates->map(fn (Delegate $delegate): string => $delegate->user->name)->join(', ');
 
-        // return sprintf(
-        //     '%s (%s): %s',
-        //     $organization->short_name,
-        //     $college->name,
-        //     $delegateNames ?: 'Vide'
-        // );
         return sprintf(
             '%s: %s',
             $college->name,
@@ -134,6 +136,7 @@ final class Seat extends Model
         );
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

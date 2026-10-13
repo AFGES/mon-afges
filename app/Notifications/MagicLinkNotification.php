@@ -14,9 +14,6 @@ final class MagicLinkNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         private readonly string $token,
         private readonly int $expiresInMinutes = 15
@@ -32,9 +29,6 @@ final class MagicLinkNotification extends Notification implements ShouldQueue
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         $url = URL::temporarySignedRoute(
@@ -53,17 +47,5 @@ final class MagicLinkNotification extends Notification implements ShouldQueue
             ->action('Se connecter', $url)
             ->line("Ce lien expirera dans {$this->expiresInMinutes} minutes.")
             ->line("Si vous n'avez pas demandé ce lien, ignorez simplement cet e-mail.");
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
-    {
-        return [
-            //
-        ];
     }
 }

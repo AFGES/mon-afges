@@ -8,6 +8,7 @@ use Exception;
 use Google\Client as GoogleClient;
 use Google\Service\Directory;
 use Google\Service\Directory\Member;
+use Google\Service\Exception as GoogleServiceException;
 use Illuminate\Support\Facades\Log;
 
 final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
@@ -38,7 +39,7 @@ final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
             ]);
 
             return true;
-        } catch (\Google\Service\Exception $e) {
+        } catch (GoogleServiceException $e) {
             // If user is already a member, consider it a success
             if ($e->getCode() === 409) {
                 Log::info('User already in Google Workspace delegate group', [
@@ -81,7 +82,7 @@ final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
             ]);
 
             return true;
-        } catch (\Google\Service\Exception $e) {
+        } catch (GoogleServiceException $e) {
             // If user is not a member, consider it a success
             if ($e->getCode() === 404) {
                 Log::info('User not in Google Workspace delegate group', [
@@ -119,7 +120,7 @@ final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
             $this->getService()->members->get($this->delegateGroup, $email);
 
             return true;
-        } catch (\Google\Service\Exception $e) {
+        } catch (GoogleServiceException $e) {
             if ($e->getCode() === 404) {
                 return false;
             }

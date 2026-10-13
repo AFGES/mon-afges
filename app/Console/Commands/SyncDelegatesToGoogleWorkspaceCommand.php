@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Services\DelegateGoogleWorkspaceSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -24,9 +25,6 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
      */
     protected $description = 'Sync delegates to Google Workspace group, removing users who are no longer delegates';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
         $serviceAccountJson = config('services.google.workspace.service_account_json');
@@ -52,9 +50,8 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
 
         $activeDelegateEmails = $syncService->getActiveDelegateEmails();
 
-        $this->info('Found '.$activeDelegateEmails->count().' active delegate(s)');
+        $this->info("Found {$activeDelegateEmails->count()} active delegate(s)");
 
-        // Initialize counters
         $alreadyInCount = 0;
         $addedCount = 0;
         $failedToAddCount = 0;
@@ -82,17 +79,14 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
             }
         }
 
-        // Perform the bulk sync operation
         $this->newLine();
         $this->info('Checking for users to remove from the group...');
         $this->newLine();
 
-        // Get all user emails and check for removals
-        $allUserEmails = \App\Models\User::whereNotNull('email')->get('email');
+        $allUserEmails = User::whereNotNull('email')->get('email');
 
         foreach ($allUserEmails as $userEmail) {
             $email = $userEmail->email;
-            // Skip if this user is an active delegate
             if ($activeDelegateEmails->contains($email)) {
                 continue;
             }
@@ -112,7 +106,6 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
             }
         }
 
-        // Summary
         $this->newLine();
         $this->info('Synchronization complete!');
         $this->table(

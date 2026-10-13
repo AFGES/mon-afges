@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\SessionSignInFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,10 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class SessionSignIn extends Model
 {
-    /** @use HasFactory<\Database\Factories\SessionSignInFactory> */
-    use HasFactory, HasUuids;
+    /** @use HasFactory<SessionSignInFactory> */
+    use HasFactory;
 
-    public $fillable = [
+    use HasUuids;
+
+    /** @var list<string> */
+    protected $fillable = [
         'democratic_time_session_id',
         'seat_id',
         'delegate_id',
@@ -23,16 +27,19 @@ final class SessionSignIn extends Model
         'signed_out_at',
     ];
 
+    /** @return BelongsTo<DemocraticTimeSession, $this> */
     public function democraticTimeSession(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeSession::class);
     }
 
+    /** @return BelongsTo<Seat, $this> */
     public function seat(): BelongsTo
     {
         return $this->belongsTo(Seat::class);
     }
 
+    /** @return BelongsTo<Delegate, $this> */
     public function delegate(): BelongsTo
     {
         return $this->belongsTo(Delegate::class);
@@ -40,6 +47,8 @@ final class SessionSignIn extends Model
 
     /**
      * The seat that signed in on behalf (via proxy).
+     *
+     * @return BelongsTo<Seat, $this>
      */
     public function signedInBySeat(): BelongsTo
     {
@@ -80,6 +89,7 @@ final class SessionSignIn extends Model
         return $this->signed_in_by_seat_id !== null && $this->signed_in_by_seat_id !== $this->seat_id;
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

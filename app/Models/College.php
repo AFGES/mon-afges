@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\CollegeFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,9 +14,12 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 final class College extends Model
 {
-    /** @use HasFactory<\Database\Factories\CollegeFactory> */
-    use HasFactory, HasUuids;
+    /** @use HasFactory<CollegeFactory> */
+    use HasFactory;
 
+    use HasUuids;
+
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'can_vote',
@@ -59,6 +63,7 @@ final class College extends Model
             ->withTimestamps();
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

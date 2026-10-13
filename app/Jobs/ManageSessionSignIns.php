@@ -13,9 +13,6 @@ final class ManageSessionSignIns implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         $openedCount = 0;

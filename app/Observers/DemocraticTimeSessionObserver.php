@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Models\DemocraticTimeSession;
+use Carbon\Carbon;
 
 final class DemocraticTimeSessionObserver
 {
@@ -34,7 +35,6 @@ final class DemocraticTimeSessionObserver
      */
     public function updated(DemocraticTimeSession $session): void
     {
-        // Check if ended_at was changed
         if (! $session->isDirty('ended_at')) {
             return;
         }
@@ -49,7 +49,7 @@ final class DemocraticTimeSessionObserver
 
         // Convert to Carbon if string
         if (is_string($oldEndedAt)) {
-            $oldEndedAt = \Carbon\Carbon::parse($oldEndedAt);
+            $oldEndedAt = Carbon::parse($oldEndedAt);
         }
 
         // Update sign-ins where signed_out_at matches the old ended_at

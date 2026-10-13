@@ -12,11 +12,15 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
 final class ManageDelegates extends MyProfileComponent
 {
+    /** @var array<string, mixed> */
     public array $data = [];
 
     protected string $view = 'livewire.profile.manage-delegates';
@@ -34,7 +38,10 @@ final class ManageDelegates extends MyProfileComponent
         $this->form->fill($this->data);
     }
 
-    public function getDelegatesProperty()
+    /**
+     * @return Collection<int, Delegate>
+     */
+    public function getDelegatesProperty(): Collection
     {
         return Delegate::withoutGlobalScopes()
             ->where('user_id', auth()->id())
@@ -67,7 +74,7 @@ final class ManageDelegates extends MyProfileComponent
                             ->email()
                             ->required()
                             ->maxLength(255)
-                            ->default(fn () => auth()->user()->email)
+                            ->default(fn (): string => auth()->user()->email)
                             ->validationMessages([
                                 'required' => __('profile.form.email.required'),
                                 'email' => __('profile.form.email.invalid'),
@@ -75,19 +82,19 @@ final class ManageDelegates extends MyProfileComponent
                         Select::make('seat_id')
                             ->label(__('profile.form.seat.label'))
                             ->helperText(__('profile.form.seat.helper'))
-                            ->options(function (callable $get) {
+                            ->options(function (Get $get) {
                                 $organizationId = $get('organization_id');
                                 if (! $organizationId) {
                                     return [];
                                 }
 
                                 return Seat::query()
-                                    ->whereHas('collegeOrganization', function ($query) use ($organizationId) {
+                                    ->whereHas('collegeOrganization', function (Builder $query) use ($organizationId) {
                                         $query->where('organization_id', $organizationId);
                                     })
                                     ->with(['collegeOrganization.college', 'collegeOrganization.organization'])
                                     ->get()
-                                    ->mapWithKeys(fn ($seat) => [$seat->id => $seat->label()]);
+                                    ->mapWithKeys(fn (Seat $seat) => [$seat->id => $seat->label()]);
                             })
                             ->searchable()
                             ->preload()
@@ -137,7 +144,6 @@ final class ManageDelegates extends MyProfileComponent
             ]);
         }
 
-        // Reset the applications field
         $this->data['applications'] = [];
         $this->form->fill();
 

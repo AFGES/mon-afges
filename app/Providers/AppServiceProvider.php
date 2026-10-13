@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\ApprovalStatus;
+use App\Livewire\Profile\ManageDelegates;
+use App\Livewire\Profile\ManageVolunteers;
 use App\Models\Delegate;
 use App\Models\DemocraticTimeSession;
 use App\Models\DemocraticTimeType;
@@ -22,24 +24,21 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Telescope\TelescopeServiceProvider as LaravelTelescopeServiceProvider;
 use Livewire\Livewire;
+use SocialiteProviders\Google\Provider as GoogleProvider;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        if ($this->app->environment('local') && class_exists(\Laravel\Telescope\TelescopeServiceProvider::class)) {
-            $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
+        if ($this->app->environment('local') && class_exists(LaravelTelescopeServiceProvider::class)) {
+            $this->app->register(LaravelTelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
         }
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         // Enable strict mode for Eloquent models in non-production environments
@@ -60,11 +59,11 @@ final class AppServiceProvider extends ServiceProvider
         DemocraticTimeType::observe(DemocraticTimeTypeObserver::class);
 
         // Register custom Filament Breezy profile components
-        Livewire::component('manage_volunteers', \App\Livewire\Profile\ManageVolunteers::class);
-        Livewire::component('manage_delegates', \App\Livewire\Profile\ManageDelegates::class);
+        Livewire::component('manage_volunteers', ManageVolunteers::class);
+        Livewire::component('manage_delegates', ManageDelegates::class);
 
-        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
-            $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
+        Event::listen(function (SocialiteWasCalled $event): void {
+            $event->extendSocialite('google', GoogleProvider::class);
         });
 
         Gate::before(function (User $user, string $ability): ?bool {
@@ -77,7 +76,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function blueprintApprovalStatusMacro(): void
     {
-        Blueprint::macro('approvalStatus', function (?string $after = null) {
+        Blueprint::macro('approvalStatus', function (?string $after = null): void {
             /** @var Blueprint $this */
             $approvalStatus = $this->enum('approval_status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value);
             if ($after !== null) {
@@ -88,7 +87,7 @@ final class AppServiceProvider extends ServiceProvider
             $this->text('rejection_reason')->nullable()->after('approved_by');
         });
 
-        Blueprint::macro('dropApprovalStatus', function () {
+        Blueprint::macro('dropApprovalStatus', function (): void {
             /** @var Blueprint $this */
             $this->dropForeign(['approved_by']);
             $this->dropColumn(['approval_status', 'approved_at', 'approved_by', 'rejection_reason']);
@@ -100,7 +99,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     private function blueprintPeriodMacro(): void
     {
-        Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null) {
+        Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null): void {
             /** @var Blueprint $this */
             if ($startType === 'datetime') {
                 $this->datetime('started_at')->useCurrent()->after($after);
@@ -111,7 +110,7 @@ final class AppServiceProvider extends ServiceProvider
             }
         });
 
-        Blueprint::macro('dropPeriod', function () {
+        Blueprint::macro('dropPeriod', function (): void {
             /** @var Blueprint $this */
             $this->dropColumn(['started_at', 'ended_at']);
         });

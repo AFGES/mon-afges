@@ -21,27 +21,22 @@ final class EnsureHasVolunteerOrganization
     {
         $user = Auth::user();
 
-        // Skip if user is not authenticated
         if (! $user) {
             return $next($request);
         }
 
-        // Skip if user is a super admin
         if ($user->hasRole('super_admin')) {
             return $next($request);
         }
 
-        // Skip if already on the profile page
         if ($request->routeIs('filament.root.pages.my-profile')) {
             return $next($request);
         }
 
-        // Skip if on logout route
         if ($request->routeIs('filament.root.auth.logout')) {
             return $next($request);
         }
 
-        // Skip if there are no organizations available
         if (Organization::query()->doesntExist()) {
             return $next($request);
         }

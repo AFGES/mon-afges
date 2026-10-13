@@ -12,12 +12,13 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 final class VolunteersRelationManager extends RelationManager
 {
     protected static string $relationship = 'volunteers';
 
-    public static function getTitle($ownerRecord, $livewire): string
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('volunteer.relation_managers.user_title');
     }

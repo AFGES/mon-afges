@@ -21,12 +21,19 @@ final class SessionQuorumStatusWidget extends ChartWidget
         $status = $this->record->getQuorumStatus();
 
         if ($status['met']) {
-            return __('emargement.quorum.met').' - '.$status['percentage'].'%';
+            $label = __('emargement.quorum.met');
+
+            return "{$label} - {$status['percentage']}%";
         }
 
-        return __('emargement.quorum.not_met').' - '.$status['percentage'].'%';
+        $label = __('emargement.quorum.not_met');
+
+        return "{$label} - {$status['percentage']}%";
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getData(): array
     {
         if (! $this->record) {
@@ -39,6 +46,8 @@ final class SessionQuorumStatusWidget extends ChartWidget
         $status = $this->record->getQuorumStatus();
         $presentCount = $status['present_count'];
         $absentCount = $status['total_eligible'] - $status['present_count'];
+        $presentLabel = __('emargement.present');
+        $absentLabel = __('emargement.absent');
 
         return [
             'datasets' => [
@@ -51,8 +60,8 @@ final class SessionQuorumStatusWidget extends ChartWidget
                 ],
             ],
             'labels' => [
-                __('emargement.present').' ('.$presentCount.')',
-                __('emargement.absent').' ('.$absentCount.')',
+                "{$presentLabel} ({$presentCount})",
+                "{$absentLabel} ({$absentCount})",
             ],
         ];
     }

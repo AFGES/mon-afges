@@ -20,9 +20,6 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
      */
     private string $translationKey;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         public Model $approvable,
         ?string $translationKey = null,
@@ -40,9 +37,6 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)

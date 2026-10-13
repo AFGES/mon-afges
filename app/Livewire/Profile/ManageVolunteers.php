@@ -12,10 +12,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Collection;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
 final class ManageVolunteers extends MyProfileComponent
 {
+    /** @var array<string, mixed> */
     public array $data = [];
 
     protected string $view = 'livewire.profile.manage-volunteers';
@@ -33,7 +35,10 @@ final class ManageVolunteers extends MyProfileComponent
         $this->form->fill($this->data);
     }
 
-    public function getVolunteersProperty()
+    /**
+     * @return Collection<int, Volunteer>
+     */
+    public function getVolunteersProperty(): Collection
     {
         return Volunteer::withoutGlobalScopes()
             ->where('user_id', auth()->id())
@@ -105,7 +110,6 @@ final class ManageVolunteers extends MyProfileComponent
             ]);
         }
 
-        // Reset the organizations field
         $this->data['organizations'] = [];
         $this->form->fill();
 

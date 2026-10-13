@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -17,8 +18,12 @@ use Spatie\Permission\Traits\HasRoles;
 
 final class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasRoles, HasUuids, Notifiable;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory;
+
+    use HasRoles;
+    use HasUuids;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -44,24 +49,20 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     ];
 
     /**
-     * Permission for access to the panel
+     * Only users with an @afges.org email address may access the panel.
      */
     final public function canAccessPanel(Panel $panel): bool
     {
         return Str::endsWith($this->email, '@afges.org');
     }
 
-    /**
-     * Get all volunteer positions for the user.
-     */
+    /** @return HasMany<Volunteer, $this> */
     public function volunteers(): HasMany
     {
         return $this->hasMany(Volunteer::class);
     }
 
-    /**
-     * Get all delegate positions for the user.
-     */
+    /** @return HasMany<Delegate, $this> */
     public function delegates(): HasMany
     {
         return $this->hasMany(Delegate::class);

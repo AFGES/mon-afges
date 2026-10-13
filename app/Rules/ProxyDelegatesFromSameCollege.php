@@ -8,6 +8,7 @@ use App\Models\College;
 use App\Models\Seat;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 final class ProxyDelegatesFromSameCollege implements ValidationRule
 {
@@ -18,7 +19,7 @@ final class ProxyDelegatesFromSameCollege implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string, ?string=): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -39,7 +40,6 @@ final class ProxyDelegatesFromSameCollege implements ValidationRule
         $delegatorCollegeId = $delegatorSeat->collegeOrganization->college_id;
         $proxyHolderCollegeId = $proxyHolderSeat->collegeOrganization->college_id;
 
-        // Get the delegator's college configuration
         $delegatorCollege = College::find($delegatorCollegeId);
 
         if (! $delegatorCollege) {

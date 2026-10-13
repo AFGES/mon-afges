@@ -10,6 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 final class DelegateApprovalRequested extends Notification implements ShouldQueue
 {
@@ -19,6 +20,9 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
         public Delegate $delegate
     ) {}
 
+    /**
+     * @return array<int, string>
+     */
     public function via(object $notifiable): array
     {
         return ['mail'];
@@ -26,15 +30,17 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
-        $approveUrl = \Illuminate\Support\Facades\URL::signedRoute(
+        $approveUrl = URL::signedRoute(
             'delegates.approve',
             ['delegate' => $this->delegate->id]
         );
 
-        $rejectUrl = \Illuminate\Support\Facades\URL::signedRoute(
+        $rejectUrl = URL::signedRoute(
             'delegates.reject',
             ['delegate' => $this->delegate->id]
         );
+
+        $rejectLabel = __('delegate.notifications.approval_requested.reject_action');
 
         return (new MailMessage)
             ->subject(__('delegate.notifications.approval_requested.subject'))
@@ -56,7 +62,7 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
                 __('delegate.notifications.approval_requested.approve_action'),
                 $approveUrl
             )
-            ->line('['.__('delegate.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
+            ->line("[{$rejectLabel}]({$rejectUrl})")
             ->line(__('delegate.notifications.approval_requested.view_details', [
                 'url' => DelegateResource::getUrl('edit', ['record' => $this->delegate]),
             ]))

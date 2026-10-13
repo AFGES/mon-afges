@@ -6,9 +6,12 @@ namespace App\Models;
 
 use App\Enums\ApprovalStatus;
 use App\Models\Scopes\ApprovedScope;
+use App\Notifications\ProxyApprovedNotification;
 use App\Traits\HasApprovalStatus;
+use Database\Factories\ProxyFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,13 +20,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[ScopedBy([ApprovedScope::class])]
 final class Proxy extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProxyFactory> */
     use HasApprovalStatus;
 
+    /** @use HasFactory<ProxyFactory> */
     use HasFactory;
+
     use HasUuids;
 
-    public $fillable = [
+    /** @var list<string> */
+    protected $fillable = [
         'delegator_seat_id',
         'proxy_holder_seat_id',
         'democratic_time_session_id',
@@ -39,6 +44,8 @@ final class Proxy extends Model
 
     /**
      * The seat whose holder is giving their proxy (cannot be present).
+     *
+     * @return BelongsTo<Seat, $this>
      */
     public function delegatorSeat(): BelongsTo
     {
@@ -47,12 +54,15 @@ final class Proxy extends Model
 
     /**
      * The seat whose holder is receiving the proxy (will vote on behalf of delegator seat holder).
+     *
+     * @return BelongsTo<Seat, $this>
      */
     public function proxyHolderSeat(): BelongsTo
     {
         return $this->belongsTo(Seat::class, 'proxy_holder_seat_id');
     }
 
+    /** @return BelongsTo<DemocraticTimeSession, $this> */
     public function democraticTimeSession(): BelongsTo
     {
         return $this->belongsTo(DemocraticTimeSession::class);
@@ -91,7 +101,7 @@ final class Proxy extends Model
     {
         $delegates = $this->delegatorSeat->delegates()
             ->where('started_at', '<=', now())
-            ->where(function ($query) {
+            ->where(function (Builder $query): void {
                 $query->whereNull('ended_at')
                     ->orWhere('ended_at', '>=', now());
             })
@@ -99,11 +109,12 @@ final class Proxy extends Model
 
         foreach ($delegates as $delegate) {
             if ($delegate->user) {
-                $delegate->user->notify(new \App\Notifications\ProxyApprovedNotification($this));
+                $delegate->user->notify(new ProxyApprovedNotification($this));
             }
         }
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

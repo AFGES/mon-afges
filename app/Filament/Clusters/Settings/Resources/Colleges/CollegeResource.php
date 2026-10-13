@@ -12,6 +12,10 @@ use App\Filament\Clusters\Settings\Resources\Colleges\Tables\CollegesTable;
 use App\Filament\Clusters\Settings\SettingsCluster;
 use App\Models\College;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -45,6 +49,9 @@ final class CollegeResource extends Resource
         return CollegesTable::configure($table);
     }
 
+    /**
+     * @return array<class-string<RelationManager>|RelationGroup|RelationManagerConfiguration>
+     */
     public static function getRelations(): array
     {
         return [
@@ -52,6 +59,9 @@ final class CollegeResource extends Resource
         ];
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

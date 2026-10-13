@@ -116,6 +116,8 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
 
     /**
      * Get all active delegate emails that should be in the Google Workspace group.
+     *
+     * @return Collection<int, string>
      */
     public function getActiveDelegateEmails(): Collection
     {
@@ -170,6 +172,14 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
     /**
      * Sync all delegates to the Google Workspace group.
      * Returns an array with sync statistics.
+     *
+     * @return array{
+     *     already_in_group: int,
+     *     added: int,
+     *     removed: int,
+     *     failed_to_add: int,
+     *     failed_to_remove: int,
+     * }
      */
     public function syncAll(bool $dryRun = false): array
     {
@@ -214,7 +224,6 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         $allUserEmails = User::whereNotNull('email')->pluck('email')->toArray();
 
         foreach ($allUserEmails as $email) {
-            // Skip if this user is an active delegate
             if ($activeDelegateEmails->contains($email)) {
                 continue;
             }

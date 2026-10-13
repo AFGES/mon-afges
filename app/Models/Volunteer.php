@@ -9,6 +9,7 @@ use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
 use App\Traits\HasPeriod;
+use Database\Factories\VolunteerFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,29 +22,33 @@ final class Volunteer extends Model
 {
     use HasApprovalStatus;
 
-    /** @use HasFactory<\Database\Factories\VolunteerFactory> */
+    /** @use HasFactory<VolunteerFactory> */
     use HasFactory;
 
     use HasPeriod;
     use HasUuids;
     use SoftDeletes;
 
-    public $fillable = [
+    /** @var list<string> */
+    protected $fillable = [
         'position_title',
         'user_id',
         'organization_id',
     ];
 
+    /** @return BelongsTo<Organization, $this> */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

@@ -11,11 +11,16 @@ use App\Filament\Resources\Organizations\Schemas\OrganizationForm;
 use App\Filament\Resources\Organizations\Tables\OrganizationsTable;
 use App\Models\Organization;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 final class OrganizationResource extends Resource
@@ -46,6 +51,9 @@ final class OrganizationResource extends Resource
         return OrganizationsTable::configure($table);
     }
 
+    /**
+     * @return array<class-string<RelationManager>|RelationGroup|RelationManagerConfiguration>
+     */
     public static function getRelations(): array
     {
         return [
@@ -54,6 +62,9 @@ final class OrganizationResource extends Resource
         ];
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [
@@ -71,12 +82,18 @@ final class OrganizationResource extends Resource
             ]);
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function getGloballySearchableAttributes(): array
     {
         return ['short_name', 'legal_name', 'domain'];
     }
 
-    public static function getGlobalSearchResultDetails($record): array
+    /**
+     * @return array<string, string>
+     */
+    public static function getGlobalSearchResultDetails(Model $record): array
     {
         return [
             __('organization.fields.legal_name') => $record->legal_name,

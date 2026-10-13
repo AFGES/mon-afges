@@ -14,6 +14,7 @@ use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Schemas\SessionForm
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Tables\SessionsTable;
 use App\Models\DemocraticTimeSession;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -49,6 +50,9 @@ final class SessionResource extends Resource
         return SessionsTable::configure($table);
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [
@@ -60,6 +64,9 @@ final class SessionResource extends Resource
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
     public static function getGloballySearchableAttributes(): array
     {
         return ['location', 'democraticTimeType.name'];

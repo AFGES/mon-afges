@@ -12,6 +12,10 @@ use App\Filament\Clusters\DemocraticTimes\Resources\SessionSignIns\Schemas\Sessi
 use App\Filament\Clusters\DemocraticTimes\Resources\SessionSignIns\Tables\SessionSignInsTable;
 use App\Models\SessionSignIn;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -54,6 +58,9 @@ final class SessionSignInResource extends Resource
         return SessionSignInsTable::configure($table);
     }
 
+    /**
+     * @return array<class-string<RelationManager>|RelationGroup|RelationManagerConfiguration>
+     */
     public static function getRelations(): array
     {
         return [
@@ -61,6 +68,9 @@ final class SessionSignInResource extends Resource
         ];
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

@@ -12,25 +12,16 @@ use Illuminate\Contracts\Auth\Authenticatable;
 
 final class MarkEmailAsVerifiedOnSocialiteLogin
 {
-    /**
-     * Handle the Login event.
-     */
     public function handleLogin(Login $event): void
     {
         $this->markEmailAsVerified($event->socialiteUser->getUser());
     }
 
-    /**
-     * Handle the Registered event.
-     */
     public function handleRegistered(Registered $event): void
     {
         $this->markEmailAsVerified($event->socialiteUser->getUser());
     }
 
-    /**
-     * Handle the SocialiteUserConnected event.
-     */
     public function handleSocialiteUserConnected(SocialiteUserConnected $event): void
     {
         $this->markEmailAsVerified($event->socialiteUser->getUser());

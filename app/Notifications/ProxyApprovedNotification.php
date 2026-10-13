@@ -14,13 +14,7 @@ final class ProxyApprovedNotification extends Notification implements ShouldQueu
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct(public Proxy $proxy)
-    {
-        //
-    }
+    public function __construct(public Proxy $proxy) {}
 
     /**
      * Get the notification's delivery channels.
@@ -32,9 +26,6 @@ final class ProxyApprovedNotification extends Notification implements ShouldQueu
         return ['mail', 'database'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)

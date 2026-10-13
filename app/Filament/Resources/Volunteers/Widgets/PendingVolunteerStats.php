@@ -15,6 +15,9 @@ final class PendingVolunteerStats extends StatsOverviewWidget
 {
     use HasWidgetShield;
 
+    /**
+     * @return array<Stat>
+     */
     protected function getStats(): array
     {
         $pendingCount = Volunteer::withoutGlobalScopes()

@@ -8,12 +8,10 @@ use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\VolunteerApprovalRequested;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 final class VolunteerObserver
 {
-    /**
-     * Handle the Volunteer "created" event.
-     */
     public function created(Volunteer $volunteer): void
     {
         $this->notifyApprovers($volunteer);
@@ -32,9 +30,8 @@ final class VolunteerObserver
             }
 
             Notification::send($approvers, new VolunteerApprovalRequested($volunteer));
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist) {
             // Permission doesn't exist yet, skip notification
-            return;
         }
     }
 }

@@ -10,14 +10,11 @@ use Illuminate\Database\Eloquent\Scope;
 
 final class CurrentlyScope implements Scope
 {
-    /**
-     * Apply the scope to a given Eloquent query builder.
-     */
     public function apply(Builder $builder, Model $model): void
     {
         $builder
             ->whereTodayOrBefore('started_at')
-            ->where(function (Builder $query) {
+            ->where(function (Builder $query): void {
                 $query->whereTodayOrAfter('ended_at')
                     ->orWhereNull('ended_at');
             });

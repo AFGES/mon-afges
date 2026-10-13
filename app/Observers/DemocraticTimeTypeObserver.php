@@ -14,7 +14,6 @@ final class DemocraticTimeTypeObserver
      */
     public function updated(DemocraticTimeType $democraticTimeType): void
     {
-        // Check if any quorum-related fields were changed
         $quorumFieldsChanged = $democraticTimeType->isDirty('calculate_quorum_per_college') ||
             $democraticTimeType->isDirty('quorum_percentage') ||
             $democraticTimeType->isDirty('include_proxies_in_quorum');
@@ -23,12 +22,10 @@ final class DemocraticTimeTypeObserver
             return;
         }
 
-        // Get all future sessions (started_at is in the future) for this type
         $futureSessions = $democraticTimeType->sessions()
             ->where('started_at', '>', now())
             ->get();
 
-        // Update each future session with the new quorum values
         foreach ($futureSessions as $session) {
             $updates = [];
 

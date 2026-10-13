@@ -27,16 +27,13 @@ final class MagicLinkController
         $user = User::where('email', $request->email)->first();
 
         if ($user) {
-            // Generate a random token
             $token = Str::random(64);
 
-            // Store hashed token and expiration
             $user->update([
                 'magic_link_token' => Hash::make($token),
                 'magic_link_token_expires_at' => now()->addMinutes(15),
             ]);
 
-            // Send the notification
             $user->notify(new MagicLinkNotification($token));
         }
 
@@ -85,12 +82,10 @@ final class MagicLinkController
             'magic_link_token_expires_at' => null,
         ]);
 
-        // Log in the user
         Auth::login($user, remember: true);
 
         $request->session()->regenerate();
 
-        // Redirect to the admin panel
         return redirect()->intended(filament()->getUrl());
     }
 }

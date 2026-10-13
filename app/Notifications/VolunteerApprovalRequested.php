@@ -10,6 +10,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 final class VolunteerApprovalRequested extends Notification implements ShouldQueue
 {
@@ -19,6 +20,9 @@ final class VolunteerApprovalRequested extends Notification implements ShouldQue
         public Volunteer $volunteer
     ) {}
 
+    /**
+     * @return array<int, string>
+     */
     public function via(object $notifiable): array
     {
         return ['mail'];
@@ -26,15 +30,17 @@ final class VolunteerApprovalRequested extends Notification implements ShouldQue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $approveUrl = \Illuminate\Support\Facades\URL::signedRoute(
+        $approveUrl = URL::signedRoute(
             'volunteers.approve',
             ['volunteer' => $this->volunteer->id]
         );
 
-        $rejectUrl = \Illuminate\Support\Facades\URL::signedRoute(
+        $rejectUrl = URL::signedRoute(
             'volunteers.reject',
             ['volunteer' => $this->volunteer->id]
         );
+
+        $rejectLabel = __('volunteer.notifications.approval_requested.reject_action');
 
         return (new MailMessage)
             ->subject(__('volunteer.notifications.approval_requested.subject'))
@@ -56,7 +62,7 @@ final class VolunteerApprovalRequested extends Notification implements ShouldQue
                 __('volunteer.notifications.approval_requested.approve_action'),
                 $approveUrl
             )
-            ->line('['.__('volunteer.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
+            ->line("[{$rejectLabel}]({$rejectUrl})")
             ->line(__('volunteer.notifications.approval_requested.view_details', [
                 'url' => VolunteerResource::getUrl('edit', ['record' => $this->volunteer]),
             ]))

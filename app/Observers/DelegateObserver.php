@@ -10,6 +10,7 @@ use App\Notifications\DelegateApprovalRequested;
 use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 final class DelegateObserver
 {
@@ -17,18 +18,12 @@ final class DelegateObserver
         private ?DelegateGoogleWorkspaceSyncServiceInterface $syncService = null
     ) {}
 
-    /**
-     * Handle the Delegate "created" event.
-     */
     public function created(Delegate $delegate): void
     {
         $this->notifyApprovers($delegate);
         $this->addToGroup($delegate);
     }
 
-    /**
-     * Handle the Delegate "updated" event.
-     */
     public function updated(Delegate $delegate): void
     {
         // If the delegate's end date was set, remove them from the group
@@ -37,17 +32,11 @@ final class DelegateObserver
         }
     }
 
-    /**
-     * Handle the Delegate "deleted" event.
-     */
     public function deleted(Delegate $delegate): void
     {
         $this->removeFromGroup($delegate);
     }
 
-    /**
-     * Handle the Delegate "restored" event.
-     */
     public function restored(Delegate $delegate): void
     {
         $this->addToGroup($delegate);
@@ -80,9 +69,8 @@ final class DelegateObserver
             }
 
             Notification::send($approvers, new DelegateApprovalRequested($delegate));
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist) {
             // Permission doesn't exist yet, skip notification
-            return;
         }
     }
 

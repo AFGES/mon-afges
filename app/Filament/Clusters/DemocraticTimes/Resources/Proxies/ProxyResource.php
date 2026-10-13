@@ -12,6 +12,10 @@ use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Schemas\ProxyForm;
 use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Tables\ProxiesTable;
 use App\Models\Proxy;
 use BackedEnum;
+use Filament\Resources\Pages\PageRegistration;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -57,6 +61,9 @@ final class ProxyResource extends Resource
         return ProxiesTable::configure($table);
     }
 
+    /**
+     * @return array<class-string<RelationManager>|RelationGroup|RelationManagerConfiguration>
+     */
     public static function getRelations(): array
     {
         return [
@@ -64,6 +71,9 @@ final class ProxyResource extends Resource
         ];
     }
 
+    /**
+     * @return array<string, PageRegistration>
+     */
     public static function getPages(): array
     {
         return [

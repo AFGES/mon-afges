@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\DemocraticTimeTypeFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,10 +12,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class DemocraticTimeType extends Model
 {
-    /** @use HasFactory<\Database\Factories\DemocraticTimeTypeFactory> */
-    use HasFactory, HasUuids;
+    /** @use HasFactory<DemocraticTimeTypeFactory> */
+    use HasFactory;
 
-    public $fillable = [
+    use HasUuids;
+
+    /** @var list<string> */
+    protected $fillable = [
         'name',
         'acronym',
         'convocation_interval_days',
@@ -23,11 +27,13 @@ final class DemocraticTimeType extends Model
         'include_proxies_in_quorum',
     ];
 
+    /** @return HasMany<DemocraticTimeSession, $this> */
     public function sessions(): HasMany
     {
         return $this->hasMany(DemocraticTimeSession::class);
     }
 
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

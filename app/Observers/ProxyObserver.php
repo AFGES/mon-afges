@@ -9,12 +9,10 @@ use App\Models\Proxy;
 use App\Models\User;
 use App\Notifications\ProxyApprovalNotification;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 final class ProxyObserver
 {
-    /**
-     * Handle the Proxy "created" event.
-     */
     public function created(Proxy $proxy): void
     {
         // Notify users who can approve proxies
@@ -24,14 +22,11 @@ final class ProxyObserver
             if ($approvers->isNotEmpty()) {
                 Notification::send($approvers, new ProxyApprovalNotification($proxy));
             }
-        } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
+        } catch (PermissionDoesNotExist) {
             // Permission doesn't exist yet, skip notification
         }
     }
 
-    /**
-     * Handle the Proxy "updated" event.
-     */
     public function updated(Proxy $proxy): void
     {
         // Send notification to the delegator seat's delegate when proxy is approved

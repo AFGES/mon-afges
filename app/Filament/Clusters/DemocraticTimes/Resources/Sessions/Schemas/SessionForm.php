@@ -97,7 +97,7 @@ final class SessionForm
 
                         TextInput::make('quorum_percentage_display')
                             ->label(__('democratic_time_session.fields.quorum_percentage'))
-                            ->default(fn ($record) => $record?->quorum_percentage ? $record->quorum_percentage.'%' : '-')
+                            ->default(fn ($record) => $record?->quorum_percentage ? "{$record->quorum_percentage}%" : '-')
                             ->disabled()
                             ->dehydrated(false),
 

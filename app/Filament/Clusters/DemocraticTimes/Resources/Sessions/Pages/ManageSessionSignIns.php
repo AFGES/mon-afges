@@ -16,6 +16,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Widgets\Widget;
+use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Database\Eloquent\Builder;
 
 final class ManageSessionSignIns extends ManageRelatedRecords
@@ -117,6 +119,9 @@ final class ManageSessionSignIns extends ManageRelatedRecords
             ]);
     }
 
+    /**
+     * @return array<class-string<Widget>|WidgetConfiguration>
+     */
     protected function getHeaderWidgets(): array
     {
         return [

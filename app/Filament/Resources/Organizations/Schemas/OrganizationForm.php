@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Organizations\Schemas;
 
 use App\Models\College;
+use App\Models\CollegeOrganization;
 use Exception;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -151,7 +153,7 @@ final class OrganizationForm
                                 }
 
                                 $data = $record->colleges->map(function ($college) {
-                                    $collegeOrg = \App\Models\CollegeOrganization::where('college_id', $college->id)
+                                    $collegeOrg = CollegeOrganization::where('college_id', $college->id)
                                         ->where('organization_id', $college->pivot->organization_id)
                                         ->first();
 
@@ -175,13 +177,13 @@ final class OrganizationForm
 
                                     $record->syncCollegesWithSeats($collegesData);
 
-                                    \Filament\Notifications\Notification::make()
+                                    Notification::make()
                                         ->title(__('organization.notifications.seats_updated.title'))
                                         ->body(__('organization.notifications.seats_updated.body'))
                                         ->success()
                                         ->send();
                                 } catch (Exception $e) {
-                                    \Filament\Notifications\Notification::make()
+                                    Notification::make()
                                         ->title(__('organization.notifications.seats_update_failed.title'))
                                         ->body($e->getMessage())
                                         ->danger()

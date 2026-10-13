@@ -17,10 +17,14 @@ final class ProxyForm
         return $schema
             ->components([
                 Select::make('delegator_seat_id')
+                    ->label(__('proxy.fields.delegator_seat'))
+                    ->helperText(__('proxy.fields.delegator_seat_helper'))
                     ->relationship('delegatorSeat', 'id')
                     ->required()
                     ->live(),
                 Select::make('proxy_holder_seat_id')
+                    ->label(__('proxy.fields.proxy_holder_seat'))
+                    ->helperText(__('proxy.fields.proxy_holder_seat_helper'))
                     ->relationship('proxyHolderSeat', 'id')
                     ->required()
                     ->rules([
@@ -29,10 +33,16 @@ final class ProxyForm
                         ),
                     ]),
                 Select::make('democratic_time_session_id')
+                    ->label(__('proxy.fields.democratic_time_session'))
+                    ->helperText(__('proxy.fields.democratic_time_session_helper'))
                     ->relationship('democraticTimeSession', 'id')
                     ->required(),
-                DateTimePicker::make('started_at'),
-                DateTimePicker::make('ended_at'),
+                DateTimePicker::make('started_at')
+                    ->label(__('proxy.fields.started_at'))
+                    ->helperText(__('proxy.fields.started_at_helper')),
+                DateTimePicker::make('ended_at')
+                    ->label(__('proxy.fields.ended_at'))
+                    ->helperText(__('proxy.fields.ended_at_helper')),
             ]);
     }
 }

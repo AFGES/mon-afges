@@ -67,6 +67,14 @@ final class UserResource extends Resource
         return __('user.label');
     }
 
+    public static function getPluralModelLabel(): string
+    {
+        return __('user.plural');
+    }
+
+    /**
+     * @return array<int, string>
+     */
     public static function getGloballySearchableAttributes(): array
     {
         return ['name', 'email'];

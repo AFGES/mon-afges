@@ -78,8 +78,8 @@ final class SessionSignInsTable
                 SelectFilter::make('is_signed_in')
                     ->label(__('emargement.fields.is_signed_in'))
                     ->options([
-                        'yes' => __('Présent-e'),
-                        'no' => __('Sorti-e'),
+                        'yes' => __('emargement.states.present'),
+                        'no' => __('emargement.states.signed_out'),
                     ])
                     ->query(function ($query, $state) {
                         if ($state['value'] === 'yes') {

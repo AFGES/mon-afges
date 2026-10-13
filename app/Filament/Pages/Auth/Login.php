@@ -9,6 +9,7 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -59,8 +60,8 @@ final class Login extends BaseLogin
         }
 
         Notification::make()
-            ->title('Lien envoyé')
-            ->body('Si un compte existe avec cette adresse e-mail, un lien de connexion vous a été envoyé.')
+            ->title(__('login.magic_link.sent.title'))
+            ->body(__('login.magic_link.sent.body'))
             ->success()
             ->send();
     }
@@ -89,20 +90,15 @@ final class Login extends BaseLogin
      */
     public function content(Schema $schema): Schema
     {
+        $toggleLabel = $this->showMagicLinkForm
+            ? __('login.toggle.password')
+            : __('login.toggle.magic_link');
+
         return parent::content($schema)
             ->components([
                 ...(parent::content($schema)->getComponents()),
-                \Filament\Schemas\Components\Html::make(
-                    '<div class="mt-4 text-center">
-                        <button
-                            type="button"
-                            wire:click="toggleMagicLinkForm"
-                            class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium underline underline-offset-4 outline-none transition duration-75"
-                        >
-                            '.($this->showMagicLinkForm ? 'Se connecter avec un mot de passe' : 'Se connecter avec un lien magique').'
-                        </button>
-                    </div>'
-                ),
+                View::make('filament.pages.auth.magic-link-toggle')
+                    ->viewData(['toggleLabel' => $toggleLabel]),
             ]);
     }
 }

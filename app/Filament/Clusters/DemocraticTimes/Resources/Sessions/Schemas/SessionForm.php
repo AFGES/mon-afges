@@ -103,7 +103,7 @@ final class SessionForm
 
                         TextInput::make('include_proxies_in_quorum_display')
                             ->label(__('democratic_time_session.fields.include_proxies_in_quorum'))
-                            ->default(fn ($record) => $record?->include_proxies_in_quorum ? __('Oui') : __('Non'))
+                            ->default(fn ($record) => $record?->include_proxies_in_quorum ? __('common.yes') : __('common.no'))
                             ->disabled()
                             ->dehydrated(false),
                     ])

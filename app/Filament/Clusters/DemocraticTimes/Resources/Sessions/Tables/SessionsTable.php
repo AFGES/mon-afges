@@ -33,7 +33,7 @@ final class SessionsTable
                     ->label(__('democratic_time_session.fields.ended_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->placeholder('En cours'),
+                    ->placeholder(__('democratic_time_session.status.ongoing')),
 
                 TextColumn::make('location')
                     ->label(__('democratic_time_session.fields.location'))
@@ -66,7 +66,7 @@ final class SessionsTable
                     ->sortable(),
 
                 TextColumn::make('status')
-                    ->label('Statut')
+                    ->label(__('democratic_time_session.fields.status'))
                     ->badge()
                     ->getStateUsing(function ($record): string {
                         if ($record->isCurrentlyActive()) {
@@ -86,11 +86,13 @@ final class SessionsTable
                     }),
 
                 TextColumn::make('created_at')
+                    ->label(__('common.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
+                    ->label(__('common.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

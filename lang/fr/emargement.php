@@ -28,6 +28,11 @@ return [
         'not_opened' => 'pas encore ouvert',
     ],
 
+    'states' => [
+        'present' => 'Présent-e',
+        'signed_out' => 'Sorti-e',
+    ],
+
     'filters' => [
         'currently_signed_in' => 'Actuellement présent-e-s',
         'signed_out' => 'Parti-e-s',

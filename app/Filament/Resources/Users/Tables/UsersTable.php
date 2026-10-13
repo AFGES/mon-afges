@@ -18,16 +18,21 @@ final class UsersTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('user.fields.name'))
                     ->searchable(),
                 TextColumn::make('email')
+                    ->label(__('user.fields.email'))
                     ->searchable(),
                 CheckboxColumn::make('email_verified_at')
+                    ->label(__('user.fields.email_verified_at'))
                     ->disabled(),
                 TextColumn::make('created_at')
+                    ->label(__('common.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('common.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

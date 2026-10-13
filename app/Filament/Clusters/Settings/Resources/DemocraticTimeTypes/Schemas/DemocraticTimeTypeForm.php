@@ -33,7 +33,7 @@ final class DemocraticTimeTypeForm
                     ->required()
                     ->numeric()
                     ->minValue(1)
-                    ->suffix('jours')
+                    ->suffix(__('democratic_time_type.suffixes.days'))
                     ->columnSpan(3),
 
                 Section::make(__('democratic_time_type.sections.quorum_configuration'))

@@ -11,7 +11,11 @@ return [
         'convocation_interval_days' => 'Délai de convocation (jours)',
         'calculate_quorum_per_college' => 'Calculer le quorum par collège',
         'quorum_percentage' => 'Pourcentage requis pour le quorum',
+        'sessions_count' => 'Nombre de séances',
         'include_proxies_in_quorum' => 'Inclure les procurations dans le quorum',
+    ],
+    'suffixes' => [
+        'days' => 'jours',
     ],
     'sections' => [
         'quorum_configuration' => 'Configuration du quorum',

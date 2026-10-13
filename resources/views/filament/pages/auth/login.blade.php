@@ -29,9 +29,9 @@
             class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium underline underline-offset-4 outline-none transition duration-75 hover:text-primary-500 focus-visible:text-primary-500 dark:hover:text-primary-400 dark:focus-visible:text-primary-400"
         >
             @if ($showMagicLinkForm)
-                Se connecter avec un mot de passe
+                {{ __('login.toggle.password') }}
             @else
-                Se connecter avec un lien magique
+                {{ __('login.toggle.magic_link') }}
             @endif
         </button>
     </div>

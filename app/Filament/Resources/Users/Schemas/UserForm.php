@@ -16,16 +16,21 @@ final class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('user.fields.name'))
                     ->required(),
                 TextInput::make('email')
+                    ->label(__('user.fields.email'))
                     ->email()
                     ->required(),
                 DateTimePicker::make('email_verified_at')
+                    ->label(__('user.fields.email_verified_at'))
                     ->disabled(),
                 TextInput::make('password')
+                    ->label(__('user.fields.password'))
                     ->password()
                     ->disabled(),
                 Select::make('roles')
+                    ->label(__('user.fields.roles'))
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()

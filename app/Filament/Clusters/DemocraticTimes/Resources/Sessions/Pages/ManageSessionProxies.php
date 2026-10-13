@@ -58,6 +58,7 @@ final class ManageSessionProxies extends ManageRelatedRecords
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('approval_status')
+                    ->label(__('approval.fields.status'))
                     ->badge()
                     ->sortable(),
                 TextColumn::make('started_at')

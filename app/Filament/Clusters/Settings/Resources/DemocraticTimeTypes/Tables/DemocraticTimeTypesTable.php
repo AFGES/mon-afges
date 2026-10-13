@@ -31,19 +31,21 @@ final class DemocraticTimeTypesTable
                     ->label(__('democratic_time_type.fields.convocation_interval_days'))
                     ->numeric()
                     ->sortable()
-                    ->suffix(' jours'),
+                    ->suffix(' '.__('democratic_time_type.suffixes.days')),
 
                 TextColumn::make('sessions_count')
-                    ->label('Nombre de séances')
+                    ->label(__('democratic_time_type.fields.sessions_count'))
                     ->counts('sessions')
                     ->sortable(),
 
                 TextColumn::make('created_at')
+                    ->label(__('common.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
+                    ->label(__('common.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

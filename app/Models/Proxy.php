@@ -87,7 +87,11 @@ final class Proxy extends Model
      */
     public function areSeatsFromSameCollege(): bool
     {
-        if (! $this->delegatorSeat || ! $this->proxyHolderSeat) {
+        if (! $this->delegatorSeat) {
+            return false;
+        }
+
+        if (! $this->proxyHolderSeat) {
             return false;
         }
 

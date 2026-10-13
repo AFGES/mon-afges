@@ -101,13 +101,16 @@ final class AppServiceProvider extends ServiceProvider
     {
         Blueprint::macro('period', function (string $startType = 'datetime', ?string $after = null): void {
             /** @var Blueprint $this */
-            if ($startType === 'datetime') {
-                $this->datetime('started_at')->useCurrent()->after($after);
-                $this->datetime('ended_at')->nullable()->after('started_at');
-            } else {
-                $this->date('started_at')->useCurrent()->after($after);
-                $this->date('ended_at')->nullable()->after('started_at');
+            $startedAt = $startType === 'datetime'
+                ? $this->datetime('started_at')->useCurrent()
+                : $this->date('started_at')->useCurrent();
+            if ($after !== null) {
+                $startedAt->after($after);
             }
+            $endedAt = $startType === 'datetime'
+                ? $this->datetime('ended_at')
+                : $this->date('ended_at');
+            $endedAt->nullable()->after('started_at');
         });
 
         Blueprint::macro('dropPeriod', function (): void {

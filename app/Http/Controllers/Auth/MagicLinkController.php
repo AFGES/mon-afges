@@ -52,31 +52,13 @@ final class MagicLinkController
 
         $user = User::where('email', $request->email)->first();
 
-        if (! $user) {
+        if (! $this->hasValidMagicLink($user, $request->token)) {
             throw ValidationException::withMessages([
                 'email' => ['Lien invalide ou expiré.'],
             ]);
         }
 
-        // Check if token exists and hasn't expired
-        if (
-            ! $user->magic_link_token ||
-            ! $user->magic_link_token_expires_at ||
-            $user->magic_link_token_expires_at->isPast()
-        ) {
-            throw ValidationException::withMessages([
-                'email' => ['Lien invalide ou expiré.'],
-            ]);
-        }
-
-        // Verify the token
-        if (! Hash::check($request->token, $user->magic_link_token)) {
-            throw ValidationException::withMessages([
-                'email' => ['Lien invalide ou expiré.'],
-            ]);
-        }
-
-        // Clear the token after successful verification
+        /** @var User $user */
         $user->update([
             'magic_link_token' => null,
             'magic_link_token_expires_at' => null,
@@ -87,5 +69,29 @@ final class MagicLinkController
         $request->session()->regenerate();
 
         return redirect()->intended(filament()->getUrl());
+    }
+
+    /**
+     * Check that the user has an unexpired magic link token matching the given token.
+     */
+    private function hasValidMagicLink(?User $user, string $token): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if (! $user->magic_link_token) {
+            return false;
+        }
+
+        if (! $user->magic_link_token_expires_at) {
+            return false;
+        }
+
+        if ($user->magic_link_token_expires_at->isPast()) {
+            return false;
+        }
+
+        return Hash::check($token, $user->magic_link_token);
     }
 }

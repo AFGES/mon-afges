@@ -65,18 +65,26 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
             if ($syncService->isInGroup($email)) {
                 $this->line("  ✓ {$email} - already in group");
                 $alreadyInCount++;
-            } else {
-                if ($isDryRun) {
-                    $this->line("  [DRY RUN] Would add {$email}");
-                    $addedCount++;
-                } elseif ($syncService->addToGroup($email)) {
-                    $this->line("  + {$email} - added to group");
-                    $addedCount++;
-                } else {
-                    $this->line("  ✗ {$email} - failed to add");
-                    $failedToAddCount++;
-                }
+
+                continue;
             }
+
+            if ($isDryRun) {
+                $this->line("  [DRY RUN] Would add {$email}");
+                $addedCount++;
+
+                continue;
+            }
+
+            if ($syncService->addToGroup($email)) {
+                $this->line("  + {$email} - added to group");
+                $addedCount++;
+
+                continue;
+            }
+
+            $this->line("  ✗ {$email} - failed to add");
+            $failedToAddCount++;
         }
 
         $this->newLine();
@@ -91,19 +99,26 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
                 continue;
             }
 
-            // Check if they're in the group
-            if ($syncService->isInGroup($email)) {
-                if ($isDryRun) {
-                    $this->line("  [DRY RUN] Would remove {$email}");
-                    $removedCount++;
-                } elseif ($syncService->removeFromGroup($email)) {
-                    $this->line("  - {$email} - removed from group");
-                    $removedCount++;
-                } else {
-                    $this->line("  ✗ {$email} - failed to remove");
-                    $failedToRemoveCount++;
-                }
+            if (! $syncService->isInGroup($email)) {
+                continue;
             }
+
+            if ($isDryRun) {
+                $this->line("  [DRY RUN] Would remove {$email}");
+                $removedCount++;
+
+                continue;
+            }
+
+            if ($syncService->removeFromGroup($email)) {
+                $this->line("  - {$email} - removed from group");
+                $removedCount++;
+
+                continue;
+            }
+
+            $this->line("  ✗ {$email} - failed to remove");
+            $failedToRemoveCount++;
         }
 
         $this->newLine();

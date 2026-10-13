@@ -36,9 +36,14 @@ final class MarkEmailAsVerifiedOnSocialiteLogin
             return;
         }
 
-        // Get or create the primary email
-        if ($user->email && ! $user->hasVerifiedEmail()) {
-            $user->markEmailAsVerified();
+        if (! $user->email) {
+            return;
         }
+
+        if ($user->hasVerifiedEmail()) {
+            return;
+        }
+
+        $user->markEmailAsVerified();
     }
 }

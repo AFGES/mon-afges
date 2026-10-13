@@ -15,16 +15,19 @@ final class DemocraticTimeSessionObserver
      */
     public function creating(DemocraticTimeSession $session): void
     {
-        // Only copy quorum values if they're not already set
-        if ($session->calculate_quorum_per_college === null && $session->democraticTimeType) {
+        if (! $session->democraticTimeType) {
+            return;
+        }
+
+        if ($session->calculate_quorum_per_college === null) {
             $session->calculate_quorum_per_college = $session->democraticTimeType->calculate_quorum_per_college;
         }
 
-        if ($session->quorum_percentage === null && $session->democraticTimeType) {
+        if ($session->quorum_percentage === null) {
             $session->quorum_percentage = $session->democraticTimeType->quorum_percentage;
         }
 
-        if ($session->include_proxies_in_quorum === null && $session->democraticTimeType) {
+        if ($session->include_proxies_in_quorum === null) {
             $session->include_proxies_in_quorum = $session->democraticTimeType->include_proxies_in_quorum;
         }
     }
@@ -42,12 +45,14 @@ final class DemocraticTimeSessionObserver
         $oldEndedAt = $session->getOriginal('ended_at');
         $newEndedAt = $session->ended_at;
 
-        // If there was no old end date or no new end date, nothing to sync
-        if ($oldEndedAt === null || $newEndedAt === null) {
+        if ($oldEndedAt === null) {
             return;
         }
 
-        // Convert to Carbon if string
+        if ($newEndedAt === null) {
+            return;
+        }
+
         if (is_string($oldEndedAt)) {
             $oldEndedAt = Carbon::parse($oldEndedAt);
         }

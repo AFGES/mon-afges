@@ -29,9 +29,14 @@ final class ProxyObserver
 
     public function updated(Proxy $proxy): void
     {
-        // Send notification to the delegator seat's delegate when proxy is approved
-        if ($proxy->wasChanged('approval_status') && $proxy->approval_status === ApprovalStatus::Approved) {
-            $proxy->sendApprovalNotification();
+        if (! $proxy->wasChanged('approval_status')) {
+            return;
         }
+
+        if ($proxy->approval_status !== ApprovalStatus::Approved) {
+            return;
+        }
+
+        $proxy->sendApprovalNotification();
     }
 }

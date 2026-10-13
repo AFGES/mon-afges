@@ -65,11 +65,7 @@ final class Delegate extends Model implements MustVerifyEmail
                 $delegate->email = $delegate->user->email;
             }
 
-            // Mark delegate email as verified if user's email is verified and matches
-            if ($delegate->user &&
-                $delegate->user->hasVerifiedEmail() &&
-                $delegate->email === $delegate->user->email &&
-                is_null($delegate->email_verified_at)) {
+            if (self::shouldAutoVerifyEmail($delegate)) {
                 $delegate->email_verified_at = now();
             }
         });
@@ -85,5 +81,25 @@ final class Delegate extends Model implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'approval_status' => ApprovalStatus::class,
         ];
+    }
+
+    /**
+     * A delegate email is auto-verified when it matches its user's already verified email.
+     */
+    private static function shouldAutoVerifyEmail(self $delegate): bool
+    {
+        if (! $delegate->user) {
+            return false;
+        }
+
+        if (! $delegate->user->hasVerifiedEmail()) {
+            return false;
+        }
+
+        if ($delegate->email !== $delegate->user->email) {
+            return false;
+        }
+
+        return is_null($delegate->email_verified_at);
     }
 }

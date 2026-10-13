@@ -48,22 +48,18 @@ final class ProxyDelegatesFromSameCollege implements ValidationRule
             return;
         }
 
-        // If the college requires same college for proxy
-        if ($delegatorCollege->require_same_college_for_proxy) {
-            if ($delegatorCollegeId !== $proxyHolderCollegeId) {
-                $fail('Le siège mandataire doit appartenir au même collège que le siège délégateur.');
-
-                return;
-            }
-        } else {
-            // If cross-college proxies are allowed, verify the proxy holder college can vote
+        if (! $delegatorCollege->require_same_college_for_proxy) {
             $proxyHolderCollege = College::find($proxyHolderCollegeId);
 
             if (! $proxyHolderCollege || ! $proxyHolderCollege->can_vote) {
                 $fail('Le siège mandataire doit appartenir à un collège délibérant.');
-
-                return;
             }
+
+            return;
+        }
+
+        if ($delegatorCollegeId !== $proxyHolderCollegeId) {
+            $fail('Le siège mandataire doit appartenir au même collège que le siège délégateur.');
         }
     }
 }

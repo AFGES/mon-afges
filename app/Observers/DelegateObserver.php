@@ -26,10 +26,15 @@ final class DelegateObserver
 
     public function updated(Delegate $delegate): void
     {
-        // If the delegate's end date was set, remove them from the group
-        if ($delegate->wasChanged('ended_at') && $delegate->ended_at !== null) {
-            $this->removeFromGroup($delegate);
+        if (! $delegate->wasChanged('ended_at')) {
+            return;
         }
+
+        if ($delegate->ended_at === null) {
+            return;
+        }
+
+        $this->removeFromGroup($delegate);
     }
 
     public function deleted(Delegate $delegate): void

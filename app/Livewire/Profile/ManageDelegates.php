@@ -128,7 +128,7 @@ final class ManageDelegates extends MyProfileComponent
     {
         $data = $this->form->getState();
 
-        if (! isset($data['applications']) || empty($data['applications'])) {
+        if (empty($data['applications'])) {
             return;
         }
 

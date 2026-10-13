@@ -171,10 +171,10 @@ trait HasApprovalStatus
      */
     protected function getApprovalNotifiable(): ?object
     {
-        if (method_exists($this, 'user') && $this->user !== null) {
-            return $this->user;
+        if (! method_exists($this, 'user')) {
+            return null;
         }
 
-        return null;
+        return $this->user;
     }
 }

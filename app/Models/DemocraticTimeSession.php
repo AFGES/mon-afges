@@ -113,10 +113,7 @@ final class DemocraticTimeSession extends Model
      */
     public function hasQuorum(?string $collegeId = null): bool
     {
-        // Use session-level quorum settings if available, otherwise fall back to type
-        $calculatePerCollege = $this->calculate_quorum_per_college ?? $this->democraticTimeType?->calculate_quorum_per_college ?? false;
-        $quorumPercentage = $this->quorum_percentage ?? $this->democraticTimeType?->quorum_percentage ?? 50;
-        $includeProxies = $this->include_proxies_in_quorum ?? $this->democraticTimeType?->include_proxies_in_quorum ?? true;
+        ['quorumPercentage' => $quorumPercentage, 'includeProxies' => $includeProxies] = $this->resolveQuorumSettings();
 
         $totalEligible = $this->getTotalEligibleSeats($collegeId);
 
@@ -137,10 +134,11 @@ final class DemocraticTimeSession extends Model
      */
     public function getQuorumStatus(): array
     {
-        // Use session-level quorum settings if available, otherwise fall back to type
-        $calculatePerCollege = $this->calculate_quorum_per_college ?? $this->democraticTimeType?->calculate_quorum_per_college ?? false;
-        $quorumPercentage = $this->quorum_percentage ?? $this->democraticTimeType?->quorum_percentage ?? 50;
-        $includeProxies = $this->include_proxies_in_quorum ?? $this->democraticTimeType?->include_proxies_in_quorum ?? true;
+        [
+            'calculatePerCollege' => $calculatePerCollege,
+            'quorumPercentage' => $quorumPercentage,
+            'includeProxies' => $includeProxies,
+        ] = $this->resolveQuorumSettings();
 
         if (! $calculatePerCollege) {
             // All colleges combined
@@ -258,7 +256,15 @@ final class DemocraticTimeSession extends Model
      */
     public function autoOpenSignIn(): bool
     {
-        if (! $this->auto_open_sign_in || $this->sign_in_opens_at !== null || ! $this->started_at) {
+        if (! $this->auto_open_sign_in) {
+            return false;
+        }
+
+        if ($this->sign_in_opens_at !== null) {
+            return false;
+        }
+
+        if (! $this->started_at) {
             return false;
         }
 
@@ -281,7 +287,11 @@ final class DemocraticTimeSession extends Model
      */
     public function autoCloseSignIn(): bool
     {
-        if ($this->sign_in_closes_at !== null || ! $this->ended_at) {
+        if ($this->sign_in_closes_at !== null) {
+            return false;
+        }
+
+        if (! $this->ended_at) {
             return false;
         }
 
@@ -308,6 +318,20 @@ final class DemocraticTimeSession extends Model
             'calculate_quorum_per_college' => 'boolean',
             'quorum_percentage' => 'decimal:2',
             'include_proxies_in_quorum' => 'boolean',
+        ];
+    }
+
+    /**
+     * Session-level quorum settings, falling back to the democratic time type.
+     *
+     * @return array{calculatePerCollege: mixed, quorumPercentage: mixed, includeProxies: mixed}
+     */
+    private function resolveQuorumSettings(): array
+    {
+        return [
+            'calculatePerCollege' => $this->calculate_quorum_per_college ?? $this->democraticTimeType?->calculate_quorum_per_college ?? false,
+            'quorumPercentage' => $this->quorum_percentage ?? $this->democraticTimeType?->quorum_percentage ?? 50,
+            'includeProxies' => $this->include_proxies_in_quorum ?? $this->democraticTimeType?->include_proxies_in_quorum ?? true,
         ];
     }
 }

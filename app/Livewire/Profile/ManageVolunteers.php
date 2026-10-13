@@ -95,7 +95,7 @@ final class ManageVolunteers extends MyProfileComponent
     {
         $data = $this->form->getState();
 
-        if (! isset($data['organizations']) || empty($data['organizations'])) {
+        if (empty($data['organizations'])) {
             return;
         }
 

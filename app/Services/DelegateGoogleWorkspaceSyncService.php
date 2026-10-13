@@ -209,15 +209,23 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         foreach ($activeDelegateEmails as $email) {
             if ($service->isInGroup($email)) {
                 $stats['already_in_group']++;
-            } else {
-                if (! $dryRun && $service->addToGroup($email)) {
-                    $stats['added']++;
-                } elseif (! $dryRun) {
-                    $stats['failed_to_add']++;
-                } else {
-                    $stats['added']++; // Count as added in dry run
-                }
+
+                continue;
             }
+
+            if ($dryRun) {
+                $stats['added']++;
+
+                continue;
+            }
+
+            if ($service->addToGroup($email)) {
+                $stats['added']++;
+
+                continue;
+            }
+
+            $stats['failed_to_add']++;
         }
 
         // Remove users who are no longer active delegates
@@ -228,16 +236,23 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
                 continue;
             }
 
-            // Check if they're in the group
-            if ($service->isInGroup($email)) {
-                if (! $dryRun && $service->removeFromGroup($email)) {
-                    $stats['removed']++;
-                } elseif (! $dryRun) {
-                    $stats['failed_to_remove']++;
-                } else {
-                    $stats['removed']++; // Count as removed in dry run
-                }
+            if (! $service->isInGroup($email)) {
+                continue;
             }
+
+            if ($dryRun) {
+                $stats['removed']++;
+
+                continue;
+            }
+
+            if ($service->removeFromGroup($email)) {
+                $stats['removed']++;
+
+                continue;
+            }
+
+            $stats['failed_to_remove']++;
         }
 
         return $stats;

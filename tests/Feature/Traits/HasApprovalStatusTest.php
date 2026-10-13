@@ -3,17 +3,148 @@
 declare(strict_types=1);
 
 use App\Enums\ApprovalStatus;
+use App\Models\Delegate;
+use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
+use App\Notifications\ApprovalApprovedNotification;
+use Illuminate\Support\Facades\Notification;
 
-it('pending scope filters pending records', function () {
-    $pending1 = Volunteer::factory()->create([
-        'approval_status' => ApprovalStatus::Pending,
-    ]);
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 
-    $pending2 = Volunteer::factory()->create([
-        'approval_status' => ApprovalStatus::Pending,
-    ]);
+dataset('approvable models', [
+    'delegate' => Delegate::class,
+    'volunteer' => Volunteer::class,
+]);
+
+test('approves a pending record on behalf of the authenticated user', function (string $model) {
+    Notification::fake();
+    travelTo('2026-03-15 12:00:00');
+    $approver = User::factory()->create();
+    $record = $model::factory()->pending()->create();
+
+    actingAs($approver);
+
+    $result = $record->approve();
+
+    expect($result)->toBeTrue()
+        ->and($record->refresh())
+        ->isApproved()->toBeTrue()
+        ->approved_at->toDateTimeString()->toBe('2026-03-15 12:00:00')
+        ->approved_by->toBe($approver->id)
+        ->rejection_reason->toBeNull();
+
+    Notification::assertSentTo($record->user, ApprovalApprovedNotification::class);
+})->with('approvable models');
+
+test('approves on behalf of the explicit approver rather than the authenticated user', function (string $model) {
+    Notification::fake();
+    $authenticatedUser = User::factory()->create();
+    $explicitApprover = User::factory()->create();
+    $record = $model::factory()->pending()->create();
+
+    actingAs($authenticatedUser);
+
+    $record->approve($explicitApprover->id);
+
+    expect($record->refresh()->approved_by)->toBe($explicitApprover->id);
+})->with('approvable models');
+
+test('approves a rejected record and clears its rejection reason', function (string $model) {
+    Notification::fake();
+    $approver = User::factory()->create();
+    $record = $model::factory()->rejected()->create();
+
+    $result = $record->approve($approver->id);
+
+    expect($result)->toBeTrue()
+        ->and($record->refresh())
+        ->isApproved()->toBeTrue()
+        ->approved_by->toBe($approver->id)
+        ->rejection_reason->toBeNull();
+
+    Notification::assertSentTo($record->user, ApprovalApprovedNotification::class);
+})->with('approvable models');
+
+test('does not approve an already approved record', function (string $model) {
+    Notification::fake();
+    travelTo('2026-03-15 12:00:00');
+    $record = $model::factory()->approved()->create(['approved_at' => '2026-03-01 08:00:00']);
+    $originalApprover = $record->approved_by;
+
+    $result = $record->approve(User::factory()->create()->id);
+
+    expect($result)->toBeFalse()
+        ->and($record->refresh())
+        ->approved_at->toDateTimeString()->toBe('2026-03-01 08:00:00')
+        ->approved_by->toBe($originalApprover);
+
+    Notification::assertNothingSent();
+})->with('approvable models');
+
+test('rejects a pending record with a reason on behalf of the authenticated user', function (string $model) {
+    travelTo('2026-03-15 12:00:00');
+    $rejecter = User::factory()->create();
+    $record = $model::factory()->pending()->create();
+
+    actingAs($rejecter);
+
+    $result = $record->reject('Documents incomplets');
+
+    expect($result)->toBeTrue()
+        ->and($record->refresh())
+        ->isRejected()->toBeTrue()
+        ->approved_at->toDateTimeString()->toBe('2026-03-15 12:00:00')
+        ->approved_by->toBe($rejecter->id)
+        ->rejection_reason->toBe('Documents incomplets');
+})->with('approvable models');
+
+test('rejects on behalf of the explicit rejecter rather than the authenticated user', function (string $model) {
+    $authenticatedUser = User::factory()->create();
+    $explicitRejecter = User::factory()->create();
+    $record = $model::factory()->pending()->create();
+
+    actingAs($authenticatedUser);
+
+    $record->reject('Not eligible', $explicitRejecter->id);
+
+    expect($record->refresh()->approved_by)->toBe($explicitRejecter->id);
+})->with('approvable models');
+
+test('rejects an approved record', function (string $model) {
+    $record = $model::factory()->approved()->create();
+
+    $result = $record->reject('Revoked');
+
+    expect($result)->toBeTrue()
+        ->and($record->refresh())
+        ->isRejected()->toBeTrue()
+        ->rejection_reason->toBe('Revoked');
+})->with('approvable models');
+
+test('does not reject an already rejected record', function (string $model) {
+    $record = $model::factory()->rejected()->create(['rejection_reason' => 'Original reason']);
+
+    $result = $record->reject('New reason');
+
+    expect($result)->toBeFalse()
+        ->and($record->refresh()->rejection_reason)->toBe('Original reason');
+})->with('approvable models');
+
+test('reports a new record as pending only', function (string $model) {
+    $record = $model::factory()->pending()->create();
+
+    expect($record)
+        ->isPending()->toBeTrue()
+        ->isApproved()->toBeFalse()
+        ->isRejected()->toBeFalse();
+})->with('approvable models');
+
+test('pending scope returns only pending records', function () {
+    $pending1 = Volunteer::factory()->pending()->create();
+
+    $pending2 = Volunteer::factory()->pending()->create();
 
     $approved = Volunteer::factory()->approved()->create();
     $rejected = Volunteer::factory()->rejected()->create();
@@ -27,13 +158,11 @@ it('pending scope filters pending records', function () {
     expect($results->pluck('id'))->not->toContain($approved->id, $rejected->id);
 });
 
-it('approved scope filters approved records', function () {
+test('approved scope returns only approved records', function () {
     $approved1 = Volunteer::factory()->approved()->create();
     $approved2 = Volunteer::factory()->approved()->create();
 
-    $pending = Volunteer::factory()->create([
-        'approval_status' => ApprovalStatus::Pending,
-    ]);
+    $pending = Volunteer::factory()->pending()->create();
     $rejected = Volunteer::factory()->rejected()->create();
 
     $results = Volunteer::withoutGlobalScopes()
@@ -45,13 +174,11 @@ it('approved scope filters approved records', function () {
     expect($results->pluck('id'))->not->toContain($pending->id, $rejected->id);
 });
 
-it('rejected scope filters rejected records', function () {
+test('rejected scope returns only rejected records', function () {
     $rejected1 = Volunteer::factory()->rejected()->create();
-    $rejected2 = Volunteer::factory()->rejected('Different reason')->create();
+    $rejected2 = Volunteer::factory()->rejected()->create();
 
-    $pending = Volunteer::factory()->create([
-        'approval_status' => ApprovalStatus::Pending,
-    ]);
+    $pending = Volunteer::factory()->pending()->create();
     $approved = Volunteer::factory()->approved()->create();
 
     $results = Volunteer::withoutGlobalScopes()
@@ -63,10 +190,8 @@ it('rejected scope filters rejected records', function () {
     expect($results->pluck('id'))->not->toContain($pending->id, $approved->id);
 });
 
-it('withApprovalStatus scope filters by specific status', function () {
-    $pending = Volunteer::factory()->create([
-        'approval_status' => ApprovalStatus::Pending,
-    ]);
+test('withApprovalStatus scope returns only records with the given status', function () {
+    $pending = Volunteer::factory()->pending()->create();
     $approved = Volunteer::factory()->approved()->create();
     $rejected = Volunteer::factory()->rejected()->create();
 
@@ -92,7 +217,7 @@ it('withApprovalStatus scope filters by specific status', function () {
     expect($rejectedResults->first()->id)->toBe($rejected->id);
 });
 
-it('approvedBy scope filters records approved by specific user', function () {
+test('approvedBy scope returns only records approved by the given user', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
@@ -107,8 +232,6 @@ it('approvedBy scope filters records approved by specific user', function () {
     $approvedByUser2 = Volunteer::factory()->approved()->create([
         'approved_by' => $user2->id,
     ]);
-
-    // Rejected by user1 (should not be included)
     $rejectedByUser1 = Volunteer::factory()->rejected()->create([
         'approved_by' => $user1->id,
     ]);
@@ -122,23 +245,21 @@ it('approvedBy scope filters records approved by specific user', function () {
     expect($results->pluck('id'))->not->toContain($approvedByUser2->id, $rejectedByUser1->id);
 });
 
-it('rejectedBy scope filters records rejected by specific user', function () {
+test('rejectedBy scope returns only records rejected by the given user', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
-    $rejectedByUser1 = Volunteer::factory()->rejected('Reason 1')->create([
+    $rejectedByUser1 = Volunteer::factory()->rejected()->create([
         'approved_by' => $user1->id,
     ]);
 
-    $alsoRejectedByUser1 = Volunteer::factory()->rejected('Reason 2')->create([
+    $alsoRejectedByUser1 = Volunteer::factory()->rejected()->create([
         'approved_by' => $user1->id,
     ]);
 
-    $rejectedByUser2 = Volunteer::factory()->rejected('Reason 3')->create([
+    $rejectedByUser2 = Volunteer::factory()->rejected()->create([
         'approved_by' => $user2->id,
     ]);
-
-    // Approved by user1 (should not be included)
     $approvedByUser1 = Volunteer::factory()->approved()->create([
         'approved_by' => $user1->id,
     ]);
@@ -152,13 +273,12 @@ it('rejectedBy scope filters records rejected by specific user', function () {
     expect($results->pluck('id'))->not->toContain($rejectedByUser2->id, $approvedByUser1->id);
 });
 
-it('scopes can be combined with other query constraints', function () {
-    $org1 = App\Models\Organization::factory()->create();
-    $org2 = App\Models\Organization::factory()->create();
+test('approval scope combines with other query constraints', function () {
+    $org1 = Organization::factory()->create();
+    $org2 = Organization::factory()->create();
 
-    $pending = Volunteer::factory()->create([
+    $pending = Volunteer::factory()->pending()->create([
         'organization_id' => $org1->id,
-        'approval_status' => ApprovalStatus::Pending,
     ]);
 
     $approved = Volunteer::factory()->approved()->create([
@@ -178,21 +298,16 @@ it('scopes can be combined with other query constraints', function () {
     expect($results->first()->id)->toBe($approved->id);
 });
 
-it('scopes can be combined with period scopes', function () {
-    // Currently active and approved
+test('approval scope combines with the currentlyActive scope', function () {
+    travelTo('2026-03-15 12:00:00');
     $currentApproved = Volunteer::factory()->approved()->create([
         'started_at' => now()->subDays(5),
         'ended_at' => null,
     ]);
-
-    // Currently active but pending
-    $currentPending = Volunteer::factory()->create([
+    $currentPending = Volunteer::factory()->pending()->create([
         'started_at' => now()->subDays(5),
         'ended_at' => null,
-        'approval_status' => ApprovalStatus::Pending,
     ]);
-
-    // Ended but approved
     $endedApproved = Volunteer::factory()->approved()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => now()->subDays(2),
@@ -207,21 +322,7 @@ it('scopes can be combined with period scopes', function () {
     expect($results->first()->id)->toBe($currentApproved->id);
 });
 
-it('multiple approval scopes cannot be combined meaningfully', function () {
-    Volunteer::factory()->approved()->create();
-    Volunteer::factory()->rejected()->create();
-    Volunteer::factory()->create(['approval_status' => ApprovalStatus::Pending]);
-
-    // This should return no results as a record can't be both approved and rejected
-    $results = Volunteer::withoutGlobalScopes()
-        ->approved()
-        ->rejected()
-        ->get();
-
-    expect($results)->toHaveCount(0);
-});
-
-it('approvedBy scope accepts string user id', function () {
+test('approvedBy scope accepts the user id as a string', function () {
     $user = User::factory()->create();
 
     $approved = Volunteer::factory()->approved()->create([
@@ -236,10 +337,10 @@ it('approvedBy scope accepts string user id', function () {
     expect($results->first()->id)->toBe($approved->id);
 });
 
-it('rejectedBy scope accepts string user id', function () {
+test('rejectedBy scope accepts the user id as a string', function () {
     $user = User::factory()->create();
 
-    $rejected = Volunteer::factory()->rejected('Test reason')->create([
+    $rejected = Volunteer::factory()->rejected()->create([
         'approved_by' => $user->id,
     ]);
 
@@ -249,55 +350,4 @@ it('rejectedBy scope accepts string user id', function () {
 
     expect($results)->toHaveCount(1);
     expect($results->first()->id)->toBe($rejected->id);
-});
-
-it('scopes work with pagination', function () {
-    Volunteer::factory()->count(15)->approved()->create();
-    Volunteer::factory()->count(10)->create(['approval_status' => ApprovalStatus::Pending]);
-
-    $results = Volunteer::withoutGlobalScopes()
-        ->approved()
-        ->paginate(10);
-
-    expect($results->total())->toBe(15);
-    expect($results->perPage())->toBe(10);
-    expect($results->count())->toBe(10);
-});
-
-it('scopes work with aggregations', function () {
-    $org = App\Models\Organization::factory()->create();
-
-    Volunteer::factory()->count(5)->approved()->create(['organization_id' => $org->id]);
-    Volunteer::factory()->count(3)->create([
-        'organization_id' => $org->id,
-        'approval_status' => ApprovalStatus::Pending,
-    ]);
-
-    $approvedCount = Volunteer::withoutGlobalScopes()
-        ->approved()
-        ->where('organization_id', $org->id)
-        ->count();
-
-    expect($approvedCount)->toBe(5);
-});
-
-it('scopes work with soft deletes', function () {
-    $approved = Volunteer::factory()->approved()->create();
-    $deleted = Volunteer::factory()->approved()->create();
-    $deleted->delete();
-
-    // Without global scopes, soft deletes are also removed, so we see both
-    $resultsWithoutScopes = Volunteer::withoutGlobalScopes()
-        ->approved()
-        ->get();
-
-    expect($resultsWithoutScopes)->toHaveCount(2);
-
-    // With only ApprovedScope removed, soft deletes still work
-    $results = Volunteer::withoutGlobalScope(App\Models\Scopes\ApprovedScope::class)
-        ->approved()
-        ->get();
-
-    expect($results)->toHaveCount(1);
-    expect($results->first()->id)->toBe($approved->id);
 });

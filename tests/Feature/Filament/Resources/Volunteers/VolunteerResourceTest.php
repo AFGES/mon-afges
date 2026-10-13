@@ -16,20 +16,29 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
+function actingAsSuperAdminForVolunteerResource(): User
+{
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    actingAs($this->actingAsUser);
-});
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListVolunteers', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         livewire(ListVolunteers::class)
             ->assertOk();
     });
 
     it('can list volunteers', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         $volunteers = Volunteer::factory()->count(5)->approved()->create();
 
         livewire(ListVolunteers::class)
@@ -38,6 +47,8 @@ describe('ListVolunteers', function () {
     });
 
     it('can search volunteers', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         $volunteers = Volunteer::factory()->count(5)->approved()->create();
 
         livewire(ListVolunteers::class)
@@ -50,11 +61,15 @@ describe('ListVolunteers', function () {
 
 describe('CreateVolunteer', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         livewire(CreateVolunteer::class)
             ->assertOk();
     });
 
     it('can create a volunteer', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
         $positionTitle = fake()->jobTitle();
@@ -80,6 +95,8 @@ describe('CreateVolunteer', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForVolunteerResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
 
@@ -103,6 +120,8 @@ describe('CreateVolunteer', function () {
 
 describe('EditVolunteer', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         $volunteer = Volunteer::factory()->approved()->create();
 
         livewire(EditVolunteer::class, [
@@ -115,6 +134,8 @@ describe('EditVolunteer', function () {
     });
 
     it('can update a volunteer', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         $volunteer = Volunteer::factory()->approved()->create();
         $newPositionTitle = fake()->jobTitle();
 
@@ -134,6 +155,8 @@ describe('EditVolunteer', function () {
     });
 
     it('can soft delete a volunteer', function () {
+        actingAsSuperAdminForVolunteerResource();
+
         $volunteer = Volunteer::factory()->approved()->create();
 
         livewire(EditVolunteer::class, [

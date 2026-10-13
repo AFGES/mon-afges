@@ -15,20 +15,29 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
+function actingAsSuperAdminForOrganizationResource(): User
+{
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    actingAs($this->actingAsUser);
-});
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListOrganizations', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         livewire(ListOrganizations::class)
             ->assertOk();
     });
 
     it('can list organizations', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $organizations = Organization::factory()->count(5)->create();
 
         livewire(ListOrganizations::class)
@@ -37,6 +46,8 @@ describe('ListOrganizations', function () {
     });
 
     it('can search organizations by short name', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $organizations = Organization::factory()->count(5)->create();
 
         livewire(ListOrganizations::class)
@@ -47,6 +58,8 @@ describe('ListOrganizations', function () {
     });
 
     it('can search organizations by legal name', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $organizations = Organization::factory()->count(5)->create();
 
         livewire(ListOrganizations::class)
@@ -59,11 +72,15 @@ describe('ListOrganizations', function () {
 
 describe('CreateOrganization', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         livewire(CreateOrganization::class)
             ->assertOk();
     });
 
     it('can create an organization', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $newOrgData = Organization::factory()->make();
 
         livewire(CreateOrganization::class)
@@ -83,6 +100,8 @@ describe('CreateOrganization', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForOrganizationResource();
+
         $newOrgData = Organization::factory()->make();
 
         livewire(CreateOrganization::class)
@@ -105,6 +124,8 @@ describe('CreateOrganization', function () {
 
 describe('EditOrganization', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $organization = Organization::factory()->create();
 
         livewire(EditOrganization::class, [
@@ -118,6 +139,8 @@ describe('EditOrganization', function () {
     });
 
     it('can update an organization', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $organization = Organization::factory()->create();
         $newOrgData = Organization::factory()->make();
 
@@ -139,6 +162,8 @@ describe('EditOrganization', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForOrganizationResource();
+
         $organization = Organization::factory()->create();
         $newOrgData = Organization::factory()->make();
 
@@ -161,6 +186,8 @@ describe('EditOrganization', function () {
     ]);
 
     it('can soft delete an organization', function () {
+        actingAsSuperAdminForOrganizationResource();
+
         $organization = Organization::factory()->create();
 
         livewire(EditOrganization::class, [

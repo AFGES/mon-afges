@@ -7,16 +7,24 @@ use App\Models\DemocraticTimeSession;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForSessionQuorumStatusWidget(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 it('can render the widget', function () {
+    actingAsSuperAdminForSessionQuorumStatusWidget();
+
     $session = DemocraticTimeSession::factory()->create();
 
     livewire(SessionQuorumStatusWidget::class, [
@@ -26,6 +34,8 @@ it('can render the widget', function () {
 });
 
 it('displays a heading', function () {
+    actingAsSuperAdminForSessionQuorumStatusWidget();
+
     $session = DemocraticTimeSession::factory()->create();
 
     $widget = livewire(SessionQuorumStatusWidget::class, [
@@ -39,6 +49,8 @@ it('displays a heading', function () {
 });
 
 it('displays quorum status in heading', function () {
+    actingAsSuperAdminForSessionQuorumStatusWidget();
+
     $session = DemocraticTimeSession::factory()->create();
 
     $widget = livewire(SessionQuorumStatusWidget::class, [
@@ -55,6 +67,8 @@ it('displays quorum status in heading', function () {
 });
 
 it('handles null record gracefully', function () {
+    actingAsSuperAdminForSessionQuorumStatusWidget();
+
     $widget = livewire(SessionQuorumStatusWidget::class);
 
     $heading = $widget->instance()->getHeading();

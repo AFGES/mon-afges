@@ -14,25 +14,35 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
+function actingAsSuperAdminForDelegateResource(): User
+{
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListDelegates', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForDelegateResource();
+
         livewire(ListDelegates::class)
             ->assertOk();
     });
 
     it('can list delegates', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(5)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -40,6 +50,8 @@ describe('ListDelegates', function () {
     });
 
     it('can search delegates by user name', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(5)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -49,6 +61,8 @@ describe('ListDelegates', function () {
     });
 
     it('can search delegates by email', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(5)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -58,6 +72,8 @@ describe('ListDelegates', function () {
     });
 
     it('can search delegates by organization', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(5)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -67,6 +83,8 @@ describe('ListDelegates', function () {
     });
 
     it('can sort delegates by user name', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(3)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -77,6 +95,8 @@ describe('ListDelegates', function () {
     });
 
     it('can sort delegates by email', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(3)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -87,6 +107,8 @@ describe('ListDelegates', function () {
     });
 
     it('can sort delegates by started_at', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(3)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -97,6 +119,8 @@ describe('ListDelegates', function () {
     });
 
     it('can sort delegates by organization', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegates = Delegate::factory()->count(3)->approved()->create();
 
         livewire(ListDelegates::class)
@@ -109,11 +133,15 @@ describe('ListDelegates', function () {
 
 describe('CreateDelegate', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForDelegateResource();
+
         livewire(CreateDelegate::class)
             ->assertOk();
     });
 
     it('can create a delegate', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
@@ -139,6 +167,8 @@ describe('CreateDelegate', function () {
     });
 
     it('can create a delegate with minimal data', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
@@ -163,6 +193,8 @@ describe('CreateDelegate', function () {
     });
 
     it('validates required fields', function (array $data, array $errors) {
+        actingAsSuperAdminForDelegateResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
@@ -189,6 +221,8 @@ describe('CreateDelegate', function () {
     ]);
 
     it('validates email format', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
@@ -208,6 +242,8 @@ describe('CreateDelegate', function () {
     });
 
     it('validates ended_at is after started_at', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $user = User::factory()->create();
         $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
@@ -230,6 +266,8 @@ describe('CreateDelegate', function () {
 
 describe('EditDelegate', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
 
         livewire(EditDelegate::class, [
@@ -246,6 +284,8 @@ describe('EditDelegate', function () {
     });
 
     it('can update a delegate', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
         $newUser = User::factory()->create();
         $newEmail = fake()->email();
@@ -268,6 +308,8 @@ describe('EditDelegate', function () {
     });
 
     it('can update delegate dates', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
         $newStartedAt = today()->addMonth();
         $newEndedAt = today()->addMonths(3);
@@ -289,6 +331,8 @@ describe('EditDelegate', function () {
     });
 
     it('can update delegate organization and seat', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
         $newOrganization = Organization::factory()->create();
         $newSeat = Seat::factory()->create();
@@ -311,6 +355,8 @@ describe('EditDelegate', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
 
         livewire(EditDelegate::class, [
@@ -330,6 +376,8 @@ describe('EditDelegate', function () {
     ]);
 
     it('can soft delete a delegate', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
 
         livewire(EditDelegate::class, [
@@ -345,6 +393,8 @@ describe('EditDelegate', function () {
     });
 
     it('can restore a soft deleted delegate', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
         $delegate->delete();
 
@@ -361,6 +411,8 @@ describe('EditDelegate', function () {
     });
 
     it('can force delete a delegate', function () {
+        actingAsSuperAdminForDelegateResource();
+
         $delegate = Delegate::factory()->approved()->create();
         $delegate->delete();
 

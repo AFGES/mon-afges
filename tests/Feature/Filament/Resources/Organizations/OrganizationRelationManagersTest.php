@@ -12,17 +12,25 @@ use App\Models\Volunteer;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForOrganizationRelationManagers(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('DelegatesRelationManager', function () {
     it('can render the relation manager', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
 
         Livewire::test(DelegatesRelationManager::class, [
@@ -33,6 +41,8 @@ describe('DelegatesRelationManager', function () {
     });
 
     it('can list delegates for an organization', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
         $delegates = Delegate::factory()->count(3)->for($organization)->approved()->create();
         $otherOrgDelegate = Delegate::factory()->approved()->create();
@@ -46,6 +56,8 @@ describe('DelegatesRelationManager', function () {
     });
 
     it('can create a delegate for an organization', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
         $user = User::factory()->create();
         $seat = Seat::factory()->create();
@@ -70,6 +82,8 @@ describe('DelegatesRelationManager', function () {
     });
 
     it('can edit a delegate', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
         $delegate = Delegate::factory()->for($organization)->approved()->create();
         $newEmail = fake()->email();
@@ -92,6 +106,8 @@ describe('DelegatesRelationManager', function () {
 
 describe('VolunteersRelationManager', function () {
     it('can render the relation manager', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
 
         Livewire::test(VolunteersRelationManager::class, [
@@ -102,6 +118,8 @@ describe('VolunteersRelationManager', function () {
     });
 
     it('can list volunteers for an organization', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
         $volunteers = Volunteer::factory()->count(3)->for($organization)->approved()->create();
         $otherOrgVolunteer = Volunteer::factory()->approved()->create();
@@ -115,6 +133,8 @@ describe('VolunteersRelationManager', function () {
     });
 
     it('can create a volunteer for an organization', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
         $user = User::factory()->create();
 
@@ -137,6 +157,8 @@ describe('VolunteersRelationManager', function () {
     });
 
     it('can edit a volunteer', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
         $organization = Organization::factory()->create();
         $volunteer = Volunteer::factory()->for($organization)->approved()->create();
         $newPositionTitle = fake()->jobTitle();

@@ -13,23 +13,33 @@ use App\Models\Seat;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForProxyResource(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListProxies', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForProxyResource();
+
         livewire(ListProxies::class)
             ->assertOk();
     });
 
     it('can list proxies', function () {
+        actingAsSuperAdminForProxyResource();
+
         $proxies = Proxy::factory()->count(3)->approved()->create();
 
         livewire(ListProxies::class)
@@ -37,6 +47,8 @@ describe('ListProxies', function () {
     });
 
     it('displays proxy delegator seat information', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create(['name' => 'Test College']);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
         $seat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id]);
@@ -49,11 +61,15 @@ describe('ListProxies', function () {
 
 describe('CreateProxy', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForProxyResource();
+
         livewire(CreateProxy::class)
             ->assertOk();
     });
 
     it('can create a proxy with valid data', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => true,
@@ -83,6 +99,8 @@ describe('CreateProxy', function () {
     });
 
     it('can create a proxy without start and end times', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => true,
@@ -110,6 +128,8 @@ describe('CreateProxy', function () {
     });
 
     it('validates required delegator_seat_id', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create(['can_vote' => true]);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
         $proxyHolderSeat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id]);
@@ -128,6 +148,8 @@ describe('CreateProxy', function () {
     });
 
     it('validates required proxy_holder_seat_id', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create(['can_vote' => true]);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
         $delegatorSeat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id, 'seat_number' => 1]);
@@ -146,6 +168,8 @@ describe('CreateProxy', function () {
     });
 
     it('validates required democratic_time_session_id', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create(['can_vote' => true]);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
         $delegatorSeat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id, 'seat_number' => 1]);
@@ -164,6 +188,8 @@ describe('CreateProxy', function () {
     });
 
     it('validates that proxy holder seat must be from same college when required', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college1 = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => true,
@@ -191,6 +217,8 @@ describe('CreateProxy', function () {
     });
 
     it('allows cross-college proxy when not required to be same college', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college1 = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => false,
@@ -222,6 +250,8 @@ describe('CreateProxy', function () {
     });
 
     it('validates that proxy holder college can vote for cross-college proxies', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college1 = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => false,
@@ -250,6 +280,8 @@ describe('CreateProxy', function () {
 
 describe('EditProxy', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForProxyResource();
+
         $proxy = Proxy::factory()->approved()->create();
 
         livewire(EditProxy::class, [
@@ -264,6 +296,8 @@ describe('EditProxy', function () {
     });
 
     it('can update a proxy', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => true,
@@ -291,6 +325,8 @@ describe('EditProxy', function () {
     });
 
     it('can update proxy start and end times', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college = College::factory()->create(['can_vote' => true]);
         $collegeOrg = CollegeOrganization::factory()->create(['college_id' => $college->id]);
         $delegatorSeat = Seat::factory()->create(['college_organization_id' => $collegeOrg->id, 'seat_number' => 1]);
@@ -327,6 +363,8 @@ describe('EditProxy', function () {
     });
 
     it('can delete a proxy', function () {
+        actingAsSuperAdminForProxyResource();
+
         $proxy = Proxy::factory()->approved()->create();
 
         livewire(EditProxy::class, [
@@ -339,6 +377,8 @@ describe('EditProxy', function () {
     });
 
     it('validates same college rule when updating proxy holder seat', function () {
+        actingAsSuperAdminForProxyResource();
+
         $college1 = College::factory()->create([
             'can_vote' => true,
             'require_same_college_for_proxy' => true,
@@ -369,6 +409,8 @@ describe('EditProxy', function () {
     });
 
     it('validates required fields when updating', function (array $data, array $errors) {
+        actingAsSuperAdminForProxyResource();
+
         $proxy = Proxy::factory()->approved()->create();
 
         livewire(EditProxy::class, [

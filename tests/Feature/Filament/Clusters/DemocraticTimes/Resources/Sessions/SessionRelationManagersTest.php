@@ -15,18 +15,26 @@ use App\Models\SessionSignIn;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForSessionRelationManagers(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ProxiesRelationManager', function () {
     it('can render the relation manager', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
 
         livewire(ManageSessionProxies::class, [
@@ -36,6 +44,8 @@ describe('ProxiesRelationManager', function () {
     });
 
     it('can list proxies for a session', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
         $proxies = Proxy::factory()->count(3)->for($session)->create();
         $otherSessionProxy = Proxy::factory()->create();
@@ -48,6 +58,8 @@ describe('ProxiesRelationManager', function () {
     });
 
     it('can create a proxy for a session', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
 
         // Create seats from the same college (required by validation rule)
@@ -88,6 +100,8 @@ describe('ProxiesRelationManager', function () {
 
 describe('SessionSignInsRelationManager', function () {
     it('can render the relation manager', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
 
         livewire(ManageSessionSignIns::class, [
@@ -97,6 +111,8 @@ describe('SessionSignInsRelationManager', function () {
     });
 
     it('can list sign-ins for a session', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
         $signIns = SessionSignIn::factory()->count(3)->for($session)->create();
         $otherSessionSignIn = SessionSignIn::factory()->create();
@@ -109,6 +125,8 @@ describe('SessionSignInsRelationManager', function () {
     });
 
     it('can create a sign-in for a session', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
         $delegate = Delegate::factory()->for($seat)->approved()->create();
@@ -133,6 +151,8 @@ describe('SessionSignInsRelationManager', function () {
     });
 
     it('can filter signed-in delegates', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
         $signedIn = SessionSignIn::factory()->for($session)->create([
             'signed_in_at' => now(),
@@ -152,6 +172,8 @@ describe('SessionSignInsRelationManager', function () {
     });
 
     it('can filter signed-out delegates', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
         $session = DemocraticTimeSession::factory()->create();
         $signedIn = SessionSignIn::factory()->for($session)->create([
             'signed_in_at' => now(),

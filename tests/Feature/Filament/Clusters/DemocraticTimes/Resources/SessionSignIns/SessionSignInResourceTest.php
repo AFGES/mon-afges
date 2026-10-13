@@ -12,23 +12,33 @@ use App\Models\SessionSignIn;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForSessionSignInResource(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListSessionSignIns', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         livewire(ListSessionSignIns::class)
             ->assertOk();
     });
 
     it('can list session sign-ins', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIns = SessionSignIn::factory()->count(3)->create();
 
         livewire(ListSessionSignIns::class)
@@ -36,6 +46,8 @@ describe('ListSessionSignIns', function () {
     });
 
     it('can search session sign-ins by session location', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $session1 = DemocraticTimeSession::factory()->create(['location' => 'Main Hall']);
         $session2 = DemocraticTimeSession::factory()->create(['location' => 'Conference Room']);
 
@@ -54,6 +66,8 @@ describe('ListSessionSignIns', function () {
     });
 
     it('can search session sign-ins by delegate email', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $delegate1 = Delegate::factory()->approved()->create(['email' => 'john@example.com']);
         $delegate2 = Delegate::factory()->approved()->create(['email' => 'jane@example.com']);
 
@@ -67,6 +81,8 @@ describe('ListSessionSignIns', function () {
     });
 
     it('can filter session sign-ins by session', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $session1 = DemocraticTimeSession::factory()->create();
         $session2 = DemocraticTimeSession::factory()->create();
 
@@ -85,6 +101,8 @@ describe('ListSessionSignIns', function () {
     });
 
     it('can filter session sign-ins by signed in status', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $signedIn = SessionSignIn::factory()->create(['signed_out_at' => null]);
         $signedOut = SessionSignIn::factory()->create([
             'signed_in_at' => now()->subHours(2),
@@ -105,11 +123,15 @@ describe('ListSessionSignIns', function () {
 
 describe('CreateSessionSignIn', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         livewire(CreateSessionSignIn::class)
             ->assertOk();
     });
 
     it('can create a session sign-in', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
         $delegate = Delegate::factory()->approved()->for($seat)->create();
@@ -134,6 +156,8 @@ describe('CreateSessionSignIn', function () {
     });
 
     it('can create a session sign-in with proxy', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
         $delegate = Delegate::factory()->approved()->for($seat)->create();
@@ -161,6 +185,8 @@ describe('CreateSessionSignIn', function () {
     });
 
     it('can create a session sign-in with sign out time', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
         $delegate = Delegate::factory()->approved()->for($seat)->create();
@@ -187,6 +213,8 @@ describe('CreateSessionSignIn', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForSessionSignInResource();
+
         $session = DemocraticTimeSession::factory()->create();
         $seat = Seat::factory()->create();
         $delegate = Delegate::factory()->approved()->for($seat)->create();
@@ -229,6 +257,8 @@ describe('CreateSessionSignIn', function () {
 
 describe('EditSessionSignIn', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIn = SessionSignIn::factory()->create();
 
         livewire(EditSessionSignIn::class, [
@@ -243,6 +273,8 @@ describe('EditSessionSignIn', function () {
     });
 
     it('can update a session sign-in', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_at' => now()->subHours(2),
         ]);
@@ -265,6 +297,8 @@ describe('EditSessionSignIn', function () {
     });
 
     it('can update session sign-in to add proxy seat', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_by_seat_id' => null,
         ]);
@@ -287,6 +321,8 @@ describe('EditSessionSignIn', function () {
     });
 
     it('can update session sign-in to remove sign out time', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_at' => now()->subHours(2),
             'signed_out_at' => now()->subHour(),
@@ -308,6 +344,8 @@ describe('EditSessionSignIn', function () {
     });
 
     it('validates that signed_out_at is after signed_in_at', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIn = SessionSignIn::factory()->create([
             'signed_in_at' => now(),
         ]);
@@ -324,6 +362,8 @@ describe('EditSessionSignIn', function () {
     });
 
     it('can delete a session sign-in', function () {
+        actingAsSuperAdminForSessionSignInResource();
+
         $sessionSignIn = SessionSignIn::factory()->create();
 
         livewire(EditSessionSignIn::class, [

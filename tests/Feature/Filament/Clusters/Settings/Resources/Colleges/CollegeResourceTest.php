@@ -9,23 +9,33 @@ use App\Models\College;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForCollegeResource(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListColleges', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForCollegeResource();
+
         livewire(ListColleges::class)
             ->assertOk();
     });
 
     it('can list colleges', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $colleges = College::factory()->count(3)->create();
 
         livewire(ListColleges::class)
@@ -33,6 +43,8 @@ describe('ListColleges', function () {
     });
 
     it('can search colleges by name', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $colleges = College::factory()->count(3)->create();
 
         livewire(ListColleges::class)
@@ -42,6 +54,8 @@ describe('ListColleges', function () {
     });
 
     it('can sort colleges by name', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $colleges = College::factory()->count(3)->create();
 
         livewire(ListColleges::class)
@@ -54,11 +68,15 @@ describe('ListColleges', function () {
 
 describe('CreateCollege', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForCollegeResource();
+
         livewire(CreateCollege::class)
             ->assertOk();
     });
 
     it('can create a college', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $collegeName = fake()->unique()->word();
 
         Livewire::test(CreateCollege::class)
@@ -78,6 +96,8 @@ describe('CreateCollege', function () {
     });
 
     it('validates required fields', function (array $data, array $errors) {
+        actingAsSuperAdminForCollegeResource();
+
         livewire(CreateCollege::class)
             ->fillForm([
                 'name' => fake()->unique()->word(),
@@ -96,6 +116,8 @@ describe('CreateCollege', function () {
     ]);
 
     it('validates name uniqueness', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $existingCollege = College::factory()->create();
 
         Livewire::test(CreateCollege::class)
@@ -113,6 +135,8 @@ describe('CreateCollege', function () {
 
 describe('EditCollege', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $college = College::factory()->create();
 
         Livewire::test(EditCollege::class, [
@@ -126,6 +150,8 @@ describe('EditCollege', function () {
     });
 
     it('can update a college', function () {
+        actingAsSuperAdminForCollegeResource();
+
         $college = College::factory()->create();
         $newName = fake()->unique()->word();
 
@@ -145,6 +171,8 @@ describe('EditCollege', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForCollegeResource();
+
         $college = College::factory()->create();
 
         Livewire::test(EditCollege::class, [

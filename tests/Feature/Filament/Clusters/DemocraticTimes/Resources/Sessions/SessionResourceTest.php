@@ -13,23 +13,33 @@ use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertModelMissing;
 
-beforeEach(function () {
-    Role::firstOrCreate(['name' => 'super_admin']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    $this->actingAs($this->actingAsUser);
-});
+function actingAsSuperAdminForSessionResource(): User
+{
+    Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListSessions', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForSessionResource();
+
         Livewire::test(ListSessions::class)
             ->assertOk();
     });
 
     it('can list sessions', function () {
+        actingAsSuperAdminForSessionResource();
+
         $sessions = DemocraticTimeSession::factory()->count(3)->create();
 
         Livewire::test(ListSessions::class)
@@ -37,6 +47,8 @@ describe('ListSessions', function () {
     });
 
     it('shows translated status and sign-in status labels', function () {
+        actingAsSuperAdminForSessionResource();
+
         app()->setLocale('en');
         $session = DemocraticTimeSession::factory()->create([
             'started_at' => now()->subHour(),
@@ -53,6 +65,8 @@ describe('ListSessions', function () {
     });
 
     it('can search sessions by location', function () {
+        actingAsSuperAdminForSessionResource();
+
         $sessions = DemocraticTimeSession::factory()->count(3)->create();
 
         Livewire::test(ListSessions::class)
@@ -62,6 +76,8 @@ describe('ListSessions', function () {
     });
 
     it('can search sessions by democratic time type name', function () {
+        actingAsSuperAdminForSessionResource();
+
         $type = DemocraticTimeType::factory()->create(['name' => 'Special Council Meeting']);
         $session = DemocraticTimeSession::factory()->create(['democratic_time_type_id' => $type->id]);
         $otherSessions = DemocraticTimeSession::factory()->count(2)->create();
@@ -73,6 +89,8 @@ describe('ListSessions', function () {
     });
 
     it('can sort sessions by started_at', function () {
+        actingAsSuperAdminForSessionResource();
+
         $sessions = DemocraticTimeSession::factory()->count(3)->create();
 
         Livewire::test(ListSessions::class)
@@ -83,6 +101,8 @@ describe('ListSessions', function () {
     });
 
     it('can sort sessions by ended_at', function () {
+        actingAsSuperAdminForSessionResource();
+
         $sessions = DemocraticTimeSession::factory()->count(3)->create();
 
         Livewire::test(ListSessions::class)
@@ -95,11 +115,15 @@ describe('ListSessions', function () {
 
 describe('CreateSession', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForSessionResource();
+
         Livewire::test(CreateSession::class)
             ->assertOk();
     });
 
     it('can create a session', function () {
+        actingAsSuperAdminForSessionResource();
+
         $type = DemocraticTimeType::factory()->create();
         $startedAt = now()->addDays(1)->format('Y-m-d H:i:s');
         $endedAt = now()->addDays(1)->addHours(2)->format('Y-m-d H:i:s');
@@ -127,6 +151,8 @@ describe('CreateSession', function () {
     });
 
     it('can create a session without ended_at', function () {
+        actingAsSuperAdminForSessionResource();
+
         $type = DemocraticTimeType::factory()->create();
         $startedAt = now()->addDays(1)->format('Y-m-d H:i:s');
         $location = fake()->address();
@@ -152,6 +178,8 @@ describe('CreateSession', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForSessionResource();
+
         $type = DemocraticTimeType::factory()->create();
         $startedAt = now()->addDays(1)->format('Y-m-d H:i:s');
         $location = fake()->address();
@@ -183,6 +211,8 @@ describe('CreateSession', function () {
 
 describe('EditSession', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create();
 
         Livewire::test(EditSession::class, [
@@ -196,6 +226,8 @@ describe('EditSession', function () {
     });
 
     it('can update a session', function () {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create();
         $newType = DemocraticTimeType::factory()->create();
         $newLocation = fake()->address();
@@ -218,6 +250,8 @@ describe('EditSession', function () {
     });
 
     it('can update session dates', function () {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create();
         $newStartedAt = now()->addDays(7)->format('Y-m-d H:i:s');
         $newEndedAt = now()->addDays(7)->addHours(3)->format('Y-m-d H:i:s');
@@ -237,6 +271,8 @@ describe('EditSession', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create();
 
         Livewire::test(EditSession::class, [
@@ -254,6 +290,8 @@ describe('EditSession', function () {
     ]);
 
     it('can delete a session', function () {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create();
 
         Livewire::test(EditSession::class, [
@@ -269,6 +307,8 @@ describe('EditSession', function () {
 
 describe('SessionActions', function () {
     it('can open sign in', function () {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create([
             'sign_in_opens_at' => null,
         ]);
@@ -282,6 +322,8 @@ describe('SessionActions', function () {
     });
 
     it('can close sign in', function () {
+        actingAsSuperAdminForSessionResource();
+
         $session = DemocraticTimeSession::factory()->create([
             'sign_in_opens_at' => now()->subHour(),
             'sign_in_closes_at' => null,

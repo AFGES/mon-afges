@@ -14,20 +14,29 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
+function actingAsSuperAdminForUserResource(): User
+{
     Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-    $this->actingAsUser = User::factory()->create();
-    $this->actingAsUser->assignRole('super_admin');
-    actingAs($this->actingAsUser);
-});
+
+    $user = User::factory()->create();
+    $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
 
 describe('ListUsers', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForUserResource();
+
         livewire(ListUsers::class)
             ->assertOk();
     });
 
     it('can list users', function () {
+        actingAsSuperAdminForUserResource();
+
         $users = User::factory()->count(5)->create();
 
         livewire(ListUsers::class)
@@ -36,6 +45,8 @@ describe('ListUsers', function () {
     });
 
     it('can search users by name', function () {
+        actingAsSuperAdminForUserResource();
+
         $users = User::factory()->count(5)->create();
 
         livewire(ListUsers::class)
@@ -46,6 +57,8 @@ describe('ListUsers', function () {
     });
 
     it('can search users by email', function () {
+        actingAsSuperAdminForUserResource();
+
         $users = User::factory()->count(5)->create();
 
         livewire(ListUsers::class)
@@ -58,11 +71,15 @@ describe('ListUsers', function () {
 
 describe('CreateUser', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForUserResource();
+
         livewire(CreateUser::class)
             ->assertOk();
     });
 
     it('can create a user', function () {
+        actingAsSuperAdminForUserResource();
+
         $newUserData = User::factory()->make();
 
         livewire(CreateUser::class)
@@ -82,6 +99,8 @@ describe('CreateUser', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForUserResource();
+
         livewire(CreateUser::class)
             ->fillForm($data)
             ->call('create')
@@ -97,6 +116,8 @@ describe('CreateUser', function () {
 
 describe('EditUser', function () {
     it('can load the page', function () {
+        actingAsSuperAdminForUserResource();
+
         $user = User::factory()->create();
 
         livewire(EditUser::class, [
@@ -110,6 +131,8 @@ describe('EditUser', function () {
     });
 
     it('can update a user', function () {
+        actingAsSuperAdminForUserResource();
+
         $user = User::factory()->create();
         $newUserData = User::factory()->make();
 
@@ -131,6 +154,8 @@ describe('EditUser', function () {
     });
 
     it('validates the form data', function (array $data, array $errors) {
+        actingAsSuperAdminForUserResource();
+
         $user = User::factory()->create();
 
         livewire(EditUser::class, [
@@ -147,6 +172,8 @@ describe('EditUser', function () {
     ]);
 
     it('can delete a user', function () {
+        actingAsSuperAdminForUserResource();
+
         $user = User::factory()->create();
 
         livewire(EditUser::class, [

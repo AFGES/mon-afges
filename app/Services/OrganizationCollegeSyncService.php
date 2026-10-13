@@ -8,6 +8,7 @@ use App\Models\CollegeOrganization;
 use App\Models\Organization;
 use App\Models\Seat;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 final class OrganizationCollegeSyncService
 {
@@ -20,13 +21,13 @@ final class OrganizationCollegeSyncService
      */
     public function sync(Organization $organization, array $collegesData): void
     {
-        foreach ($collegesData as $collegeId => $data) {
-            $this->syncCollege($organization, (string) $collegeId, $data);
-        }
+        DB::transaction(function () use ($organization, $collegesData): void {
+            foreach ($collegesData as $collegeId => $data) {
+                $this->syncCollege($organization, (string) $collegeId, $data);
+            }
 
-        // Detach colleges that are no longer in the data
-        $collegeIds = array_keys($collegesData);
-        $organization->colleges()->sync($collegeIds);
+            $organization->colleges()->sync(array_keys($collegesData));
+        });
     }
 
     /**

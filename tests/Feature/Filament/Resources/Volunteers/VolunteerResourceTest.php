@@ -10,6 +10,7 @@ use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
 use Filament\Actions\DeleteAction;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -130,6 +131,17 @@ describe('CreateVolunteer', function () {
         '`organization_id` is required' => [['organization_id' => null], ['organization_id' => 'required']],
         '`started_at` is required' => [['started_at' => null], ['started_at' => 'required']],
     ]);
+
+    it('shows the translated required message for user_id', function () {
+        actingAsSuperAdminForVolunteerResource();
+
+        livewire(CreateVolunteer::class)
+            ->fillForm(['organization_id' => Organization::factory()->create()->id, 'started_at' => '2026-01-01', 'user_id' => null])
+            ->call('create')
+            ->assertHasFormErrors(['user_id' => [
+                __('validation.required', ['attribute' => Str::lower(__('volunteer.fields.user'))]),
+            ]]);
+    });
 });
 
 describe('EditVolunteer', function () {

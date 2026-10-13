@@ -12,6 +12,7 @@ use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -286,6 +287,17 @@ describe('CreateDelegate', function () {
             ->assertHasFormErrors(['ended_at'])
             ->assertNotNotified()
             ->assertNoRedirect();
+    });
+
+    it('shows the translated required message for email', function () {
+        actingAsSuperAdminForDelegateResource();
+
+        livewire(CreateDelegate::class)
+            ->fillForm(['started_at' => '2026-01-01', 'user_id' => User::factory()->create()->id, 'organization_id' => Organization::factory()->create()->id, 'seat_id' => Seat::factory()->create()->id, 'email' => null])
+            ->call('create')
+            ->assertHasFormErrors(['email' => [
+                __('validation.required', ['attribute' => Str::lower(__('delegate.fields.email'))]),
+            ]]);
     });
 });
 

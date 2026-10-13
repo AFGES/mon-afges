@@ -7,6 +7,7 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -112,6 +113,28 @@ describe('CreateUser', function () {
         '`email` is a valid email address' => [['name' => 'Test User', 'email' => 'invalid-email'], ['email' => 'email']],
         '`email` is required' => [['name' => 'Test User', 'email' => null], ['email' => 'required']],
     ]);
+
+    it('shows the translated required message for email', function () {
+        actingAsSuperAdminForUserResource();
+
+        livewire(CreateUser::class)
+            ->fillForm(['name' => 'Test User', 'email' => null])
+            ->call('create')
+            ->assertHasFormErrors(['email' => [
+                __('validation.required', ['attribute' => Str::lower(__('user.fields.email'))]),
+            ]]);
+    });
+
+    it('shows the translated email message for email', function () {
+        actingAsSuperAdminForUserResource();
+
+        livewire(CreateUser::class)
+            ->fillForm(['name' => 'Test User', 'email' => 'invalid-email'])
+            ->call('create')
+            ->assertHasFormErrors(['email' => [
+                __('validation.email', ['attribute' => Str::lower(__('user.fields.email'))]),
+            ]]);
+    });
 });
 
 describe('EditUser', function () {

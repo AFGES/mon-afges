@@ -7,6 +7,7 @@ use App\Filament\Clusters\Settings\Resources\Colleges\Pages\EditCollege;
 use App\Filament\Clusters\Settings\Resources\Colleges\Pages\ListColleges;
 use App\Models\College;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -130,6 +131,28 @@ describe('CreateCollege', function () {
             ->assertHasFormErrors(['name' => 'unique'])
             ->assertNotNotified()
             ->assertNoRedirect();
+    });
+
+    it('shows the translated required message for name', function () {
+        actingAsSuperAdminForCollegeResource();
+
+        livewire(CreateCollege::class)
+            ->fillForm(['can_vote' => true, 'require_same_college_for_proxy' => true, 'name' => null])
+            ->call('create')
+            ->assertHasFormErrors(['name' => [
+                __('validation.required', ['attribute' => Str::lower(__('college.fields.name'))]),
+            ]]);
+    });
+
+    it('shows the translated unique message for name', function () {
+        actingAsSuperAdminForCollegeResource();
+
+        livewire(CreateCollege::class)
+            ->fillForm(['can_vote' => true, 'require_same_college_for_proxy' => true, 'name' => College::factory()->create()->name])
+            ->call('create')
+            ->assertHasFormErrors(['name' => [
+                __('validation.unique', ['attribute' => Str::lower(__('college.fields.name'))]),
+            ]]);
     });
 });
 

@@ -120,6 +120,28 @@ describe('CreateOrganization', function () {
         '`legal_name` is required' => [['legal_name' => null], ['legal_name' => 'required']],
         '`legal_name` is max 255 characters' => [['legal_name' => Str::random(256)], ['legal_name' => 'max']],
     ]);
+
+    it('shows the translated required message for short_name', function () {
+        actingAsSuperAdminForOrganizationResource();
+
+        livewire(CreateOrganization::class)
+            ->fillForm(['legal_name' => fake()->unique()->company(), 'short_name' => null])
+            ->call('create')
+            ->assertHasFormErrors(['short_name' => [
+                __('validation.required', ['attribute' => Str::lower(__('organization.fields.short_name'))]),
+            ]]);
+    });
+
+    it('shows the translated max message for short_name', function () {
+        actingAsSuperAdminForOrganizationResource();
+
+        livewire(CreateOrganization::class)
+            ->fillForm(['legal_name' => fake()->unique()->company(), 'short_name' => Str::random(256)])
+            ->call('create')
+            ->assertHasFormErrors(['short_name' => [
+                __('validation.max.string', ['attribute' => Str::lower(__('organization.fields.short_name')), 'max' => 255]),
+            ]]);
+    });
 });
 
 describe('EditOrganization', function () {

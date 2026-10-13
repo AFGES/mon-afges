@@ -7,6 +7,7 @@ use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Pages\EditDemoc
 use App\Filament\Clusters\Settings\Resources\DemocraticTimeTypes\Pages\ListDemocraticTimeTypes;
 use App\Models\DemocraticTimeType;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
@@ -126,6 +127,17 @@ describe('CreateDemocraticTimeType', function () {
         '`quorum_percentage` is required' => [['quorum_percentage' => null], ['quorum_percentage' => 'required']],
         '`quorum_percentage` must be numeric' => [['quorum_percentage' => 'invalid'], ['quorum_percentage' => 'numeric']],
     ]);
+
+    it('shows the translated required message for name', function () {
+        actingAsSuperAdminForDemocraticTimeTypeResource();
+
+        Livewire::test(CreateDemocraticTimeType::class)
+            ->fillForm(['acronym' => fake()->unique()->lexify('???'), 'convocation_interval_days' => 30, 'calculate_quorum_per_college' => false, 'quorum_percentage' => 50, 'include_proxies_in_quorum' => true, 'name' => null])
+            ->call('create')
+            ->assertHasFormErrors(['name' => [
+                __('validation.required', ['attribute' => Str::lower(__('democratic_time_type.fields.name'))]),
+            ]]);
+    });
 });
 
 describe('EditDemocraticTimeType', function () {

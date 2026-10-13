@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Notifications\DelegateApprovalRequested;
@@ -93,4 +94,14 @@ test('notification includes action link to approve delegate', function () {
             );
         }
     );
+});
+
+test('notification details link points to the delegate edit page', function () {
+    $delegate = Delegate::factory()->create();
+
+    $mailMessage = (new DelegateApprovalRequested($delegate))->toMail($delegate->user);
+
+    $expectedUrl = DelegateResource::getUrl('edit', ['record' => $delegate]);
+
+    expect(collect($mailMessage->outroLines)->implode(' '))->toContain($expectedUrl);
 });

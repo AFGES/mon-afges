@@ -37,7 +37,9 @@ final class ApprovalField extends Field
 
     public function getApproverRelationship(): ?string
     {
-        return $this->evaluate($this->approverRelationship);
+        $value = $this->evaluate($this->approverRelationship);
+
+        return is_string($value) ? $value : null;
     }
 
     public function statusAttribute(string|Closure|null $attribute): static
@@ -49,7 +51,9 @@ final class ApprovalField extends Field
 
     public function getStatusAttribute(): ?string
     {
-        return $this->evaluate($this->statusAttribute);
+        $value = $this->evaluate($this->statusAttribute);
+
+        return is_string($value) ? $value : null;
     }
 
     public function approvedAtAttribute(string|Closure|null $attribute): static
@@ -61,7 +65,9 @@ final class ApprovalField extends Field
 
     public function getApprovedAtAttribute(): ?string
     {
-        return $this->evaluate($this->approvedAtAttribute);
+        $value = $this->evaluate($this->approvedAtAttribute);
+
+        return is_string($value) ? $value : null;
     }
 
     public function approvedByAttribute(string|Closure|null $attribute): static
@@ -73,7 +79,9 @@ final class ApprovalField extends Field
 
     public function getApprovedByAttribute(): ?string
     {
-        return $this->evaluate($this->approvedByAttribute);
+        $value = $this->evaluate($this->approvedByAttribute);
+
+        return is_string($value) ? $value : null;
     }
 
     public function rejectionReasonAttribute(string|Closure|null $attribute): static
@@ -85,6 +93,8 @@ final class ApprovalField extends Field
 
     public function getRejectionReasonAttribute(): ?string
     {
-        return $this->evaluate($this->rejectionReasonAttribute);
+        $value = $this->evaluate($this->rejectionReasonAttribute);
+
+        return is_string($value) ? $value : null;
     }
 }

@@ -14,14 +14,14 @@ final class OrganizationCollegeSyncService
     /**
      * Sync colleges with seat creation/deletion.
      *
-     * @param  array<int, array{delegates_per_seat: int, seats: int}>  $collegesData
+     * @param  array<string, array{delegates_per_seat: int, seats?: int}>  $collegesData
      *
      * @throws Exception
      */
     public function sync(Organization $organization, array $collegesData): void
     {
         foreach ($collegesData as $collegeId => $data) {
-            $this->syncCollege($organization, $collegeId, $data);
+            $this->syncCollege($organization, (string) $collegeId, $data);
         }
 
         // Detach colleges that are no longer in the data

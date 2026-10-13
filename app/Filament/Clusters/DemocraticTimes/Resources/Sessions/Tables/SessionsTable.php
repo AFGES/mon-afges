@@ -43,19 +43,20 @@ final class SessionsTable
                 TextColumn::make('sign_in_status')
                     ->label(__('emargement.label'))
                     ->badge()
-                    ->getStateUsing(function ($record) {
+                    ->getStateUsing(function ($record): string {
                         if ($record->isSignInOpen()) {
-                            return __('emargement.status.open');
+                            return 'open';
                         }
                         if ($record->sign_in_closes_at !== null) {
-                            return __('emargement.status.closed');
+                            return 'closed';
                         }
 
-                        return __('emargement.status.not_opened');
+                        return 'not_opened';
                     })
+                    ->formatStateUsing(fn (string $state): string => __("emargement.status.{$state}"))
                     ->color(fn (string $state): string => match ($state) {
-                        'ouvert' => 'success',
-                        'fermé' => 'gray',
+                        'open' => 'success',
+                        'closed' => 'gray',
                         default => 'warning',
                     }),
 
@@ -67,20 +68,21 @@ final class SessionsTable
                 TextColumn::make('status')
                     ->label('Statut')
                     ->badge()
-                    ->getStateUsing(function ($record) {
+                    ->getStateUsing(function ($record): string {
                         if ($record->isCurrentlyActive()) {
-                            return 'En cours';
+                            return 'ongoing';
                         }
                         if ($record->hasEnded()) {
-                            return 'Terminée';
+                            return 'ended';
                         }
 
-                        return 'À venir';
+                        return 'upcoming';
                     })
+                    ->formatStateUsing(fn (string $state): string => __("democratic_time_session.status.{$state}"))
                     ->color(fn (string $state): string => match ($state) {
-                        'En cours' => 'success',
-                        'Terminée' => 'gray',
-                        'À venir' => 'info',
+                        'ongoing' => 'success',
+                        'ended' => 'gray',
+                        default => 'info',
                     }),
 
                 TextColumn::make('created_at')

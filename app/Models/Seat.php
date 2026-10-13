@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 final class Seat extends Model
@@ -70,14 +71,34 @@ final class Seat extends Model
         return $thisCollegeId === $otherCollegeId;
     }
 
-    public function college(): BelongsTo
+    /**
+     * @return HasOneThrough<College, CollegeOrganization, $this>
+     */
+    public function college(): HasOneThrough
     {
-        return $this->collegeOrganization->college();
+        return $this->hasOneThrough(
+            College::class,
+            CollegeOrganization::class,
+            firstKey: 'id',
+            secondKey: 'id',
+            localKey: 'college_organization_id',
+            secondLocalKey: 'college_id',
+        );
     }
 
-    public function organization(): BelongsTo
+    /**
+     * @return HasOneThrough<Organization, CollegeOrganization, $this>
+     */
+    public function organization(): HasOneThrough
     {
-        return $this->collegeOrganization->organization();
+        return $this->hasOneThrough(
+            Organization::class,
+            CollegeOrganization::class,
+            firstKey: 'id',
+            secondKey: 'id',
+            localKey: 'college_organization_id',
+            secondLocalKey: 'organization_id',
+        );
     }
 
     /**

@@ -105,9 +105,9 @@ trait HasPeriod
             'ended_at',
         ]);
 
-        $this->casts = array_merge($this->casts ?? [], [
+        $this->mergeCasts(array_diff_key([
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
-        ]);
+        ], $this->getCasts()));
     }
 }

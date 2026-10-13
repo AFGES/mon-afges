@@ -96,3 +96,10 @@ test('delegate is scoped by currently scope', function () {
 
     expect($delegates)->toHaveCount(2);
 });
+
+test('delegate keeps date casts declared on the model over trait defaults', function () {
+    $casts = (new Delegate)->getCasts();
+
+    expect($casts['started_at'])->toBe('date')
+        ->and($casts['ended_at'])->toBe('date');
+});

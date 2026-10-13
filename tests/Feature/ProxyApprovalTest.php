@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\ApprovalStatus;
+use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\ProxyResource;
 use App\Models\College;
 use App\Models\CollegeOrganization;
 use App\Models\Delegate;
@@ -212,4 +213,12 @@ test('proxy navigation badge shows pending count', function () {
     $badge = Proxy::getNavigationBadge();
 
     expect($badge)->toBe('3');
+});
+
+test('proxy approval notification action links to the proxies list page', function () {
+    $proxy = Proxy::factory()->create();
+
+    $mailMessage = (new ProxyApprovalNotification($proxy))->toMail(User::factory()->create());
+
+    expect($mailMessage->actionUrl)->toBe(ProxyResource::getUrl('index'));
 });

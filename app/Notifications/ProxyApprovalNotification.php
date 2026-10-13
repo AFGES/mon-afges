@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\ProxyResource;
 use App\Models\Proxy;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,7 +46,7 @@ final class ProxyApprovalNotification extends Notification implements ShouldQueu
                 'proxy_holder' => $this->proxy->proxyHolderSeat->label(),
                 'session' => $this->proxy->democraticTimeSession->democraticTimeType->name,
             ]))
-            ->action(__('proxy.notifications.approval_needed.action'), url('/admin/proxies'));
+            ->action(__('proxy.notifications.approval_needed.action'), ProxyResource::getUrl('index'));
     }
 
     /**

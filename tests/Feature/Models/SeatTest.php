@@ -42,7 +42,8 @@ test('seat can access college through college organization', function () {
 
     $seat = $collegeOrg->seatRecords->first();
 
-    expect($seat->college()->first()->name)->toBe('Test College');
+    expect($seat->college()->first()->name)->toBe('Test College')
+        ->and($seat->college->is($college))->toBeTrue();
 });
 
 test('seat can access organization through college organization', function () {
@@ -57,7 +58,8 @@ test('seat can access organization through college organization', function () {
 
     $seat = $collegeOrg->seatRecords->first();
 
-    expect($seat->organization()->first()->short_name)->toBe('TEST');
+    expect($seat->organization()->first()->short_name)->toBe('TEST')
+        ->and($seat->organization->is($organization))->toBeTrue();
 });
 
 test('seat has seat number', function () {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Volunteers\VolunteerResource;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\VolunteerApprovalRequested;
@@ -94,4 +95,13 @@ test('notification includes action link to approve volunteer', function () {
             );
         }
     );
+});
+
+test('notification details link points to the volunteer edit page', function () {
+    $volunteer = Volunteer::factory()->create();
+
+    $mailMessage = (new VolunteerApprovalRequested($volunteer))->toMail($volunteer->user);
+
+    expect(collect($mailMessage->outroLines)->implode(' '))
+        ->toContain(VolunteerResource::getUrl('edit', ['record' => $volunteer]));
 });

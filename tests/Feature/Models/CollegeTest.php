@@ -111,3 +111,24 @@ test('college organizations relationship includes pivot data', function () {
 
     expect($pivot->delegates_per_seat)->toBe(3);
 });
+
+test('college delegates query returns only delegates seated in that college', function () {
+    $college = College::factory()->create();
+    $otherCollege = College::factory()->create();
+
+    $collegeOrg = CollegeOrganization::factory()->for($college)->withSeats(2)->create();
+    $otherCollegeOrg = CollegeOrganization::factory()->for($otherCollege)->withSeats(1)->create();
+
+    $inCollege = $collegeOrg->seatRecords->map(fn (Seat $seat) => Delegate::factory()->approved()->create([
+        'seat_id' => $seat->id,
+        'organization_id' => $collegeOrg->organization_id,
+    ]));
+    Delegate::factory()->approved()->create([
+        'seat_id' => $otherCollegeOrg->seatRecords->first()->id,
+        'organization_id' => $otherCollegeOrg->organization_id,
+    ]);
+
+    expect($college->delegates()->pluck('delegates.id')->all())
+        ->toEqualCanonicalizing($inCollege->pluck('id')->all())
+        ->and($college->seats()->count())->toBe(2);
+});

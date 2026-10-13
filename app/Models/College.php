@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,21 +24,33 @@ final class College extends Model
         'require_same_college_for_proxy',
     ];
 
-    public function delegates(): HasManyThrough
+    /**
+     * @return HasManyThrough<Seat, CollegeOrganization, $this>
+     */
+    public function seats(): HasManyThrough
     {
         return $this->hasManyThrough(
-            Delegate::class,
             Seat::class,
-            firstKey: 'college_organization_id', // This won't work as expected
-            secondKey: 'seat_id',
-            localKey: 'id',
-            secondLocalKey: 'id'
-        )
-            ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
-            ->where('college_organization.college_id', $this->getKey())
-            ->select('delegates.*');
+            CollegeOrganization::class,
+            firstKey: 'college_id',
+            secondKey: 'college_organization_id',
+        );
     }
 
+    /**
+     * Query the delegates sitting on seats of this college (two hops away, so not a native relation).
+     *
+     * @return Builder<Delegate>
+     */
+    public function delegates(): Builder
+    {
+        return Delegate::query()->whereIn(
+            'seat_id',
+            $this->seats()->select('seats.id')->getQuery()
+        );
+    }
+
+    /** @return BelongsToMany<Organization, $this, CollegeOrganization> */
     public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class)

@@ -165,13 +165,6 @@ final class OrganizationForm
                                 $component->state($data);
                             })
                             ->saveRelationshipsUsing(function (Repeater $component, $record, $state) {
-                                $syncData = collect($state)->mapWithKeys(function ($item) {
-                                    return [$item['college_id'] => [
-                                        'delegates_per_seat' => $item['delegates_per_seat'],
-                                    ]];
-                                })->toArray();
-
-                                // Use the service to handle seat synchronization
                                 try {
                                     $collegesData = collect($state)->mapWithKeys(function ($item) {
                                         return [$item['college_id'] => [

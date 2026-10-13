@@ -8,6 +8,7 @@ use App\Models\User;
 use DutchCodingCompany\FilamentSocialite\Events\Login;
 use DutchCodingCompany\FilamentSocialite\Events\Registered;
 use DutchCodingCompany\FilamentSocialite\Events\SocialiteUserConnected;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 final class MarkEmailAsVerifiedOnSocialiteLogin
 {
@@ -38,9 +39,9 @@ final class MarkEmailAsVerifiedOnSocialiteLogin
     /**
      * Mark the user's primary email as verified.
      */
-    private function markEmailAsVerified(User $user): void
+    private function markEmailAsVerified(?Authenticatable $user): void
     {
-        if (! $user) {
+        if (! $user instanceof User) {
             return;
         }
 

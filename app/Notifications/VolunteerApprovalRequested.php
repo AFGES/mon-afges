@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Filament\Resources\Volunteers\VolunteerResource;
 use App\Models\Volunteer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -57,7 +58,7 @@ final class VolunteerApprovalRequested extends Notification implements ShouldQue
             )
             ->line('['.__('volunteer.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
             ->line(__('volunteer.notifications.approval_requested.view_details', [
-                'url' => route('filament.root.resources.volunteers.edit', $this->volunteer),
+                'url' => VolunteerResource::getUrl('edit', ['record' => $this->volunteer]),
             ]))
             ->line(__('volunteer.notifications.approval_requested.outro'));
     }

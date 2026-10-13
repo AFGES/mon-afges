@@ -36,6 +36,22 @@ describe('ListSessions', function () {
             ->assertCanSeeTableRecords($sessions);
     });
 
+    it('shows translated status and sign-in status labels', function () {
+        app()->setLocale('en');
+        $session = DemocraticTimeSession::factory()->create([
+            'started_at' => now()->subHour(),
+            'ended_at' => now()->addHour(),
+            'sign_in_opens_at' => null,
+            'sign_in_closes_at' => null,
+        ]);
+
+        Livewire::test(ListSessions::class)
+            ->assertTableColumnStateSet('status', 'ongoing', $session)
+            ->assertTableColumnFormattedStateSet('status', 'Ongoing', $session)
+            ->assertTableColumnStateSet('sign_in_status', 'not_opened', $session)
+            ->assertTableColumnFormattedStateSet('sign_in_status', 'not opened yet', $session);
+    });
+
     it('can search sessions by location', function () {
         $sessions = DemocraticTimeSession::factory()->count(3)->create();
 

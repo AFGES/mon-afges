@@ -133,10 +133,10 @@ trait HasApprovalStatus
             'rejection_reason',
         ]);
 
-        $this->casts = array_merge($this->casts ?? [], [
+        $this->mergeCasts(array_diff_key([
             'approval_status' => ApprovalStatus::class,
             'approved_at' => 'datetime',
-        ]);
+        ], $this->getCasts()));
     }
 
     /**

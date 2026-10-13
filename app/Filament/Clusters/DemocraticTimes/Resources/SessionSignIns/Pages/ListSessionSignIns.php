@@ -8,6 +8,7 @@ use App\Filament\Clusters\DemocraticTimes\Resources\SessionSignIns\SessionSignIn
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 final class ListSessionSignIns extends ListRecords
 {
@@ -20,10 +21,10 @@ final class ListSessionSignIns extends ListRecords
         ];
     }
 
-    protected function getTableQuery(): ?Builder
+    protected function getTableQuery(): Builder|Relation|null
     {
         return parent::getTableQuery()
-            ->with([
+            ?->with([
                 'seat.collegeOrganization.college',
                 'seat.delegates.user',
                 'signedInBySeat.collegeOrganization.college',

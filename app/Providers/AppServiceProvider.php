@@ -67,23 +67,7 @@ final class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('google', \SocialiteProviders\Google\Provider::class);
         });
 
-        // Mark email as verified when user logs in with Socialite
-        Event::listen(
-            \DutchCodingCompany\FilamentSocialite\Events\Login::class,
-            [\App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin::class, 'handleLogin']
-        );
-
-        Event::listen(
-            \DutchCodingCompany\FilamentSocialite\Events\Registered::class,
-            [\App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin::class, 'handleRegistered']
-        );
-
-        Event::listen(
-            \DutchCodingCompany\FilamentSocialite\Events\SocialiteUserConnected::class,
-            [\App\Listeners\MarkEmailAsVerifiedOnSocialiteLogin::class, 'handleSocialiteUserConnected']
-        );
-
-        Gate::before(function (User $user, $ability) {
+        Gate::before(function (User $user, string $ability): ?bool {
             return $user->hasRole('super_admin') ?: null;
         });
     }
@@ -95,7 +79,10 @@ final class AppServiceProvider extends ServiceProvider
     {
         Blueprint::macro('approvalStatus', function (?string $after = null) {
             /** @var Blueprint $this */
-            $this->enum('approval_status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value)->after($after);
+            $approvalStatus = $this->enum('approval_status', array_column(ApprovalStatus::cases(), 'value'))->default(ApprovalStatus::Pending->value);
+            if ($after !== null) {
+                $approvalStatus->after($after);
+            }
             $this->timestamp('approved_at')->nullable()->after('approval_status');
             $this->foreignUuid('approved_by')->nullable()->constrained('users')->after('approved_at');
             $this->text('rejection_reason')->nullable()->after('approved_by');

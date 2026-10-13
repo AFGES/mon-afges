@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
 use Illuminate\Http\RedirectResponse;
 
-final class DelegateApprovalController extends Controller
+final class DelegateApprovalController
 {
     public function approve(Delegate $delegate): RedirectResponse
     {
         $delegate->approve();
 
         return redirect()
-            ->route('filament.root.clusters.democratic-times.resources.delegates.edit', $delegate)
+            ->to(DelegateResource::getUrl('edit', ['record' => $delegate]))
             ->with('success', __('delegate.notifications.approved.title'));
     }
 
@@ -23,7 +24,7 @@ final class DelegateApprovalController extends Controller
         $delegate->reject();
 
         return redirect()
-            ->route('filament.root.resources.delegates.edit', $delegate)
+            ->to(DelegateResource::getUrl('edit', ['record' => $delegate]))
             ->with('success', __('delegate.notifications.rejected.title'));
     }
 }

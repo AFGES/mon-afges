@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -57,7 +58,7 @@ final class DelegateApprovalRequested extends Notification implements ShouldQueu
             )
             ->line('['.__('delegate.notifications.approval_requested.reject_action').']('.$rejectUrl.')')
             ->line(__('delegate.notifications.approval_requested.view_details', [
-                'url' => route('filament.root.democratic-times.resources.delegates.edit', $this->delegate),
+                'url' => DelegateResource::getUrl('edit', ['record' => $this->delegate]),
             ]))
             ->line(__('delegate.notifications.approval_requested.outro'));
     }

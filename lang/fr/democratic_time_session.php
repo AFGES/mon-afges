@@ -18,6 +18,11 @@ return [
         'quorum_percentage' => 'Pourcentage requis pour le quorum',
         'include_proxies_in_quorum' => 'Inclure les procurations dans le quorum',
     ],
+    'status' => [
+        'ongoing' => 'En cours',
+        'ended' => 'Terminée',
+        'upcoming' => 'À venir',
+    ],
     'sections' => [
         'quorum_configuration' => 'Configuration du quorum (copiée du type)',
     ],

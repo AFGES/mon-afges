@@ -42,6 +42,8 @@ final class Organization extends Model
 
     /**
      * Sync colleges with seat creation.
+     *
+     * @param  array<string, array{delegates_per_seat: int, seats?: int}>  $collegesData
      */
     public function syncCollegesWithSeats(array $collegesData): void
     {

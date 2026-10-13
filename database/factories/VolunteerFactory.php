@@ -29,6 +29,13 @@ final class VolunteerFactory extends Factory
         ];
     }
 
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'approval_status' => ApprovalStatus::Pending,
+        ]);
+    }
+
     public function approved(): static
     {
         return $this->state(fn (array $attributes) => [

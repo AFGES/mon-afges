@@ -75,24 +75,8 @@ final class OrganizationForm
                                     ->minValue(0)
                                     ->default(1)
                                     ->helperText(__('organization.helpers.seats'))
-                                    ->live()
                                     ->hidden(function ($get) {
                                         return self::findCollege($get('college_id'))?->max_seats_per_organization === 1;
-                                    })
-                                    ->afterStateUpdated(function ($state, $set, $get) {
-                                        if (! $state) {
-                                            return;
-                                        }
-
-                                        $college = self::findCollege($get('college_id'));
-
-                                        if (! $college?->max_seats_per_organization) {
-                                            return;
-                                        }
-
-                                        if ($state > $college->max_seats_per_organization) {
-                                            $set('seats', $college->max_seats_per_organization);
-                                        }
                                     })
                                     ->maxValue(function ($get) {
                                         return self::findCollege($get('college_id'))?->max_seats_per_organization;
@@ -104,24 +88,8 @@ final class OrganizationForm
                                     ->minValue(1)
                                     ->default(1)
                                     ->helperText(__('organization.helpers.delegates_per_seat'))
-                                    ->live()
                                     ->hidden(function ($get) {
                                         return self::findCollege($get('college_id'))?->max_delegates_per_seat === 1;
-                                    })
-                                    ->afterStateUpdated(function ($state, $set, $get) {
-                                        if (! $state) {
-                                            return;
-                                        }
-
-                                        $college = self::findCollege($get('college_id'));
-
-                                        if (! $college?->max_delegates_per_seat) {
-                                            return;
-                                        }
-
-                                        if ($state > $college->max_delegates_per_seat) {
-                                            $set('delegates_per_seat', $college->max_delegates_per_seat);
-                                        }
                                     })
                                     ->maxValue(function ($get) {
                                         return self::findCollege($get('college_id'))?->max_delegates_per_seat;

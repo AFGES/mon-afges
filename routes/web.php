@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Route;
 // Magic Link Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::post('/magic-link/request', [MagicLinksController::class, 'store'])
-        ->middleware('throttle:magic-link')
         ->name('magicLink.request');
 });
 

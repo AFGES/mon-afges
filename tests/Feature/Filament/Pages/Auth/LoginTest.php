@@ -86,3 +86,26 @@ it('rejects a wrong password', function () {
 
     assertGuest();
 });
+
+it('limits magic links per email and shows the rate limited notification', function () {
+    $this->freezeSecond();
+    Notification::fake();
+    $user = User::factory()->create(['email' => 'test@afges.org']);
+
+    foreach (range(1, 5) as $attempt) {
+        livewire(Login::class)
+            ->set('data.email', 'test@afges.org')
+            ->call('authenticate')
+            ->assertNotified(__('login.magic_link.sent.title'));
+    }
+
+    livewire(Login::class)
+        ->set('data.email', 'test@afges.org')
+        ->call('authenticate')
+        ->assertNotified(__('filament-panels::auth/pages/login.notifications.throttled.title', [
+            'seconds' => 3600,
+            'minutes' => 60,
+        ]));
+
+    Notification::assertSentToTimes($user, MagicLinkNotification::class, 5);
+});

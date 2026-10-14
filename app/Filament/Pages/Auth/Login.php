@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages\Auth;
 
-use App\Notifications\MagicLinkNotification;
+use App\Actions\SendMagicLink;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 final class Login extends BaseLogin
 {
@@ -33,30 +31,16 @@ final class Login extends BaseLogin
             ]);
     }
 
-    public function sendMagicLink(): void
+    public function sendMagicLink(SendMagicLink $sendMagicLink): void
     {
+        $data = $this->form->getState();
+
         try {
-            $this->rateLimit(2);
+            $sendMagicLink->handle($data['email'], request()->ip());
         } catch (TooManyRequestsException $exception) {
             $this->getRateLimitedNotification($exception)?->send();
 
             return;
-        }
-
-        $data = $this->form->getState();
-
-        $userModel = config('auth.providers.users.model');
-        $user = $userModel::where('email', $data['email'])->first();
-
-        if ($user) {
-            $token = Str::random(64);
-
-            $user->update([
-                'magic_link_token' => Hash::make($token),
-                'magic_link_token_expires_at' => now()->addMinutes(15),
-            ]);
-
-            $user->notify(new MagicLinkNotification($token));
         }
 
         Notification::make()
@@ -77,7 +61,7 @@ final class Login extends BaseLogin
     public function authenticate(): ?LoginResponse
     {
         if ($this->showMagicLinkForm) {
-            $this->sendMagicLink();
+            $this->sendMagicLink(app(SendMagicLink::class));
 
             return null;
         }

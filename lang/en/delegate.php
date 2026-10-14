@@ -48,6 +48,17 @@ return [
         'reject' => 'Reject',
     ],
 
+    'approval' => [
+        'terminate_label' => 'Current delegates of the seat to end',
+        'occupancy' => 'Seat occupancy: :count / :capacity',
+        'bulk_terminate_label' => 'End the delegation of the current delegates of these seats',
+        'bulk_terminate_helper' => 'Other current delegates of each concerned seat will end on the start date of the approved request.',
+        'minimum_terminations' => 'The college limits this seat: at least one delegate must give up their mandate.|The college limits this seat: at least :min delegates must give up their mandate.',
+        'capacity_exceeded' => 'The seat is full for this college: select at least one delegate who must give up their mandate.|The seat is full for this college: select at least :min delegates who must give up their mandate.',
+        'bulk_skipped_title' => 'Requests not approved',
+        'bulk_skipped_body' => ':count request was not approved because its seat is full. Enable ending current delegations or approve it individually.|:count requests were not approved because their seat is full. Enable ending current delegations or approve them individually.',
+    ],
+
     'notifications' => [
         'approved' => [
             'title' => 'Delegate approved successfully',

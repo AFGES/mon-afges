@@ -6,12 +6,17 @@ namespace App\Http\Controllers;
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
+use App\Services\DelegateApprovalService;
 use Illuminate\Http\RedirectResponse;
 
 final class ApproveDelegateController
 {
-    public function __invoke(Delegate $delegate): RedirectResponse
+    public function __invoke(Delegate $delegate, DelegateApprovalService $approvalService): RedirectResponse
     {
+        if ($approvalService->currentDelegatesOfSeat($delegate)->isNotEmpty()) {
+            return redirect()->to(DelegateResource::getUrl('edit', ['record' => $delegate, 'approve' => 1]));
+        }
+
         $delegate->approve();
 
         return redirect()

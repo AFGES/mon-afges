@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Tables;
 
 use App\Enums\ApprovalStatus;
-use App\Filament\Actions\ApproveAction;
-use App\Filament\Actions\BulkApproveAction;
+use App\Filament\Actions\ApproveDelegateAction;
+use App\Filament\Actions\BulkApproveDelegatesAction;
 use App\Filament\Actions\BulkRejectAction;
 use App\Filament\Actions\RejectAction;
 use App\Models\Delegate;
@@ -100,7 +100,7 @@ final class DelegatesTable
             ->deferFilters(false)
             ->recordActions([
                 ActionGroup::make([
-                    ApproveAction::make()->hiddenLabel(),
+                    ApproveDelegateAction::make()->hiddenLabel(),
                     RejectAction::make()->hiddenLabel(),
                 ])
                     ->buttonGroup(),
@@ -108,7 +108,7 @@ final class DelegatesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    BulkApproveAction::make(),
+                    BulkApproveDelegatesAction::make(),
                     BulkRejectAction::make(),
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

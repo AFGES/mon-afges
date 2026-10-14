@@ -5,15 +5,19 @@ declare(strict_types=1);
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\CreateDelegate;
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\EditDelegate;
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\ListDelegates;
+use App\Models\CollegeOrganization;
 use App\Models\Delegate;
 use App\Models\Organization;
 use App\Models\Seat;
 use App\Models\User;
+use App\Notifications\DelegateApprovalRequestedNotification;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -198,8 +202,8 @@ describe('CreateDelegate', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
-        $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
+        $organization = $seat->collegeOrganization->organization;
 
         livewire(CreateDelegate::class)
             ->fillForm([
@@ -221,12 +225,90 @@ describe('CreateDelegate', function () {
         ]);
     });
 
+    it('creates the delegate already approved without asking for approval', function () {
+        $admin = actingAsSuperAdminForDelegateResource();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+        Permission::firstOrCreate(['name' => 'Update:Delegate', 'guard_name' => 'web']);
+        User::factory()->create()->givePermissionTo('Update:Delegate');
+        Notification::fake();
+
+        $seat = Seat::factory()->create();
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'user_id' => User::factory()->create()->id,
+                'email' => fake()->email(),
+                'organization_id' => $seat->collegeOrganization->organization_id,
+                'seat_id' => $seat->id,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $delegate = Delegate::withoutGlobalScopes()->where('seat_id', $seat->id)->sole();
+
+        expect($delegate->isApproved())->toBeTrue()
+            ->and($delegate->approved_by)->toBe($admin->id)
+            ->and($delegate->approved_at)->not->toBeNull();
+        Notification::assertNotSentTo(User::permission('Update:Delegate')->get(), DelegateApprovalRequestedNotification::class);
+    });
+
+    it('refuses a delegate on a full seat when no current delegate is ended', function () {
+        actingAsSuperAdminForDelegateResource();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+
+        $seat = Seat::factory()->create([
+            'college_organization_id' => CollegeOrganization::factory()->create(['delegates_per_seat' => 1])->id,
+        ]);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => today()->format('Y-m-d'),
+                'user_id' => User::factory()->create()->id,
+                'email' => 'full-seat@example.org',
+                'organization_id' => $seat->collegeOrganization->organization_id,
+                'seat_id' => $seat->id,
+                'terminated_delegate_ids' => [],
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['terminated_delegate_ids']);
+
+        assertDatabaseMissing(Delegate::class, ['email' => 'full-seat@example.org']);
+    });
+
+    it('ends the selected current delegate when creating on a full seat', function () {
+        actingAsSuperAdminForDelegateResource();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+
+        $seat = Seat::factory()->create([
+            'college_organization_id' => CollegeOrganization::factory()->create(['delegates_per_seat' => 1])->id,
+        ]);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $startedAt = today()->subDays(3);
+
+        livewire(CreateDelegate::class)
+            ->fillForm([
+                'started_at' => $startedAt->format('Y-m-d'),
+                'user_id' => User::factory()->create()->id,
+                'email' => 'replacement@example.org',
+                'organization_id' => $seat->collegeOrganization->organization_id,
+                'seat_id' => $seat->id,
+                'terminated_delegate_ids' => [$current->id],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        expect(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateString())->toBe($startedAt->toDateString())
+            ->and(Delegate::withoutGlobalScopes()->where('email', 'replacement@example.org')->sole()->isApproved())->toBeTrue();
+    });
+
     it('creates a delegate from the minimal valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
-        $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
+        $organization = $seat->collegeOrganization->organization;
 
         livewire(CreateDelegate::class)
             ->fillForm([
@@ -251,8 +333,8 @@ describe('CreateDelegate', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
-        $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
+        $organization = $seat->collegeOrganization->organization;
 
         livewire(CreateDelegate::class)
             ->fillForm([
@@ -279,8 +361,8 @@ describe('CreateDelegate', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
-        $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
+        $organization = $seat->collegeOrganization->organization;
 
         livewire(CreateDelegate::class)
             ->fillForm([
@@ -300,8 +382,8 @@ describe('CreateDelegate', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
-        $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
+        $organization = $seat->collegeOrganization->organization;
 
         livewire(CreateDelegate::class)
             ->fillForm([
@@ -373,6 +455,57 @@ describe('EditDelegate', function () {
         ]);
     });
 
+    it('saves the user fiche fields through the user relationship', function () {
+        actingAsSuperAdminForDelegateResource();
+
+        $delegate = Delegate::factory()->approved()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm([
+                'user' => [
+                    'last_name' => 'Durand',
+                    'first_name' => 'Camille',
+                    'study_program' => 'Master 2 Droit',
+                    'phone' => '0601020304',
+                    'postal_address' => '1 rue de la Paix, Paris',
+                    'elected_mandates' => 'CFVU',
+                ],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(User::class, [
+            'id' => $delegate->user_id,
+            'last_name' => 'Durand',
+            'first_name' => 'Camille',
+            'study_program' => 'Master 2 Droit',
+            'phone' => '0601020304',
+            'elected_mandates' => 'CFVU',
+        ]);
+    });
+
+    it('saves the edit form with empty optional user fields', function () {
+        actingAsSuperAdminForDelegateResource();
+
+        $delegate = Delegate::factory()->approved()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm([
+                'user' => [
+                    'phone' => '',
+                    'birth_date' => null,
+                    'study_program' => '',
+                    'postal_address' => '',
+                ],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+    });
+
     it('updates the delegate dates from valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
@@ -400,8 +533,8 @@ describe('EditDelegate', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
-        $newOrganization = Organization::factory()->create();
         $newSeat = Seat::factory()->create();
+        $newOrganization = $newSeat->collegeOrganization->organization;
 
         livewire(EditDelegate::class, [
             'record' => $delegate->id,

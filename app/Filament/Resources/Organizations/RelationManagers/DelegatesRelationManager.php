@@ -7,12 +7,14 @@ namespace App\Filament\Resources\Organizations\RelationManagers;
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Schemas\DelegateForm;
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Tables\DelegatesTable;
 use App\Models\Scopes\ApprovedScope;
+use App\Services\DelegateApprovalService;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 final class DelegatesRelationManager extends RelationManager
 {
@@ -33,7 +35,11 @@ final class DelegatesRelationManager extends RelationManager
         return DelegatesTable::configure($table)
             ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScope(ApprovedScope::class))
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->using(fn (array $data): Model => app(DelegateApprovalService::class)->createApproved(
+                        [...Arr::except($data, 'terminated_delegate_ids'), 'organization_id' => $this->getOwnerRecord()->getKey()],
+                        array_values($data['terminated_delegate_ids'] ?? []),
+                    )),
             ]);
     }
 }

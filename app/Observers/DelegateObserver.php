@@ -17,9 +17,17 @@ final class DelegateObserver
         private DelegateGoogleWorkspaceSyncServiceInterface $syncService
     ) {}
 
+    /**
+     * Approvers are only notified when the delegate still awaits approval; delegates created already approved
+     * (by an admin) need no review. A freshly created model may not carry the database default status yet,
+     * so anything not approved counts as awaiting approval.
+     */
     public function created(Delegate $delegate): void
     {
-        $this->notifyApprovers($delegate);
+        if (! $delegate->isApproved()) {
+            $this->notifyApprovers($delegate);
+        }
+
         $this->addToGroup($delegate);
     }
 

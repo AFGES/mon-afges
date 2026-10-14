@@ -3,13 +3,17 @@
 declare(strict_types=1);
 
 use App\Enums\ApprovalStatus;
+use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\EditDelegate;
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages\ListDelegates;
 use App\Filament\Resources\Volunteers\Pages\ListVolunteers;
+use App\Models\CollegeOrganization;
 use App\Models\Delegate;
+use App\Models\Seat;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\ApprovalApprovedNotification;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -186,4 +190,134 @@ describe('authorization', function () {
         'bulk approve' => ['bulkApprove', []],
         'bulk reject' => ['bulkReject', ['rejection_reason' => 'Out of scope']],
     ]);
+});
+
+function seatWithCapacityForApprovalActions(int $delegatesPerSeat): Seat
+{
+    return Seat::factory()->create([
+        'college_organization_id' => CollegeOrganization::factory()->create(['delegates_per_seat' => $delegatesPerSeat])->id,
+    ]);
+}
+
+describe('ApproveDelegateAction', function () {
+    beforeEach(function () {
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+    });
+
+    it('ends the selected current delegates of the seat when approving', function () {
+        actingAsSuperAdminForApprovalActions();
+        Notification::fake();
+        $seat = Seat::factory()->create();
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->subDay()->startOfDay()]);
+
+        livewire(ListDelegates::class)
+            ->callTableAction('approve', $record, ['terminated_delegate_ids' => [$current->id]])
+            ->assertNotified(__('approval.notifications.approved.title'));
+
+        expect($record->refresh()->isApproved())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateString())->toBe(now()->subDay()->toDateString());
+    });
+
+    it('keeps current delegates when none is selected and the seat has room', function () {
+        actingAsSuperAdminForApprovalActions();
+        Notification::fake();
+        $seat = seatWithCapacityForApprovalActions(2);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id]);
+
+        livewire(ListDelegates::class)
+            ->callTableAction('approve', $record, ['terminated_delegate_ids' => []]);
+
+        expect($record->refresh()->isApproved())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
+    });
+
+    it('requires ending current delegates when the seat capacity of the college is reached', function () {
+        actingAsSuperAdminForApprovalActions();
+        $seat = seatWithCapacityForApprovalActions(1);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id]);
+
+        livewire(ListDelegates::class)
+            ->callTableAction('approve', $record, ['terminated_delegate_ids' => []])
+            ->assertHasTableActionErrors(['terminated_delegate_ids' => 'min']);
+
+        expect($record->refresh()->isPending())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
+    });
+
+    it('checks the current delegates by default only when the seat is full', function (int $perSeat, array $expectedChecked) {
+        actingAsSuperAdminForApprovalActions();
+        $collegeOrganization = CollegeOrganization::factory()->create(['delegates_per_seat' => $perSeat]);
+        $seat = Seat::factory()->create(['college_organization_id' => $collegeOrganization->id]);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id]);
+
+        livewire(ListDelegates::class)
+            ->mountTableAction('approve', $record)
+            ->assertSchemaStateSet(['terminated_delegate_ids' => $expectedChecked === [] ? [] : [$current->id]]);
+    })->with([
+        'seat full' => [1, [true]],
+        'seat not full' => [2, []],
+    ]);
+});
+
+describe('BulkApproveDelegatesAction', function () {
+    beforeEach(function () {
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+    });
+
+    it('ends the other current delegates of each seat when the toggle is on', function () {
+        actingAsSuperAdminForApprovalActions();
+        Notification::fake();
+        $seat = Seat::factory()->create();
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->subDay()->startOfDay()]);
+
+        livewire(ListDelegates::class)
+            ->callTableBulkAction('bulkApprove', [$record], ['terminate_current_delegates' => true]);
+
+        expect($record->refresh()->isApproved())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateString())->toBe(now()->subDay()->toDateString());
+    });
+
+    it('keeps the other current delegates when the toggle is off and the seat has room', function () {
+        actingAsSuperAdminForApprovalActions();
+        Notification::fake();
+        $seat = seatWithCapacityForApprovalActions(2);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id]);
+
+        livewire(ListDelegates::class)
+            ->callTableBulkAction('bulkApprove', [$record], ['terminate_current_delegates' => false]);
+
+        expect($record->refresh()->isApproved())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
+    });
+
+    it('skips requests whose seat is full when the toggle is off', function () {
+        actingAsSuperAdminForApprovalActions();
+        $seat = seatWithCapacityForApprovalActions(1);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id]);
+
+        livewire(ListDelegates::class)
+            ->callTableBulkAction('bulkApprove', [$record], ['terminate_current_delegates' => false])
+            ->assertNotified(__('delegate.approval.bulk_skipped_title'));
+
+        expect($record->refresh()->isPending())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
+    });
+});
+
+describe('EditDelegate approval link', function () {
+    it('opens the approve action when approve=1 is present on a pending delegate', function (bool $pending, bool $opened) {
+        actingAsSuperAdminForApprovalActions();
+        $record = Delegate::factory()->{$pending ? 'pending' : 'approved'}()->create();
+
+        $component = Livewire::withQueryParams(['approve' => 1])->test(EditDelegate::class, ['record' => $record->getKey()]);
+
+        expect($component->get('mountedActions'))->toHaveCount($opened ? 1 : 0);
+    })->with(['pending' => [true, true], 'approved' => [false, false]]);
 });

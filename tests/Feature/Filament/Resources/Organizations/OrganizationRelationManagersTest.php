@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalStatus;
 use App\Filament\Resources\Organizations\RelationManagers\DelegatesRelationManager;
 use App\Filament\Resources\Organizations\RelationManagers\VolunteersRelationManager;
 use App\Models\CollegeOrganization;
@@ -95,8 +96,8 @@ describe('DelegatesRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherOrgDelegate]);
     });
 
-    it('creates a delegate for an organization from valid form data', function () {
-        actingAsSuperAdminForOrganizationRelationManagers();
+    it('creates an already approved delegate for an organization from valid form data', function () {
+        $admin = actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
         $user = User::factory()->create();
@@ -117,6 +118,8 @@ describe('DelegatesRelationManager', function () {
         assertDatabaseHas(Delegate::class, [
             'user_id' => $user->id,
             'organization_id' => $organization->id,
+            'approval_status' => ApprovalStatus::Approved->value,
+            'approved_by' => $admin->id,
         ]);
     });
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalStatus;
 use App\Filament\Resources\Users\RelationManagers\DelegatesRelationManager;
 use App\Filament\Resources\Users\RelationManagers\VolunteersRelationManager;
 use App\Models\Delegate;
@@ -55,12 +56,12 @@ describe('DelegatesRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherUserDelegate]);
     });
 
-    it('creates a delegate for a user from valid form data', function () {
-        actingAsSuperAdminForUserRelationManagers();
+    it('creates an already approved delegate for a user from valid form data', function () {
+        $admin = actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
-        $organization = Organization::factory()->create();
         $seat = Seat::factory()->create();
+        $organization = $seat->collegeOrganization->organization;
 
         Livewire::test(DelegatesRelationManager::class, [
             'ownerRecord' => $user,
@@ -77,6 +78,8 @@ describe('DelegatesRelationManager', function () {
         assertDatabaseHas(Delegate::class, [
             'user_id' => $user->id,
             'organization_id' => $organization->id,
+            'approval_status' => ApprovalStatus::Approved->value,
+            'approved_by' => $admin->id,
         ]);
     });
 

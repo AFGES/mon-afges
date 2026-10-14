@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Enums\ApprovalStatus;
+use App\Models\Seat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,8 +22,11 @@ final class DelegateFactory extends Factory
     {
         return [
             'user_id' => \App\Models\User::factory(),
-            'organization_id' => \App\Models\Organization::factory(),
-            'seat_id' => \App\Models\Seat::factory(),
+            'seat_id' => Seat::factory(),
+            'organization_id' => fn (array $attributes): string => Seat::query()
+                ->findOrFail($attributes['seat_id'])
+                ->collegeOrganization
+                ->organization_id,
             'email' => fake()->unique()->safeEmail(),
             'started_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'ended_at' => fake()->optional()->dateTimeBetween('now', '+1 year'),

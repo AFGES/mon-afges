@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
+use App\Models\Seat;
 use App\Models\User;
 use App\Notifications\ApprovalApprovedNotification;
 use Illuminate\Support\Facades\Notification;
@@ -32,6 +33,19 @@ it('approves the delegate through a signed url, flashes the result and redirects
         ApprovalApprovedNotification::class,
         fn (ApprovalApprovedNotification $notification): bool => $notification->approvable->is($delegate),
     );
+});
+
+it('redirects to the edit page without approving when the seat already has a current delegate', function () {
+    mockGoogleWorkspaceService()->shouldIgnoreMissing();
+    $seat = Seat::factory()->create();
+    Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+    $delegate = Delegate::factory()->pending()->create(['seat_id' => $seat->id]);
+    $approver = User::factory()->create()->givePermissionTo('Update:Delegate');
+
+    $response = $this->actingAs($approver)->get(URL::signedRoute('delegates.approve', ['delegate' => $delegate->id]));
+
+    $response->assertRedirect(DelegateResource::getUrl('edit', ['record' => $delegate]).'?approve=1');
+    expect($delegate->refresh()->isPending())->toBeTrue();
 });
 
 it('returns 403 when the url is not signed', function () {

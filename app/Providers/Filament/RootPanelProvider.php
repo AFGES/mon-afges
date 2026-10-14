@@ -7,6 +7,7 @@ namespace App\Providers\Filament;
 use App\Actions\CreateUserFromSocialite;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
+use App\Filament\Widgets\DelegateRequestWidget;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
 use App\Livewire\Profile\ManageDelegates;
 use App\Livewire\Profile\ManageVolunteers;
@@ -53,6 +54,7 @@ final class RootPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                DelegateRequestWidget::class,
                 PendingVolunteerStats::class,
                 AccountWidget::class,
                 FilamentInfoWidget::class,

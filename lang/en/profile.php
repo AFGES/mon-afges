@@ -9,8 +9,7 @@ return [
             'required' => 'The organization is required.',
         ],
         'email' => [
-            'label' => 'Email',
-            'helper' => 'Email that will be added to the Google Workspace group upon approval',
+            'helper' => 'Address where you will receive notices of meeting. It may differ from your account email.',
             'required' => 'The email is required.',
             'invalid' => 'The email must be a valid email address.',
         ],
@@ -34,16 +33,20 @@ return [
 
     'manage_delegates' => [
         'label' => 'Delegate Applications',
-        'add_action' => 'Add Delegate Application',
-        'new_item' => 'New Application',
-        'seat_format' => '%s - %s (Seat %d)',
         'section_heading' => 'Delegation',
         'section_description' => 'Manage your delegate applications',
+        'request_action' => 'Request a delegate seat',
         'my_applications' => 'My Delegate Applications',
         'seat_label' => 'Seat :number',
-        'submit_button' => 'Submit Application',
-        'notification_title' => 'Delegate Mandate Pending Approval',
-        'notification_body' => 'Your delegate mandate has been submitted and is pending approval.',
+        'ended_on' => 'Ended on :date',
+        'terminate' => [
+            'action' => 'End this mandate',
+            'confirm' => 'Are you sure you want to end this delegate mandate?',
+            'success_title' => 'Mandate ended',
+            'success_body' => 'Your delegate mandate has been ended.',
+            'not_authorized_title' => 'Action not allowed',
+            'not_authorized_body' => 'You can only end your own approved and active mandates.',
+        ],
     ],
 
     'manage_volunteers' => [

@@ -9,15 +9,14 @@ return [
             'required' => 'L\'association est requise.',
         ],
         'email' => [
-            'label' => 'Courriel',
-            'helper' => 'Courriel qui sera ajouté au groupe Google Workspace lors de l\'approbation',
+            'helper' => 'Adresse à laquelle vous recevrez les convocations. Elle peut être différente de celle de votre compte.',
             'required' => 'Le courriel est requis.',
             'invalid' => 'Le courriel doit être une adresse courriel valide.',
         ],
         'seat' => [
             'label' => 'Siège',
-            'helper' => 'Sélectionnez le siège pour lequel vous souhaitez devenir délégué(e).',
-            'required' => 'Le siège est requis lors de la demande pour devenir délégué(e).',
+            'helper' => 'Sélectionnez le siège pour lequel vous souhaitez devenir délégué-e.',
+            'required' => 'Le siège est requis lors de la demande pour devenir délégué-e.',
         ],
         'started_at' => [
             'label' => 'Date de début',
@@ -34,16 +33,11 @@ return [
 
     'manage_delegates' => [
         'label' => 'Demandes de délégation',
-        'add_action' => 'Ajouter une demande de délégation',
-        'new_item' => 'Nouvelle demande',
-        'seat_format' => '%s - %s (Siège %d)',
         'section_heading' => 'Délégation',
         'section_description' => 'Gérez vos demandes de délégation',
+        'request_action' => 'Demander un siège de délégué-e',
         'my_applications' => 'Mes demandes de délégation',
         'seat_label' => 'Siège :number',
-        'submit_button' => 'Soumettre ma demande',
-        'notification_title' => 'Mandat de délégué(e) en attente d\'approbation',
-        'notification_body' => 'Votre mandat de délégué(e) a été soumis et est en attente d\'approbation.',
         'ended_on' => 'Terminé le :date',
         'terminate' => [
             'action' => 'Terminer ce mandat',

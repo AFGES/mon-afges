@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +41,11 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
         'password',
         'magic_link_token',
         'magic_link_token_expires_at',
+        'birth_date',
+        'phone',
+        'postal_address',
+        'study_program',
+        'elected_mandates',
     ];
 
     /**
@@ -78,6 +84,24 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     }
 
     /**
+     * Organizations the user may request a delegate seat for: those where the user
+     * is a current, approved volunteer and which have at least one seat.
+     *
+     * @return Builder<Organization>
+     */
+    public function delegateEligibleOrganizations(): Builder
+    {
+        return Organization::query()
+            ->whereHas('volunteers', fn (Builder $query) => $query->where('user_id', $this->id))
+            ->whereIn('id', CollegeOrganization::query()->whereHas('seatRecords')->select('organization_id'));
+    }
+
+    public function canRequestDelegateSeat(): bool
+    {
+        return $this->delegateEligibleOrganizations()->exists();
+    }
+
+    /**
      * The full name, kept in sync with the generated `name` column so it is
      * available before the model is refreshed from the database.
      *
@@ -105,6 +129,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'magic_link_token_expires_at' => 'datetime',
+            'birth_date' => 'date',
         ];
     }
 }

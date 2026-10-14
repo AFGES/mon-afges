@@ -44,4 +44,18 @@ final class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user has filled in the delegate form personal information.
+     */
+    public function withDelegateFormData(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'birth_date' => fake()->dateTimeBetween('-30 years', '-18 years'),
+            'phone' => fake()->phoneNumber(),
+            'postal_address' => fake()->address(),
+            'study_program' => fake()->words(3, true),
+            'elected_mandates' => fake()->sentence(),
+        ]);
+    }
 }

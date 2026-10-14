@@ -41,6 +41,10 @@
                                         {{ $delegate->email }}
                                     </span>
                                 @endif
+                                <br>
+                                <span class="text-xs text-gray-600 dark:text-gray-400">
+                                    {{ __('delegate_form.fields.submitted_at', ['date' => $delegate->created_at->format('d/m/Y')]) }}
+                                </span>
                                 <x-filament::badge :color="$delegate->approval_status->getColor()">
                                     {{ $delegate->approval_status->getLabel() }}
                                 </x-filament::badge>
@@ -56,7 +60,7 @@
                                     color="danger"
                                     size="sm"
                                     :tooltip="__('profile.manage_delegates.terminate.action')"
-                                    wire:click="terminateDelegate({{ $delegate->id }})"
+                                    wire:click="terminateDelegate('{{ $delegate->id }}')"
                                     wire:confirm="{{ __('profile.manage_delegates.terminate.confirm') }}"
                                 />
                             @endcan
@@ -67,14 +71,13 @@
         </div>
     @endif
 
-    {{-- Form to add new delegate applications --}}
-    <form wire:submit.prevent="submitDelegates" class="space-y-6">
-        {{ $this->form }}
-
-        <div class="text-right">
-            <x-filament::button type="submit">
-                {{ __('profile.manage_delegates.submit_button') }}
-            </x-filament::button>
-        </div>
-    </form>
+    @if(auth()->user()->canRequestDelegateSeat())
+        <x-filament::button
+            tag="a"
+            :href="\App\Filament\Pages\RequestDelegateSeat::getUrl()"
+            icon="heroicon-o-plus"
+        >
+            {{ __('profile.manage_delegates.request_action') }}
+        </x-filament::button>
+    @endif
 </x-filament::section>

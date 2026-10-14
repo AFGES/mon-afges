@@ -92,12 +92,14 @@ final class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Throttle magic link requests per email address and IP.
+     * Throttle magic link requests per email address and per IP address, independently.
      */
     private function configureRateLimiting(): void
     {
-        RateLimiter::for('magic-link', fn (Request $request): Limit => Limit::perMinute(5)
-            ->by(Str::lower((string) $request->input('email')).'|'.$request->ip()));
+        RateLimiter::for('magic-link', fn (Request $request): array => [
+            Limit::perHour(5)->by('email:'.Str::lower(Str::trim((string) $request->input('email')))),
+            Limit::perHour(30)->by('ip:'.$request->ip()),
+        ]);
     }
 
     /**

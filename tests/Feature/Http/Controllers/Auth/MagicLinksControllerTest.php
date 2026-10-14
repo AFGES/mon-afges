@@ -64,29 +64,30 @@ it('redirects authenticated users away from the request endpoint', function () {
     expect($user->refresh()->magic_link_token)->toBeNull();
 });
 
-it('throttles magic link requests after five attempts per email and ip', function () {
+it('limits magic link requests to five per hour per email across different ips', function () {
     Notification::fake([MagicLinkNotification::class]);
     User::factory()->create(['email' => 'test@afges.org']);
 
     foreach (range(1, 5) as $attempt) {
-        $this->post(route('magicLink.request'), ['email' => 'test@afges.org'])->assertRedirect();
+        $this->withServerVariables(['REMOTE_ADDR' => "10.0.0.{$attempt}"])
+            ->post(route('magicLink.request'), ['email' => 'test@afges.org'])
+            ->assertRedirect();
     }
-    $response = $this->post(route('magicLink.request'), ['email' => 'test@afges.org']);
+    $response = $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.99'])
+        ->post(route('magicLink.request'), ['email' => ' TEST@afges.org ']);
 
     $response->assertTooManyRequests();
     Notification::assertSentTimes(MagicLinkNotification::class, 5);
 });
 
-it('does not share the throttle between different emails', function () {
+it('limits magic link requests to thirty per hour per ip across different emails', function () {
     Notification::fake([MagicLinkNotification::class]);
-    User::factory()->create(['email' => 'test@afges.org']);
-    User::factory()->create(['email' => 'other@afges.org']);
 
-    foreach (range(1, 5) as $attempt) {
-        $this->post(route('magicLink.request'), ['email' => 'test@afges.org']);
+    foreach (range(1, 30) as $attempt) {
+        $this->post(route('magicLink.request'), ['email' => "user{$attempt}@afges.org"])->assertRedirect();
     }
-    $response = $this->post(route('magicLink.request'), ['email' => 'other@afges.org']);
+    $response = $this->post(route('magicLink.request'), ['email' => 'user31@afges.org']);
 
-    $response->assertRedirect();
-    Notification::assertSentTimes(MagicLinkNotification::class, 6);
+    $response->assertTooManyRequests();
+    Notification::assertNothingSent();
 });

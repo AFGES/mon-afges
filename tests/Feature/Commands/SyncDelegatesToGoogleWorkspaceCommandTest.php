@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Delegate;
 use App\Models\User;
+use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceServiceInterface;
 use Illuminate\Support\Facades\Log;
 use Mockery\MockInterface;
@@ -19,6 +20,7 @@ beforeEach(function () {
 /**
  * Creating a delegate makes the observer call Google, so the creation runs against a
  * throwaway spy; the test then binds a fresh mock that only records what the command does.
+ * The sync service is a singleton that captured the spy, so it is forgotten when the mock is bound.
  */
 function activeDelegateWithEmail(string $email): Delegate
 {
@@ -29,6 +31,8 @@ function activeDelegateWithEmail(string $email): Delegate
 
 function mockedGoogleWorkspaceForCommand(): MockInterface
 {
+    app()->forgetInstance(DelegateGoogleWorkspaceSyncServiceInterface::class);
+
     return test()->mock(GoogleWorkspaceServiceInterface::class);
 }
 

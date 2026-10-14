@@ -42,10 +42,10 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(GoogleWorkspaceServiceInterface::class, fn (): GoogleWorkspaceServiceInterface => GoogleWorkspaceService::isConfigured()
+        $this->app->singleton(GoogleWorkspaceServiceInterface::class, fn (): GoogleWorkspaceServiceInterface => GoogleWorkspaceService::isConfigured()
             ? GoogleWorkspaceService::fromConfig()
             : new UnconfiguredGoogleWorkspaceService);
-        $this->app->bind(DelegateGoogleWorkspaceSyncServiceInterface::class, DelegateGoogleWorkspaceSyncService::class);
+        $this->app->singleton(DelegateGoogleWorkspaceSyncServiceInterface::class, DelegateGoogleWorkspaceSyncService::class);
 
         if ($this->app->environment('local') && class_exists(LaravelTelescopeServiceProvider::class)) {
             $this->app->register(LaravelTelescopeServiceProvider::class);

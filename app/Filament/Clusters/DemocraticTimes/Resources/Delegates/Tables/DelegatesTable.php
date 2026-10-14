@@ -38,8 +38,7 @@ final class DelegatesTable
                     ->copyable(),
                 TextColumn::make('organization.short_name')
                     ->label(__('organization.label'))
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(),
                 TextColumn::make('seat.collegeOrganization.college.name')
                     ->label(__('college.label'))
                     ->searchable()

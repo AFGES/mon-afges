@@ -172,17 +172,17 @@ describe('ListDelegates', function () {
             ->assertCanSeeTableRecords([$latest, $middle, $earliest], inOrder: true);
     });
 
-    it('sorts delegates by organization name ascending within the organization grouping', function () {
+    it('orders organization groups by legal name and leaves the grouped organization column unsortable', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $bravoOrganization = Organization::factory()->create(['short_name' => 'Bravo', 'legal_name' => 'Bravo legal']);
-        $alphaOrganization = Organization::factory()->create(['short_name' => 'Alpha', 'legal_name' => 'Alpha legal']);
-        $bravo = Delegate::factory()->approved()->for($bravoOrganization)->create(['ended_at' => null]);
-        $alpha = Delegate::factory()->approved()->for($alphaOrganization)->create(['ended_at' => null]);
+        $zuluLegalName = Organization::factory()->create(['short_name' => 'Alpha', 'legal_name' => 'Zulu legal']);
+        $yankeeLegalName = Organization::factory()->create(['short_name' => 'Bravo', 'legal_name' => 'Yankee legal']);
+        $first = Delegate::factory()->approved()->for($zuluLegalName)->create(['ended_at' => null]);
+        $second = Delegate::factory()->approved()->for($yankeeLegalName)->create(['ended_at' => null]);
 
         livewire(ListDelegates::class)
-            ->sortTable('organization.short_name')
-            ->assertCanSeeTableRecords([$alpha, $bravo], inOrder: true);
+            ->assertTableColumnExists('organization.short_name', fn ($column) => ! $column->isSortable())
+            ->assertCanSeeTableRecords([$second, $first], inOrder: true);
     });
 });
 

@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Delegate;
 use App\Models\User;
+use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -151,6 +152,8 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      * Sync all delegates to the Google Workspace group.
      * Returns an array with sync statistics.
      *
+     * @param  (Closure(string, string|int): void)|null  $onProgress  Receives an event name
+     *                                                                (found_active, checking_removals or a stats key) and its detail (an email, or the count for found_active).
      * @return array{
      *     already_in_group: int,
      *     added: int,
@@ -159,7 +162,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      *     failed_to_remove: int,
      * }
      */
-    public function syncAll(bool $dryRun = false): array
+    public function syncAll(bool $dryRun = false, ?Closure $onProgress = null): array
     {
         if (! $this->isGoogleWorkspaceConfigured()) {
             Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
@@ -172,6 +175,9 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
 
         $activeDelegateEmails = $this->getActiveDelegateEmails();
 
+        $report = $onProgress ?? static fn (string $event, string|int $detail): null => null;
+        $report('found_active', $activeDelegateEmails->count());
+
         $stats = [
             'already_in_group' => 0,
             'added' => 0,
@@ -180,30 +186,33 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
             'failed_to_remove' => 0,
         ];
 
-        // Ensure active delegates are in the group
         foreach ($activeDelegateEmails as $email) {
             if ($this->googleWorkspaceService->isInGroup($email)) {
                 $stats['already_in_group']++;
+                $report('already_in_group', $email);
 
                 continue;
             }
 
             if ($dryRun) {
                 $stats['added']++;
+                $report('added', $email);
 
                 continue;
             }
 
             if ($this->googleWorkspaceService->addToGroup($email)) {
                 $stats['added']++;
+                $report('added', $email);
 
                 continue;
             }
 
             $stats['failed_to_add']++;
+            $report('failed_to_add', $email);
         }
 
-        // Remove users who are no longer active delegates
+        $report('checking_removals', 0);
         $allUserEmails = User::whereNotNull('email')->pluck('email')->toArray();
 
         foreach ($allUserEmails as $email) {
@@ -217,17 +226,20 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
 
             if ($dryRun) {
                 $stats['removed']++;
+                $report('removed', $email);
 
                 continue;
             }
 
             if ($this->googleWorkspaceService->removeFromGroup($email)) {
                 $stats['removed']++;
+                $report('removed', $email);
 
                 continue;
             }
 
             $stats['failed_to_remove']++;
+            $report('failed_to_remove', $email);
         }
 
         return $stats;

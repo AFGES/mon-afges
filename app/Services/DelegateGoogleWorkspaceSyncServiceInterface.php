@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Delegate;
+use Closure;
 
 interface DelegateGoogleWorkspaceSyncServiceInterface
 {
@@ -17,4 +18,19 @@ interface DelegateGoogleWorkspaceSyncServiceInterface
      * Remove a single delegate from the Google Workspace group.
      */
     public function removeDelegate(Delegate $delegate): bool;
+
+    /**
+     * Sync every delegate to the Google Workspace group, removing users who are no longer delegates.
+     *
+     * @param  (Closure(string, string|int): void)|null  $onProgress  Receives an event name
+     *                                                                (found_active, checking_removals or a stats key) and its detail (an email, or the count for found_active).
+     * @return array{
+     *     already_in_group: int,
+     *     added: int,
+     *     removed: int,
+     *     failed_to_add: int,
+     *     failed_to_remove: int,
+     * }
+     */
+    public function syncAll(bool $dryRun = false, ?Closure $onProgress = null): array;
 }

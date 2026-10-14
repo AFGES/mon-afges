@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\User;
-use App\Services\DelegateGoogleWorkspaceSyncService;
+use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -25,7 +24,7 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
      */
     protected $description = 'Sync delegates to Google Workspace group, removing users who are no longer delegates';
 
-    public function handle(DelegateGoogleWorkspaceSyncService $syncService): int
+    public function handle(DelegateGoogleWorkspaceSyncServiceInterface $syncService): int
     {
         $serviceAccountJson = config('services.google.workspace.service_account_json');
         $adminEmail = config('services.google.workspace.admin_email');
@@ -43,89 +42,20 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
             $this->info('Running in dry-run mode - no changes will be made');
         }
 
-        $activeDelegateEmails = $syncService->getActiveDelegateEmails();
-
-        $this->info("Found {$activeDelegateEmails->count()} active delegate(s)");
-
-        $alreadyInCount = 0;
-        $addedCount = 0;
-        $failedToAddCount = 0;
-        $removedCount = 0;
-        $failedToRemoveCount = 0;
-
-        $this->info('Ensuring active delegates are in the group...');
-        $this->newLine();
-
-        foreach ($activeDelegateEmails as $email) {
-            if ($syncService->isInGroup($email)) {
-                $this->line("  ✓ {$email} - already in group");
-                $alreadyInCount++;
-
-                continue;
-            }
-
-            if ($isDryRun) {
-                $this->line("  [DRY RUN] Would add {$email}");
-                $addedCount++;
-
-                continue;
-            }
-
-            if ($syncService->addToGroup($email)) {
-                $this->line("  + {$email} - added to group");
-                $addedCount++;
-
-                continue;
-            }
-
-            $this->line("  ✗ {$email} - failed to add");
-            $failedToAddCount++;
-        }
-
-        $this->newLine();
-        $this->info('Checking for users to remove from the group...');
-        $this->newLine();
-
-        $allUserEmails = User::whereNotNull('email')->get('email');
-
-        foreach ($allUserEmails as $userEmail) {
-            $email = $userEmail->email;
-            if ($activeDelegateEmails->contains($email)) {
-                continue;
-            }
-
-            if (! $syncService->isInGroup($email)) {
-                continue;
-            }
-
-            if ($isDryRun) {
-                $this->line("  [DRY RUN] Would remove {$email}");
-                $removedCount++;
-
-                continue;
-            }
-
-            if ($syncService->removeFromGroup($email)) {
-                $this->line("  - {$email} - removed from group");
-                $removedCount++;
-
-                continue;
-            }
-
-            $this->line("  ✗ {$email} - failed to remove");
-            $failedToRemoveCount++;
-        }
+        $stats = $syncService->syncAll($isDryRun, function (string $event, string|int $detail) use ($isDryRun): void {
+            $this->reportProgress($event, $detail, $isDryRun);
+        });
 
         $this->newLine();
         $this->info('Synchronization complete!');
         $this->table(
             ['Action', 'Count'],
             [
-                ['Already in group', $alreadyInCount],
-                ['Added to group', $addedCount],
-                ['Removed from group', $removedCount],
-                ['Failed to add', $failedToAddCount],
-                ['Failed to remove', $failedToRemoveCount],
+                ['Already in group', $stats['already_in_group']],
+                ['Added to group', $stats['added']],
+                ['Removed from group', $stats['removed']],
+                ['Failed to add', $stats['failed_to_add']],
+                ['Failed to remove', $stats['failed_to_remove']],
             ]
         );
 
@@ -133,15 +63,36 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
             $this->info('This was a dry run - no actual changes were made.');
         }
 
-        Log::info('Google Workspace delegate sync completed', [
-            'already_in_group' => $alreadyInCount,
-            'added' => $addedCount,
-            'removed' => $removedCount,
-            'failed_to_add' => $failedToAddCount,
-            'failed_to_remove' => $failedToRemoveCount,
-            'dry_run' => $isDryRun,
-        ]);
+        Log::info('Google Workspace delegate sync completed', [...$stats, 'dry_run' => $isDryRun]);
 
         return self::SUCCESS;
+    }
+
+    private function reportProgress(string $event, string|int $detail, bool $isDryRun): void
+    {
+        match ($event) {
+            'found_active' => $this->reportActiveDelegates((int) $detail),
+            'checking_removals' => $this->reportRemovalCheck(),
+            'already_in_group' => $this->line("  ✓ {$detail} - already in group"),
+            'added' => $this->line($isDryRun ? "  [DRY RUN] Would add {$detail}" : "  + {$detail} - added to group"),
+            'failed_to_add' => $this->line("  ✗ {$detail} - failed to add"),
+            'removed' => $this->line($isDryRun ? "  [DRY RUN] Would remove {$detail}" : "  - {$detail} - removed from group"),
+            'failed_to_remove' => $this->line("  ✗ {$detail} - failed to remove"),
+            default => null,
+        };
+    }
+
+    private function reportActiveDelegates(int $count): void
+    {
+        $this->info("Found {$count} active delegate(s)");
+        $this->info('Ensuring active delegates are in the group...');
+        $this->newLine();
+    }
+
+    private function reportRemovalCheck(): void
+    {
+        $this->newLine();
+        $this->info('Checking for users to remove from the group...');
+        $this->newLine();
     }
 }

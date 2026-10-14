@@ -16,11 +16,15 @@ beforeEach(function () {
     ]);
 });
 
+/**
+ * Creating a delegate makes the observer call Google, so the creation runs against a
+ * throwaway spy; the test then binds a fresh mock that only records what the command does.
+ */
 function activeDelegateWithEmail(string $email): Delegate
 {
-    return Delegate::withoutEvents(
-        fn (): Delegate => Delegate::factory()->approved()->verified()->create(['email' => $email, 'ended_at' => null])
-    );
+    test()->spy(GoogleWorkspaceServiceInterface::class);
+
+    return Delegate::factory()->approved()->verified()->create(['email' => $email, 'ended_at' => null]);
 }
 
 function mockedGoogleWorkspaceForCommand(): MockInterface

@@ -9,7 +9,8 @@
     "nightwatch": false,
     "packages": [
         "filament/filament",
-        "filament/blueprint"
+        "filament/blueprint",
+        "spatie/boost-spatie-guidelines"
     ],
     "sail": false,
     "skills": [
@@ -22,6 +23,7 @@
         "filament-development",
         "filament-security-audit",
         "planning-filament",
-        "reviewing-filament-plans"
+        "reviewing-filament-plans",
+        "spatie-laravel-php-standards"
     ]
 }

@@ -64,7 +64,17 @@ describe('ListVolunteers', function () {
     it('can search volunteers', function () {
         actingAsSuperAdminForVolunteerResource();
 
-        $volunteers = Volunteer::factory()->count(5)->approved()->create();
+        $volunteers = Volunteer::factory()
+            ->count(5)
+            ->approved()
+            ->sequence(
+                ['position_title' => 'Treasurer'],
+                ['position_title' => 'Secretary'],
+                ['position_title' => 'Chairperson'],
+                ['position_title' => 'Auditor'],
+                ['position_title' => 'Moderator'],
+            )
+            ->create();
 
         livewire(ListVolunteers::class)
             ->assertCanSeeTableRecords($volunteers)

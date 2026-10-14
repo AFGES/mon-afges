@@ -17,8 +17,6 @@ final class ApprovalField extends Field
 
     protected string|Closure|null $approvedAtAttribute = 'approved_at';
 
-    protected string|Closure|null $approvedByAttribute = 'approved_by';
-
     protected string|Closure|null $rejectionReasonAttribute = 'rejection_reason';
 
     protected function setUp(): void
@@ -66,20 +64,6 @@ final class ApprovalField extends Field
     public function getApprovedAtAttribute(): ?string
     {
         $value = $this->evaluate($this->approvedAtAttribute);
-
-        return is_string($value) ? $value : null;
-    }
-
-    public function approvedByAttribute(string|Closure|null $attribute): static
-    {
-        $this->approvedByAttribute = $attribute;
-
-        return $this;
-    }
-
-    public function getApprovedByAttribute(): ?string
-    {
-        $value = $this->evaluate($this->approvedByAttribute);
 
         return is_string($value) ? $value : null;
     }

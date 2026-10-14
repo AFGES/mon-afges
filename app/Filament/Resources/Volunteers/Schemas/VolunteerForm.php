@@ -60,7 +60,6 @@ final class VolunteerForm
                             ->label(__('volunteer.sections.approval'))
                             ->statusAttribute('approval_status')
                             ->approvedAtAttribute('approved_at')
-                            ->approvedByAttribute('approved_by')
                             ->rejectionReasonAttribute('rejection_reason')
                             ->approverRelationship('approver')
                             ->hiddenOn('create'),

@@ -20,6 +20,7 @@ final class ApproveAction extends Action
             ->requiresConfirmation()
             ->modalHeading(__('approval.modal.approve.heading'))
             ->modalDescription(__('approval.modal.approve.description'))
+            ->authorize('update')
             ->visible(fn ($record): bool => $record->isPending())
             ->action(function ($record): void {
                 $record->approve();

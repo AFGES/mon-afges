@@ -22,6 +22,7 @@ final class BulkRejectAction extends Action
             ->modalHeading(__('approval.modal.bulk_reject.heading'))
             ->modalDescription(__('approval.modal.bulk_reject.description'))
             ->accessSelectedRecords()
+            ->authorizeIndividualRecords('update')
             ->deselectRecordsAfterCompletion()
             ->schema([
                 Textarea::make('rejection_reason')

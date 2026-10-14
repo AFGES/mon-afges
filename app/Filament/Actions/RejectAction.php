@@ -21,6 +21,7 @@ final class RejectAction extends Action
             ->requiresConfirmation()
             ->modalHeading(__('approval.modal.reject.heading'))
             ->modalDescription(__('approval.modal.reject.description'))
+            ->authorize('update')
             ->visible(fn ($record): bool => $record->isPending())
             ->schema([
                 Textarea::make('rejection_reason')

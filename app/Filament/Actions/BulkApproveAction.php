@@ -21,6 +21,7 @@ final class BulkApproveAction extends Action
             ->modalHeading(__('approval.modal.bulk_approve.heading'))
             ->modalDescription(__('approval.modal.bulk_approve.description'))
             ->accessSelectedRecords()
+            ->authorizeIndividualRecords('update')
             ->deselectRecordsAfterCompletion()
             ->action(function (Collection $selectedRecords): void {
                 $count = 0;

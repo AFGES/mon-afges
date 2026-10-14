@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\ApprovalApprovedNotification;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -21,6 +22,18 @@ function actingAsSuperAdminForApprovalActions(): User
 
     $user = User::factory()->create();
     $user->assignRole('super_admin');
+
+    actingAs($user);
+
+    return $user;
+}
+
+function actingAsViewerWithoutUpdatePermission(string $model): User
+{
+    $permission = 'ViewAny:'.class_basename($model);
+    Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+
+    $user = User::factory()->create()->givePermissionTo($permission);
 
     actingAs($user);
 
@@ -149,4 +162,28 @@ describe('BulkRejectAction', function () {
 
         $pending->each(fn ($record) => expect($record->refresh()->isPending())->toBeTrue());
     })->with('approvable tables');
+});
+
+describe('authorization', function () {
+    it('hides the approve and reject actions from users who cannot update the record', function (string $listPage, string $model) {
+        actingAsViewerWithoutUpdatePermission($model);
+        $record = $model::factory()->pending()->create();
+
+        livewire($listPage)
+            ->assertTableActionHidden('approve', $record)
+            ->assertTableActionHidden('reject', $record);
+    })->with('approvable tables');
+
+    it('skips records the user cannot update in bulk actions', function (string $listPage, string $model, string $bulkAction, array $data) {
+        actingAsViewerWithoutUpdatePermission($model);
+        $pending = $model::factory()->count(2)->pending()->create();
+
+        livewire($listPage)
+            ->callTableBulkAction($bulkAction, $pending, data: $data);
+
+        $pending->each(fn ($record) => expect($record->refresh()->isPending())->toBeTrue());
+    })->with('approvable tables')->with([
+        'bulk approve' => ['bulkApprove', []],
+        'bulk reject' => ['bulkReject', ['rejection_reason' => 'Out of scope']],
+    ]);
 });

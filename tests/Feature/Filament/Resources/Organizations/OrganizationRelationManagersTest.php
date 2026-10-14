@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 use App\Filament\Resources\Organizations\RelationManagers\DelegatesRelationManager;
 use App\Filament\Resources\Organizations\RelationManagers\VolunteersRelationManager;
+use App\Models\CollegeOrganization;
 use App\Models\Delegate;
 use App\Models\Organization;
 use App\Models\Seat;
 use App\Models\User;
 use App\Models\Volunteer;
+use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 
 function actingAsSuperAdminForOrganizationRelationManagers(): User
 {
@@ -40,6 +44,42 @@ describe('DelegatesRelationManager', function () {
             ->assertOk();
     });
 
+    it('only offers seats of the owner organization', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
+        $organization = Organization::factory()->create();
+        $ownSeat = Seat::factory()->for(CollegeOrganization::factory()->for($organization))->create();
+        $otherSeat = Seat::factory()->create();
+
+        Livewire::test(DelegatesRelationManager::class, [
+            'ownerRecord' => $organization,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+        ])
+            ->mountAction(TestAction::make('create')->table())
+            ->assertSchemaComponentExists('seat_id', 'mountedActionSchema0', fn (Select $select): bool => array_key_exists($ownSeat->id, $select->getOptions())
+                && ! array_key_exists($otherSeat->id, $select->getOptions()));
+    });
+
+    it('rejects a seat of another organization', function () {
+        actingAsSuperAdminForOrganizationRelationManagers();
+
+        $organization = Organization::factory()->create();
+        $otherSeat = Seat::factory()->create();
+
+        Livewire::test(DelegatesRelationManager::class, [
+            'ownerRecord' => $organization,
+            'pageClass' => App\Filament\Resources\Organizations\Pages\EditOrganization::class,
+        ])
+            ->callTableAction('create', data: [
+                'user_id' => User::factory()->create()->id,
+                'seat_id' => $otherSeat->id,
+                'email' => fake()->email(),
+                'started_at' => now()->toDateString(),
+            ])
+            ->assertHasTableActionErrors(['seat_id']);
+
+        assertDatabaseMissing(Delegate::class, ['seat_id' => $otherSeat->id]);
+    });
     it('lists only the delegates belonging to the organization', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
@@ -60,7 +100,7 @@ describe('DelegatesRelationManager', function () {
 
         $organization = Organization::factory()->create();
         $user = User::factory()->create();
-        $seat = Seat::factory()->create();
+        $seat = Seat::factory()->for(CollegeOrganization::factory()->for($organization))->create();
 
         Livewire::test(DelegatesRelationManager::class, [
             'ownerRecord' => $organization,
@@ -84,7 +124,8 @@ describe('DelegatesRelationManager', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
-        $delegate = Delegate::factory()->for($organization)->approved()->create();
+        $seat = Seat::factory()->for(CollegeOrganization::factory()->for($organization))->create();
+        $delegate = Delegate::factory()->for($organization)->for($seat)->approved()->create();
         $newEmail = fake()->email();
 
         Livewire::test(DelegatesRelationManager::class, [

@@ -21,6 +21,25 @@ final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
     ) {}
 
     /**
+     * Whether every Google Workspace setting required to talk to the Directory API is present.
+     */
+    public static function isConfigured(): bool
+    {
+        return (bool) (config('services.google.workspace.service_account_json')
+            && config('services.google.workspace.admin_email')
+            && config('services.google.workspace.delegate_group'));
+    }
+
+    public static function fromConfig(): self
+    {
+        return new self(
+            (string) config('services.google.workspace.service_account_json'),
+            (string) config('services.google.workspace.admin_email'),
+            (string) config('services.google.workspace.delegate_group'),
+        );
+    }
+
+    /**
      * Add a user to the delegate group.
      */
     public function addToGroup(string $email): bool

@@ -202,3 +202,23 @@ describe('isInGroup', function () {
             ->withArgs(fn (string $message): bool => $message === 'Unexpected error checking Google Workspace delegate group membership');
     });
 });
+
+describe('isConfigured', function () {
+    it('requires the service account, admin email and delegate group', function (?string $missingKey, bool $expected) {
+        config([
+            'services.google.workspace.service_account_json' => '{"type":"service_account"}',
+            'services.google.workspace.admin_email' => 'admin@afges.org',
+            'services.google.workspace.delegate_group' => 'test-mon@afges.org',
+        ]);
+        if ($missingKey !== null) {
+            config(["services.google.workspace.{$missingKey}" => null]);
+        }
+
+        expect(GoogleWorkspaceService::isConfigured())->toBe($expected);
+    })->with([
+        'complete' => [null, true],
+        'no service account' => ['service_account_json', false],
+        'no admin email' => ['admin_email', false],
+        'no delegate group' => ['delegate_group', false],
+    ]);
+});

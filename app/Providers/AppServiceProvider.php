@@ -42,17 +42,9 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(GoogleWorkspaceServiceInterface::class, function (): GoogleWorkspaceServiceInterface {
-            $serviceAccountJson = config('services.google.workspace.service_account_json');
-            $adminEmail = config('services.google.workspace.admin_email');
-            $delegateGroup = config('services.google.workspace.delegate_group');
-
-            if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
-                return new UnconfiguredGoogleWorkspaceService;
-            }
-
-            return new GoogleWorkspaceService($serviceAccountJson, $adminEmail, $delegateGroup);
-        });
+        $this->app->bind(GoogleWorkspaceServiceInterface::class, fn (): GoogleWorkspaceServiceInterface => GoogleWorkspaceService::isConfigured()
+            ? GoogleWorkspaceService::fromConfig()
+            : new UnconfiguredGoogleWorkspaceService);
         $this->app->bind(DelegateGoogleWorkspaceSyncServiceInterface::class, DelegateGoogleWorkspaceSyncService::class);
 
         if ($this->app->environment('local') && class_exists(LaravelTelescopeServiceProvider::class)) {

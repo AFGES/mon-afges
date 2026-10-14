@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
+use App\Services\GoogleWorkspaceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -26,11 +27,7 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
 
     public function handle(DelegateGoogleWorkspaceSyncServiceInterface $syncService): int
     {
-        $serviceAccountJson = config('services.google.workspace.service_account_json');
-        $adminEmail = config('services.google.workspace.admin_email');
-        $delegateGroup = config('services.google.workspace.delegate_group');
-
-        if (! $serviceAccountJson || ! $adminEmail || ! $delegateGroup) {
+        if (! GoogleWorkspaceService::isConfigured()) {
             $this->error('Google Workspace configuration is incomplete. Please set all required environment variables.');
             $this->info('Required: GOOGLE_WORKSPACE_SERVICE_ACCOUNT_JSON, GOOGLE_WORKSPACE_ADMIN_EMAIL, GOOGLE_WORKSPACE_DELEGATE_GROUP');
 

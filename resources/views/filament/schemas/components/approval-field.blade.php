@@ -6,13 +6,11 @@
         $record = $getRecord();
         $statusAttribute = $getStatusAttribute();
         $approvedAtAttribute = $getApprovedAtAttribute();
-        $approvedByAttribute = $getApprovedByAttribute();
         $rejectionReasonAttribute = $getRejectionReasonAttribute();
         $approverRelationship = $getApproverRelationship();
         
         $status = data_get($record, $statusAttribute);
         $approvedAt = data_get($record, $approvedAtAttribute);
-        $approvedBy = data_get($record, $approvedByAttribute);
         $rejectionReason = data_get($record, $rejectionReasonAttribute);
         $approver = $record?->{$approverRelationship};
         

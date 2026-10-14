@@ -22,7 +22,7 @@ final class RejectAction extends Action
             ->modalHeading(__('approval.modal.reject.heading'))
             ->modalDescription(__('approval.modal.reject.description'))
             ->visible(fn ($record): bool => $record->isPending())
-            ->form([
+            ->schema([
                 Textarea::make('rejection_reason')
                     ->label(__('approval.fields.rejection_reason'))
                     ->required()

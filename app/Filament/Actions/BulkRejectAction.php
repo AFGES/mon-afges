@@ -23,7 +23,7 @@ final class BulkRejectAction extends Action
             ->modalDescription(__('approval.modal.bulk_reject.description'))
             ->accessSelectedRecords()
             ->deselectRecordsAfterCompletion()
-            ->form([
+            ->schema([
                 Textarea::make('rejection_reason')
                     ->label(__('approval.fields.rejection_reason'))
                     ->required()

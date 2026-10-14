@@ -37,6 +37,6 @@ final class ProxyObserver
             return;
         }
 
-        $proxy->sendApprovalNotification();
+        $proxy->notifyDelegatesOfApproval();
     }
 }

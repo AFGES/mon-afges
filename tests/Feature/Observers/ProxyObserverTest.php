@@ -70,6 +70,20 @@ describe('updated', function (): void {
         Notification::assertSentToTimes($delegateUser, ProxyApprovedNotification::class);
     });
 
+    it('notifies the current delegate exactly once when the proxy is approved through approve()', function (): void {
+        $proxy = Proxy::factory()->create();
+        $delegateUser = User::factory()->create();
+        Delegate::factory()->approved()->for($proxy->delegatorSeat)->for($delegateUser)->create([
+            'started_at' => '2026-03-09 12:00:00',
+            'ended_at' => null,
+        ]);
+        Notification::fake([ProxyApprovedNotification::class]);
+
+        $proxy->approve(User::factory()->create()->id);
+
+        Notification::assertSentToTimes($delegateUser, ProxyApprovedNotification::class, 1);
+    });
+
     it('sends nothing when the proxy is rejected', function (): void {
         $proxy = Proxy::factory()->create();
         Delegate::factory()->approved()->for($proxy->delegatorSeat)->create([

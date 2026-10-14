@@ -101,7 +101,7 @@ final class Proxy extends Model
     /**
      * Send approval notification to the delegator seat's current delegate(s).
      */
-    public function sendApprovalNotification(): void
+    public function notifyDelegatesOfApproval(): void
     {
         $delegates = $this->delegatorSeat->delegates()
             ->where('started_at', '<=', now())

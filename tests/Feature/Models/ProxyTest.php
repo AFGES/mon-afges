@@ -124,7 +124,7 @@ describe('approval notification', function (): void {
             'ended_at' => null,
         ]);
 
-        $proxy->sendApprovalNotification();
+        $proxy->notifyDelegatesOfApproval();
 
         Notification::assertSentTo($currentUser, ProxyApprovedNotification::class, fn (ProxyApprovedNotification $notification): bool => $notification->proxy->is($proxy));
     });
@@ -138,7 +138,7 @@ describe('approval notification', function (): void {
             'ended_at' => '2026-03-09 12:00:00',
         ]);
 
-        $proxy->sendApprovalNotification();
+        $proxy->notifyDelegatesOfApproval();
 
         Notification::assertNotSentTo($formerUser, ProxyApprovedNotification::class);
     });
@@ -152,7 +152,7 @@ describe('approval notification', function (): void {
             'ended_at' => null,
         ]);
 
-        $proxy->sendApprovalNotification();
+        $proxy->notifyDelegatesOfApproval();
 
         Notification::assertNotSentTo($futureUser, ProxyApprovedNotification::class);
     });

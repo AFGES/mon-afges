@@ -33,10 +33,7 @@ function mockedGoogleWorkspaceForCommand(): GoogleWorkspaceServiceInterface&Mock
 {
     app()->forgetInstance(DelegateGoogleWorkspaceSyncServiceInterface::class);
 
-    /** @var GoogleWorkspaceServiceInterface&MockInterface $googleWorkspaceService */
-    $googleWorkspaceService = test()->mock(GoogleWorkspaceServiceInterface::class);
-
-    return $googleWorkspaceService;
+    return mockGoogleWorkspaceService();
 }
 
 /**

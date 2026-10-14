@@ -59,7 +59,7 @@ final class College extends Model
     {
         return $this->belongsToMany(Organization::class)
             ->using(CollegeOrganization::class)
-            ->withPivot(['seats', 'delegates_per_seat'])
+            ->withPivot(['id', 'seats', 'delegates_per_seat'])
             ->withTimestamps();
     }
 

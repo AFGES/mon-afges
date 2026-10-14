@@ -24,3 +24,13 @@ test('creates the college link and its seats when syncing colleges with seats', 
         ->seats->toBe(5)
         ->delegates_per_seat->toBe(2);
 });
+
+test('exposes the seat count on the colleges pivot', function () {
+    $organization = Organization::factory()->create();
+    $college = College::factory()->create();
+    $organization->syncCollegesWithSeats([
+        $college->id => ['delegates_per_seat' => 2, 'seats' => 3],
+    ]);
+
+    expect($organization->colleges->first()->pivot->seats)->toBe(3);
+});

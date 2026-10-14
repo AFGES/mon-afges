@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Actions\CreateUserFromSocialite;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
 use App\Livewire\Profile\ManageDelegates;
 use App\Livewire\Profile\ManageVolunteers;
+use App\Livewire\Profile\PersonalInfo;
 use App\Models\SocialiteUser;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
@@ -72,6 +74,7 @@ final class RootPanelProvider extends PanelProvider
                 BreezyCore::make()
                     ->myProfile()
                     ->myProfileComponents([
+                        'personal_info' => PersonalInfo::class,
                         ManageVolunteers::class,
                         ManageDelegates::class,
                     ]),
@@ -89,6 +92,7 @@ final class RootPanelProvider extends PanelProvider
                     ])
                     ->registration(true)
                     ->socialiteUserModelClass(SocialiteUser::class)
+                    ->createUserUsing((new CreateUserFromSocialite)(...))
             )
             ->sidebarCollapsibleOnDesktop()
             ->topbar(false)

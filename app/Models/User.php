@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,7 +34,8 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'magic_link_token',
@@ -73,6 +75,23 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     public function delegates(): HasMany
     {
         return $this->hasMany(Delegate::class);
+    }
+
+    /**
+     * The full name, kept in sync with the generated `name` column so it is
+     * available before the model is refreshed from the database.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::get(function (?string $value, array $attributes): string {
+            if (! array_key_exists('first_name', $attributes) && ! array_key_exists('last_name', $attributes)) {
+                return (string) $value;
+            }
+
+            return Str::squish(($attributes['first_name'] ?? '').' '.($attributes['last_name'] ?? ''));
+        });
     }
 
     /**

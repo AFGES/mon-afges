@@ -30,7 +30,8 @@ final class DatabaseSeeder extends Seeder
 
         // Create a test user
         User::factory()->create([
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
         ]);

@@ -51,11 +51,11 @@ describe('ListUsers', function () {
         $users = User::factory()
             ->count(5)
             ->sequence(
-                ['name' => 'Aurelia Voss', 'email' => 'first@alpha.test'],
-                ['name' => 'Bastien Corbel', 'email' => 'second@bravo.test'],
-                ['name' => 'Cyrille Danton', 'email' => 'third@charlie.test'],
-                ['name' => 'Delphine Ewing', 'email' => 'fourth@delta.test'],
-                ['name' => 'Eloi Fabre', 'email' => 'fifth@echo.test'],
+                ['first_name' => 'Aurelia', 'last_name' => 'Voss', 'email' => 'first@alpha.test'],
+                ['first_name' => 'Bastien', 'last_name' => 'Corbel', 'email' => 'second@bravo.test'],
+                ['first_name' => 'Cyrille', 'last_name' => 'Danton', 'email' => 'third@charlie.test'],
+                ['first_name' => 'Delphine', 'last_name' => 'Ewing', 'email' => 'fourth@delta.test'],
+                ['first_name' => 'Eloi', 'last_name' => 'Fabre', 'email' => 'fifth@echo.test'],
             )
             ->create();
 
@@ -72,11 +72,11 @@ describe('ListUsers', function () {
         $users = User::factory()
             ->count(5)
             ->sequence(
-                ['name' => 'Aurelia Voss', 'email' => 'first@alpha.test'],
-                ['name' => 'Bastien Corbel', 'email' => 'second@bravo.test'],
-                ['name' => 'Cyrille Danton', 'email' => 'third@charlie.test'],
-                ['name' => 'Delphine Ewing', 'email' => 'fourth@delta.test'],
-                ['name' => 'Eloi Fabre', 'email' => 'fifth@echo.test'],
+                ['first_name' => 'Aurelia', 'last_name' => 'Voss', 'email' => 'first@alpha.test'],
+                ['first_name' => 'Bastien', 'last_name' => 'Corbel', 'email' => 'second@bravo.test'],
+                ['first_name' => 'Cyrille', 'last_name' => 'Danton', 'email' => 'third@charlie.test'],
+                ['first_name' => 'Delphine', 'last_name' => 'Ewing', 'email' => 'fourth@delta.test'],
+                ['first_name' => 'Eloi', 'last_name' => 'Fabre', 'email' => 'fifth@echo.test'],
             )
             ->create();
 
@@ -103,7 +103,8 @@ describe('CreateUser', function () {
 
         livewire(CreateUser::class)
             ->fillForm([
-                'name' => $newUserData->name,
+                'first_name' => $newUserData->first_name,
+                'last_name' => $newUserData->last_name,
                 'email' => $newUserData->email,
                 'password' => 'password123',
             ])
@@ -112,7 +113,8 @@ describe('CreateUser', function () {
             ->assertRedirect();
 
         assertDatabaseHas(User::class, [
-            'name' => $newUserData->name,
+            'first_name' => $newUserData->first_name,
+            'last_name' => $newUserData->last_name,
             'email' => $newUserData->email,
         ]);
     });
@@ -127,16 +129,17 @@ describe('CreateUser', function () {
             ->assertNotNotified()
             ->assertNoRedirect();
     })->with([
-        '`name` is required' => [['name' => null, 'email' => 'test@example.com'], ['name' => 'required']],
-        '`email` is a valid email address' => [['name' => 'Test User', 'email' => 'invalid-email'], ['email' => 'email']],
-        '`email` is required' => [['name' => 'Test User', 'email' => null], ['email' => 'required']],
+        '`name` is required' => [['first_name' => null, 'last_name' => 'User', 'email' => 'test@example.com'], ['first_name' => 'required']],
+        '`last_name` is required' => [['first_name' => 'Test', 'last_name' => null, 'email' => 'test@example.com'], ['last_name' => 'required']],
+        '`email` is a valid email address' => [['first_name' => 'Test', 'last_name' => 'User', 'email' => 'invalid-email'], ['email' => 'email']],
+        '`email` is required' => [['first_name' => 'Test', 'last_name' => 'User', 'email' => null], ['email' => 'required']],
     ]);
 
     it('shows the translated required message for email', function () {
         actingAsSuperAdminForUserResource();
 
         livewire(CreateUser::class)
-            ->fillForm(['name' => 'Test User', 'email' => null])
+            ->fillForm(['first_name' => 'Test', 'last_name' => 'User', 'email' => null])
             ->call('create')
             ->assertHasFormErrors(['email' => [
                 __('validation.required', ['attribute' => Str::lower(__('user.fields.email'))]),
@@ -147,7 +150,7 @@ describe('CreateUser', function () {
         actingAsSuperAdminForUserResource();
 
         livewire(CreateUser::class)
-            ->fillForm(['name' => 'Test User', 'email' => 'invalid-email'])
+            ->fillForm(['first_name' => 'Test', 'last_name' => 'User', 'email' => 'invalid-email'])
             ->call('create')
             ->assertHasFormErrors(['email' => [
                 __('validation.email', ['attribute' => Str::lower(__('user.fields.email'))]),
@@ -166,7 +169,8 @@ describe('EditUser', function () {
         ])
             ->assertOk()
             ->assertSchemaStateSet([
-                'name' => $user->name,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
                 'email' => $user->email,
             ]);
     });
@@ -181,7 +185,8 @@ describe('EditUser', function () {
             'record' => $user->id,
         ])
             ->fillForm([
-                'name' => $newUserData->name,
+                'first_name' => $newUserData->first_name,
+                'last_name' => $newUserData->last_name,
                 'email' => $newUserData->email,
             ])
             ->call('save')
@@ -189,7 +194,8 @@ describe('EditUser', function () {
 
         assertDatabaseHas(User::class, [
             'id' => $user->id,
-            'name' => $newUserData->name,
+            'first_name' => $newUserData->first_name,
+            'last_name' => $newUserData->last_name,
             'email' => $newUserData->email,
         ]);
     });
@@ -207,9 +213,10 @@ describe('EditUser', function () {
             ->assertHasFormErrors($errors)
             ->assertNotNotified();
     })->with([
-        '`name` is required' => [['name' => null, 'email' => 'test@example.com'], ['name' => 'required']],
-        '`email` is a valid email address' => [['name' => 'Test User', 'email' => 'invalid-email'], ['email' => 'email']],
-        '`email` is required' => [['name' => 'Test User', 'email' => null], ['email' => 'required']],
+        '`name` is required' => [['first_name' => null, 'last_name' => 'User', 'email' => 'test@example.com'], ['first_name' => 'required']],
+        '`last_name` is required' => [['first_name' => 'Test', 'last_name' => null, 'email' => 'test@example.com'], ['last_name' => 'required']],
+        '`email` is a valid email address' => [['first_name' => 'Test', 'last_name' => 'User', 'email' => 'invalid-email'], ['email' => 'email']],
+        '`email` is required' => [['first_name' => 'Test', 'last_name' => 'User', 'email' => null], ['email' => 'required']],
     ]);
 
     it('deletes a user when the delete action is called', function () {

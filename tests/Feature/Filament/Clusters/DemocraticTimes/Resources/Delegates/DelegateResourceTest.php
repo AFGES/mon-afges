@@ -45,17 +45,17 @@ function createDelegatesWithDistinctSearchableValues(): Collection
         ->sequence(
             [
                 'email' => 'first@alpha.test',
-                'user_id' => User::factory()->state(['name' => 'Aurelia Voss']),
+                'user_id' => User::factory()->state(['first_name' => 'Aurelia', 'last_name' => 'Voss']),
                 'organization_id' => Organization::factory()->state(['short_name' => 'Zephyr']),
             ],
             [
                 'email' => 'second@bravo.test',
-                'user_id' => User::factory()->state(['name' => 'Bastien Corbel']),
+                'user_id' => User::factory()->state(['first_name' => 'Bastien', 'last_name' => 'Corbel']),
                 'organization_id' => Organization::factory()->state(['short_name' => 'Quasar']),
             ],
             [
                 'email' => 'third@charlie.test',
-                'user_id' => User::factory()->state(['name' => 'Cyrille Danton']),
+                'user_id' => User::factory()->state(['first_name' => 'Cyrille', 'last_name' => 'Danton']),
                 'organization_id' => Organization::factory()->state(['short_name' => 'Nimbus']),
             ],
         )
@@ -130,9 +130,9 @@ describe('ListDelegates', function () {
         actingAsSuperAdminForDelegateResource();
 
         $organization = Organization::factory()->create();
-        $bravo = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['name' => 'Bravo']))->create(['ended_at' => null]);
-        $charlie = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['name' => 'Charlie']))->create(['ended_at' => null]);
-        $alpha = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['name' => 'Alpha']))->create(['ended_at' => null]);
+        $bravo = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Bravo']))->create(['ended_at' => null]);
+        $charlie = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Charlie']))->create(['ended_at' => null]);
+        $alpha = Delegate::factory()->approved()->for($organization)->for(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Alpha']))->create(['ended_at' => null]);
 
         livewire(ListDelegates::class)
             ->sortTable('user.name')

@@ -8,6 +8,8 @@ return [
     'email' => 'Courriel',
 
     'fields' => [
+        'first_name' => 'Prénom',
+        'last_name' => 'Nom de famille',
         'name' => 'Nom',
         'email' => 'Courriel',
         'email_verified_at' => 'Courriel vérifié',

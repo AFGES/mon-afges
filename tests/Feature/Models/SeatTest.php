@@ -59,7 +59,7 @@ test('labels itself with the college name and the delegate names', function () {
     $college = College::factory()->create(['name' => 'Général']);
     $collegeOrganization = CollegeOrganization::factory()->for($college)->withSeats(1)->create(['delegates_per_seat' => 2]);
     $seat = $collegeOrganization->seatRecords->first();
-    Delegate::factory()->approved()->for(User::factory()->state(['name' => 'Alice Martin']), 'user')->create([
+    Delegate::factory()->approved()->for(User::factory()->state(['first_name' => 'Alice', 'last_name' => 'Martin']), 'user')->create([
         'seat_id' => $seat->id,
         'organization_id' => $collegeOrganization->organization_id,
     ]);
@@ -71,8 +71,8 @@ test('labels itself with every delegate name separated by commas', function () {
     $college = College::factory()->create(['name' => 'Général']);
     $collegeOrganization = CollegeOrganization::factory()->for($college)->withSeats(1)->create(['delegates_per_seat' => 2]);
     $seat = $collegeOrganization->seatRecords->first();
-    foreach (['Alice Martin', 'Bob Durand'] as $name) {
-        Delegate::factory()->approved()->for(User::factory()->state(['name' => $name]), 'user')->create([
+    foreach ([['Alice', 'Martin'], ['Bob', 'Durand']] as [$firstName, $lastName]) {
+        Delegate::factory()->approved()->for(User::factory()->state(['first_name' => $firstName, 'last_name' => $lastName]), 'user')->create([
             'seat_id' => $seat->id,
             'organization_id' => $collegeOrganization->organization_id,
         ]);

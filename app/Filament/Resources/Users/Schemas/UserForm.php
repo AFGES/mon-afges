@@ -15,9 +15,14 @@ final class UserForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label(__('user.fields.name'))
-                    ->required(),
+                TextInput::make('first_name')
+                    ->label(__('user.fields.first_name'))
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('last_name')
+                    ->label(__('user.fields.last_name'))
+                    ->required()
+                    ->maxLength(255),
                 TextInput::make('email')
                     ->label(__('user.fields.email'))
                     ->email()

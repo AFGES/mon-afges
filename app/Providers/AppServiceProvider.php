@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Enums\ApprovalStatus;
 use App\Livewire\Profile\ManageDelegates;
 use App\Livewire\Profile\ManageVolunteers;
+use App\Livewire\Profile\PersonalInfo;
 use App\Models\Delegate;
 use App\Models\DemocraticTimeSession;
 use App\Models\DemocraticTimeType;
@@ -72,6 +73,7 @@ final class AppServiceProvider extends ServiceProvider
         // Register custom Filament Breezy profile components
         Livewire::component('manage_volunteers', ManageVolunteers::class);
         Livewire::component('manage_delegates', ManageDelegates::class);
+        Livewire::component('personal_info', PersonalInfo::class);
 
         Event::listen(function (SocialiteWasCalled $event): void {
             $event->extendSocialite('google', GoogleProvider::class);

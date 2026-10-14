@@ -23,7 +23,7 @@ it('is sent by mail and queued', function () {
 
 it('describes the applicant, the organization and the position', function () {
     $volunteer = Volunteer::factory()->create();
-    $approver = User::factory()->make(['name' => 'Alice Approver']);
+    $approver = User::factory()->make(['first_name' => 'Alice', 'last_name' => 'Approver']);
 
     $mail = (new VolunteerApprovalRequestedNotification($volunteer))->toMail($approver);
 
@@ -55,7 +55,7 @@ it('offers a signed reject link and a link to the edit page', function () {
 });
 
 it('escapes the applicant name and position in the rendered mail', function () {
-    $applicant = User::factory()->create(['name' => "<script>alert('xss')</script>"]);
+    $applicant = User::factory()->create(['first_name' => "<script>alert('xss')</script>", 'last_name' => 'Doe']);
     $volunteer = Volunteer::factory()->for($applicant)->create(['position_title' => '<img src=x onerror=alert(1)>']);
 
     $content = (string) (new VolunteerApprovalRequestedNotification($volunteer))->toMail(User::factory()->make())->render();

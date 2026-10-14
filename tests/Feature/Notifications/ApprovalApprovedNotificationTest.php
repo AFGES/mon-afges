@@ -53,7 +53,7 @@ it('is sent by mail and queued', function () {
 it('uses the subject of the approved mandate type', function (string $model, string $subject) {
     $notification = new ApprovalApprovedNotification($model::factory()->make());
 
-    $mail = $notification->toMail(User::factory()->make(['name' => 'Test User']));
+    $mail = $notification->toMail(User::factory()->make(['first_name' => 'Test', 'last_name' => 'User']));
 
     expect($mail->subject)->toBe($subject)
         ->and($mail->greeting)->toBe('Bonjour Test User,');
@@ -74,7 +74,7 @@ it('identifies the approved record in its array form', function () {
 });
 
 it('escapes the recipient name in the rendered mail', function () {
-    $recipient = User::factory()->make(['name' => "<script>alert('xss')</script>"]);
+    $recipient = User::factory()->make(['first_name' => "<script>alert('xss')</script>", 'last_name' => 'Doe']);
 
     $content = (new ApprovalApprovedNotification(Delegate::factory()->make()))->toMail($recipient)->render();
 

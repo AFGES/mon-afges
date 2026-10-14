@@ -3,7 +3,8 @@
 	"name": "Mon AFGES",
 	"dockerComposeFile": [
 		"../compose.yml",
-		"compose.podman.yml"
+		"compose.podman.yml",
+		"compose.ports.yml"
 	],
 	"service": "laravel.test",
 	"workspaceFolder": "/var/www/html",
@@ -17,15 +18,21 @@
 				"onecentlin.laravel5-snippets",
 				"onecentlin.laravel-blade",
 				"GitHub.copilot-chat",
-				"csstools.postcss"
+				"csstools.postcss",
+                "hverlin.mise-vscode"
 			],
 			"settings": {}
 		}
 	},
+	"features": {
+        "ghcr.io/devcontainers-extra/features/mise:1": {}
+	},
 	"remoteUser": "sail",
-	"postCreateCommand": "composer setup",
-//    "postAttachCommand": "composer dev",
-	"forwardPorts": [8000, 5173, "mailpit:8025"],
+	"postCreateCommand": "grep -qxF 'eval \"$(mise activate bash)\"' ~/.bashrc || echo 'eval \"$(mise activate bash)\"' >> ~/.bashrc; mise trust --yes --all; composer setup && mise install",
 	// "runServices": [],
-	"shutdownAction": "stopCompose"
+	"shutdownAction": "stopCompose",
+	"mounts": [
+        "source=${localEnv:HOME}/.claude,target=/home/sail/.claude,type=bind",
+        "source=${localEnv:HOME}/.claude.json,target=/home/sail/.claude.json,type=bind"
+	]
 }

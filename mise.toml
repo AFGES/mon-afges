@@ -1,0 +1,4 @@
+[tools]
+claude = "latest"
+"github:PHPantom-dev/phpantom_lsp" = "latest"
+rtk = "latest"

@@ -1,0 +1,10 @@
+services:
+    laravel.test:
+        environment:
+            SERVER_HOST: 0.0.0.0
+        ports:
+            - '127.0.0.1:8000:8000'
+            - '127.0.0.1:5173:5173'
+    mailpit:
+        ports:
+            - '127.0.0.1:${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'

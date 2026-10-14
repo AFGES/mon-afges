@@ -19,7 +19,7 @@ beforeEach(function (): void {
 describe('created', function (): void {
     it('notifies the users who can approve proxies', function (): void {
         $approver = User::factory()->create();
-        $approver->givePermissionTo(Permission::create(['name' => 'Update:Proxy']));
+        $approver->givePermissionTo(Permission::findOrCreate('Update:Proxy', 'web'));
         $bystander = User::factory()->create();
         Notification::fake([ProxyApprovalNotification::class]);
 
@@ -30,7 +30,7 @@ describe('created', function (): void {
     });
 
     it('sends nothing when no user holds the approval permission', function (): void {
-        Permission::create(['name' => 'Update:Proxy']);
+        Permission::findOrCreate('Update:Proxy', 'web');
         Notification::fake([ProxyApprovalNotification::class]);
 
         Proxy::factory()->create();

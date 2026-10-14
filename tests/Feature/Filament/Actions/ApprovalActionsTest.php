@@ -110,7 +110,7 @@ describe('BulkApproveAction', function () {
 
         livewire($listPage)
             ->filterTable('approval_status', ['pending', 'approved'])
-            ->callTableBulkAction('bulkApprove', $pending->push($alreadyApproved))
+            ->callTableBulkAction('bulkApprove', $pending->concat([$alreadyApproved]))
             ->assertNotified(__('approval.notifications.bulk_approved.title'));
 
         $pending->each(fn ($record) => expect($record->refresh())
@@ -118,7 +118,7 @@ describe('BulkApproveAction', function () {
             ->approved_by->toBe($admin->id));
         Notification::assertSentToTimes($pending->first()->user, ApprovalApprovedNotification::class, 1);
         Notification::assertNotSentTo($alreadyApproved->user, ApprovalApprovedNotification::class);
-    })->with('approvable tables')->skip('App bug: BulkApproveAction/BulkRejectAction read the selected records without accessSelectedRecords(), so Filament throws a LogicException');
+    })->with('approvable tables');
 });
 
 describe('BulkRejectAction', function () {
@@ -129,15 +129,15 @@ describe('BulkRejectAction', function () {
 
         livewire($listPage)
             ->filterTable('approval_status', ['pending', 'approved'])
-            ->callTableBulkAction('bulkReject', $pending->push($alreadyApproved), data: ['rejection_reason' => 'Out of scope'])
+            ->callTableBulkAction('bulkReject', $pending->concat([$alreadyApproved]), data: ['rejection_reason' => 'Out of scope'])
             ->assertNotified(__('approval.notifications.bulk_rejected.title'));
 
-        $pending->take(2)->each(fn ($record) => expect($record->refresh())
+        $pending->each(fn ($record) => expect($record->refresh())
             ->approval_status->toBe(ApprovalStatus::Rejected)
             ->rejection_reason->toBe('Out of scope')
             ->approved_by->toBe($admin->id));
         expect($alreadyApproved->refresh()->approval_status)->toBe(ApprovalStatus::Approved);
-    })->with('approvable tables')->skip('App bug: BulkApproveAction/BulkRejectAction read the selected records without accessSelectedRecords(), so Filament throws a LogicException');
+    })->with('approvable tables');
 
     it('requires a rejection reason for the bulk rejection', function (string $listPage, string $model) {
         actingAsSuperAdminForApprovalActions();
@@ -148,5 +148,5 @@ describe('BulkRejectAction', function () {
             ->assertHasTableBulkActionErrors(['rejection_reason' => 'required']);
 
         $pending->each(fn ($record) => expect($record->refresh()->isPending())->toBeTrue());
-    })->with('approvable tables')->skip('App bug: BulkApproveAction/BulkRejectAction read the selected records without accessSelectedRecords(), so Filament throws a LogicException');
+    })->with('approvable tables');
 });

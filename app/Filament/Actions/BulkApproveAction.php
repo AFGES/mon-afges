@@ -20,11 +20,12 @@ final class BulkApproveAction extends Action
             ->requiresConfirmation()
             ->modalHeading(__('approval.modal.bulk_approve.heading'))
             ->modalDescription(__('approval.modal.bulk_approve.description'))
+            ->accessSelectedRecords()
             ->deselectRecordsAfterCompletion()
-            ->action(function (Collection $records): void {
+            ->action(function (Collection $selectedRecords): void {
                 $count = 0;
 
-                foreach ($records as $record) {
+                foreach ($selectedRecords as $record) {
                     if ($record->isPending()) {
                         $record->approve();
                         $count++;

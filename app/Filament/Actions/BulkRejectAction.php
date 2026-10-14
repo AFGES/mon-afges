@@ -21,6 +21,7 @@ final class BulkRejectAction extends Action
             ->requiresConfirmation()
             ->modalHeading(__('approval.modal.bulk_reject.heading'))
             ->modalDescription(__('approval.modal.bulk_reject.description'))
+            ->accessSelectedRecords()
             ->deselectRecordsAfterCompletion()
             ->form([
                 Textarea::make('rejection_reason')
@@ -28,10 +29,10 @@ final class BulkRejectAction extends Action
                     ->required()
                     ->maxLength(1000),
             ])
-            ->action(function (Collection $records, array $data): void {
+            ->action(function (Collection $selectedRecords, array $data): void {
                 $count = 0;
 
-                foreach ($records as $record) {
+                foreach ($selectedRecords as $record) {
                     if ($record->isPending()) {
                         $record->reject($data['rejection_reason']);
                         $count++;

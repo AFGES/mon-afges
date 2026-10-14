@@ -3,7 +3,13 @@
 declare(strict_types=1);
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Widgets\SessionQuorumStatusWidget;
+use App\Models\College;
+use App\Models\CollegeOrganization;
+use App\Models\Delegate;
 use App\Models\DemocraticTimeSession;
+use App\Models\DemocraticTimeType;
+use App\Models\Seat;
+use App\Models\SessionSignIn;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
@@ -22,56 +28,80 @@ function actingAsSuperAdminForSessionQuorumStatusWidget(): User
     return $user;
 }
 
-it('can render the widget', function () {
+/**
+ * @return array{session: DemocraticTimeSession, seats: Illuminate\Support\Collection<int, Seat>}
+ */
+function sessionWithFourVotingSeatsAndQuorumOfFiftyPercent(): array
+{
+    $college = College::factory()->create(['can_vote' => true]);
+    $collegeOrganization = CollegeOrganization::factory()->create(['college_id' => $college->id]);
+    $seats = Seat::factory()->count(4)->sequence(
+        ['seat_number' => 1],
+        ['seat_number' => 2],
+        ['seat_number' => 3],
+        ['seat_number' => 4],
+    )->create(['college_organization_id' => $collegeOrganization->id]);
+    $type = DemocraticTimeType::factory()->create([
+        'calculate_quorum_per_college' => false,
+        'quorum_percentage' => 50,
+        'include_proxies_in_quorum' => false,
+    ]);
+    $session = DemocraticTimeSession::factory()->create(['democratic_time_type_id' => $type->id]);
+
+    return ['session' => $session, 'seats' => $seats];
+}
+
+function signInSeatsToSession(DemocraticTimeSession $session, Illuminate\Support\Collection $seats): void
+{
+    foreach ($seats as $seat) {
+        SessionSignIn::forceCreate([
+            'democratic_time_session_id' => $session->id,
+            'seat_id' => $seat->id,
+            'delegate_id' => Delegate::factory()->approved()->for($seat)->create()->id,
+            'signed_in_at' => now(),
+        ]);
+    }
+}
+
+it('renders the widget', function () {
     actingAsSuperAdminForSessionQuorumStatusWidget();
 
-    $session = DemocraticTimeSession::factory()->create();
+    ['session' => $session] = sessionWithFourVotingSeatsAndQuorumOfFiftyPercent();
 
-    livewire(SessionQuorumStatusWidget::class, [
-        'record' => $session,
-    ])
+    livewire(SessionQuorumStatusWidget::class, ['record' => $session])
         ->assertOk();
 });
 
-it('displays a heading', function () {
+it('shows quorum met with the attendance percentage when half of the seats are signed in', function () {
     actingAsSuperAdminForSessionQuorumStatusWidget();
+    ['session' => $session, 'seats' => $seats] = sessionWithFourVotingSeatsAndQuorumOfFiftyPercent();
+    signInSeatsToSession($session, $seats->take(2));
 
-    $session = DemocraticTimeSession::factory()->create();
+    $heading = livewire(SessionQuorumStatusWidget::class, ['record' => $session])
+        ->instance()
+        ->getHeading();
 
-    $widget = livewire(SessionQuorumStatusWidget::class, [
-        'record' => $session,
-    ]);
-
-    $heading = $widget->instance()->getHeading();
-
-    expect($heading)->not->toBeNull()
-        ->and($heading)->toBeString();
+    expect($heading)->toBe(__('emargement.quorum.met').' - 50%');
 });
 
-it('displays quorum status in heading', function () {
+it('shows quorum not met with the attendance percentage when too few seats are signed in', function () {
     actingAsSuperAdminForSessionQuorumStatusWidget();
+    ['session' => $session, 'seats' => $seats] = sessionWithFourVotingSeatsAndQuorumOfFiftyPercent();
+    signInSeatsToSession($session, $seats->take(1));
 
-    $session = DemocraticTimeSession::factory()->create();
+    $heading = livewire(SessionQuorumStatusWidget::class, ['record' => $session])
+        ->instance()
+        ->getHeading();
 
-    $widget = livewire(SessionQuorumStatusWidget::class, [
-        'record' => $session,
-    ]);
-
-    $heading = $widget->instance()->getHeading();
-
-    // Heading should contain either "met" or "not_met" translation
-    $containsMet = str_contains($heading, __('emargement.quorum.met'));
-    $containsNotMet = str_contains($heading, __('emargement.quorum.not_met'));
-
-    expect($containsMet || $containsNotMet)->toBeTrue();
+    expect($heading)->toBe(__('emargement.quorum.not_met').' - 25%');
 });
 
-it('handles null record gracefully', function () {
+it('has no heading without a record', function () {
     actingAsSuperAdminForSessionQuorumStatusWidget();
 
-    $widget = livewire(SessionQuorumStatusWidget::class);
-
-    $heading = $widget->instance()->getHeading();
+    $heading = livewire(SessionQuorumStatusWidget::class)
+        ->instance()
+        ->getHeading();
 
     expect($heading)->toBeNull();
 });

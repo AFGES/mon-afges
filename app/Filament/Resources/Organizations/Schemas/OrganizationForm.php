@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Organizations\Schemas;
 
 use App\Models\College;
-use App\Models\CollegeOrganization;
 use Exception;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -108,13 +107,9 @@ final class OrganizationForm
                                 }
 
                                 $data = $record->colleges->map(function ($college) {
-                                    $collegeOrg = CollegeOrganization::where('college_id', $college->id)
-                                        ->where('organization_id', $college->pivot->organization_id)
-                                        ->first();
-
                                     return [
                                         'college_id' => $college->id,
-                                        'seats' => $collegeOrg ? $collegeOrg->seatRecords()->count() : 0,
+                                        'seats' => $college->pivot->seatRecords()->count(),
                                         'delegates_per_seat' => $college->pivot->delegates_per_seat,
                                     ];
                                 })->toArray();

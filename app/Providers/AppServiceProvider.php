@@ -23,12 +23,16 @@ use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceService;
 use App\Services\GoogleWorkspaceServiceInterface;
 use App\Services\UnconfiguredGoogleWorkspaceService;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Laravel\Telescope\TelescopeServiceProvider as LaravelTelescopeServiceProvider;
 use Livewire\Livewire;
 use SocialiteProviders\Google\Provider as GoogleProvider;
@@ -66,6 +70,8 @@ final class AppServiceProvider extends ServiceProvider
             Pluralizer::useLanguage('french');
         }
 
+        $this->configureRateLimiting();
+
         $this->blueprintApprovalStatusMacro();
         $this->blueprintPeriodMacro();
 
@@ -91,6 +97,15 @@ final class AppServiceProvider extends ServiceProvider
 
             return $user->hasRole('super_admin') ?: null;
         });
+    }
+
+    /**
+     * Throttle magic link requests per email address and IP.
+     */
+    private function configureRateLimiting(): void
+    {
+        RateLimiter::for('magic-link', fn (Request $request): Limit => Limit::perMinute(5)
+            ->by(Str::lower((string) $request->input('email')).'|'.$request->ip()));
     }
 
     /**

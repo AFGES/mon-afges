@@ -63,3 +63,30 @@ it('redirects authenticated users away from the request endpoint', function () {
     Notification::assertNothingSent();
     expect($user->refresh()->magic_link_token)->toBeNull();
 });
+
+it('throttles magic link requests after five attempts per email and ip', function () {
+    Notification::fake([MagicLinkNotification::class]);
+    User::factory()->create(['email' => 'test@afges.org']);
+
+    foreach (range(1, 5) as $attempt) {
+        $this->post(route('magicLink.request'), ['email' => 'test@afges.org'])->assertRedirect();
+    }
+    $response = $this->post(route('magicLink.request'), ['email' => 'test@afges.org']);
+
+    $response->assertTooManyRequests();
+    Notification::assertSentTimes(MagicLinkNotification::class, 5);
+});
+
+it('does not share the throttle between different emails', function () {
+    Notification::fake([MagicLinkNotification::class]);
+    User::factory()->create(['email' => 'test@afges.org']);
+    User::factory()->create(['email' => 'other@afges.org']);
+
+    foreach (range(1, 5) as $attempt) {
+        $this->post(route('magicLink.request'), ['email' => 'test@afges.org']);
+    }
+    $response = $this->post(route('magicLink.request'), ['email' => 'other@afges.org']);
+
+    $response->assertRedirect();
+    Notification::assertSentTimes(MagicLinkNotification::class, 6);
+});

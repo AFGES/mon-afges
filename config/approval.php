@@ -14,6 +14,6 @@ return [
     |
     */
 
-    'link_expiry_days' => (int) env('APPROVAL_LINK_EXPIRY_DAYS', 7),
+    'link_expiry_days' => (int) (env('APPROVAL_LINK_EXPIRY_DAYS') ?: 7),
 
 ];

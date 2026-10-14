@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\User;
 use App\Models\Volunteer;
+use App\Policies\Contracts\RestrictsSuperAdmin;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class VolunteerPolicy
+final class VolunteerPolicy implements RestrictsSuperAdmin
 {
     use HandlesAuthorization;
+
+    /**
+     * @return list<string>
+     */
+    public function superAdminRestrictedAbilities(): array
+    {
+        return ['terminate'];
+    }
 
     public function viewAny(AuthUser $authUser): bool
     {
@@ -69,7 +79,7 @@ final class VolunteerPolicy
 
     public function terminate(AuthUser $authUser, Volunteer $volunteer): bool
     {
-        $canManageMandate = $volunteer->user_id === $authUser->id || $authUser->hasRole('super_admin');
+        $canManageMandate = $volunteer->user_id === $authUser->id || ($authUser instanceof User && $authUser->isSuperAdmin());
 
         return $canManageMandate
             && $volunteer->isApproved()

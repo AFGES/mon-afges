@@ -18,6 +18,7 @@ use App\Observers\DemocraticTimeSessionObserver;
 use App\Observers\DemocraticTimeTypeObserver;
 use App\Observers\ProxyObserver;
 use App\Observers\VolunteerObserver;
+use App\Policies\Contracts\RestrictsSuperAdmin;
 use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceService;
@@ -76,12 +77,18 @@ final class AppServiceProvider extends ServiceProvider
             $event->extendSocialite('google', GoogleProvider::class);
         });
 
-        Gate::before(function (User $user, string $ability): ?bool {
-            if ($ability === 'terminate') {
+        Gate::before(function (User $user, string $ability, array $arguments): ?bool {
+            if (! $user->isSuperAdmin()) {
                 return null;
             }
 
-            return $user->hasRole('super_admin') ?: null;
+            $policy = isset($arguments[0]) ? Gate::getPolicyFor($arguments[0]) : null;
+
+            if ($policy instanceof RestrictsSuperAdmin && in_array($ability, $policy->superAdminRestrictedAbilities(), true)) {
+                return null;
+            }
+
+            return true;
         });
     }
 

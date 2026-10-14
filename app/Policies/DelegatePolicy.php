@@ -5,12 +5,22 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Delegate;
+use App\Models\User;
+use App\Policies\Contracts\RestrictsSuperAdmin;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-final class DelegatePolicy
+final class DelegatePolicy implements RestrictsSuperAdmin
 {
     use HandlesAuthorization;
+
+    /**
+     * @return list<string>
+     */
+    public function superAdminRestrictedAbilities(): array
+    {
+        return ['terminate'];
+    }
 
     public function viewAny(AuthUser $authUser): bool
     {
@@ -69,7 +79,7 @@ final class DelegatePolicy
 
     public function terminate(AuthUser $authUser, Delegate $delegate): bool
     {
-        $canManageMandate = $delegate->user_id === $authUser->id || $authUser->hasRole('super_admin');
+        $canManageMandate = $delegate->user_id === $authUser->id || ($authUser instanceof User && $authUser->isSuperAdmin());
 
         return $canManageMandate
             && $delegate->isApproved()

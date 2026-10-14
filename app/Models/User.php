@@ -25,6 +25,8 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     use HasUuids;
     use Notifiable;
 
+    public const string SUPER_ADMIN_ROLE = 'super_admin';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -54,6 +56,11 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     final public function canAccessPanel(Panel $panel): bool
     {
         return Str::endsWith($this->email, '@afges.org');
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(self::SUPER_ADMIN_ROLE);
     }
 
     /** @return HasMany<Volunteer, $this> */

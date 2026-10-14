@@ -25,7 +25,7 @@ final class EnsureHasVolunteerOrganization
             return $next($request);
         }
 
-        if ($user->hasRole('super_admin')) {
+        if ($user->isSuperAdmin()) {
             return $next($request);
         }
 

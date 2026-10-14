@@ -11,14 +11,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Mockery\MockInterface;
 
-function syncServiceWith(MockInterface $googleWorkspaceService): DelegateGoogleWorkspaceSyncService
+function syncServiceWith(GoogleWorkspaceServiceInterface&MockInterface $googleWorkspaceService): DelegateGoogleWorkspaceSyncService
 {
     return new DelegateGoogleWorkspaceSyncService($googleWorkspaceService);
 }
 
-function googleWorkspaceMock(): MockInterface
+function googleWorkspaceMock(): GoogleWorkspaceServiceInterface&MockInterface
 {
-    return mock(GoogleWorkspaceServiceInterface::class);
+    /** @var GoogleWorkspaceServiceInterface&MockInterface $googleWorkspaceService */
+    $googleWorkspaceService = mock(GoogleWorkspaceServiceInterface::class);
+
+    return $googleWorkspaceService;
 }
 
 describe('shouldSync', function () {

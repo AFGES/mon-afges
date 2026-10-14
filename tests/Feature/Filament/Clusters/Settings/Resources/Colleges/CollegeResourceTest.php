@@ -94,7 +94,7 @@ describe('CreateCollege', function () {
 
         $collegeName = fake()->unique()->word();
 
-        Livewire::test(CreateCollege::class)
+        livewire(CreateCollege::class)
             ->fillForm([
                 'name' => $collegeName,
                 'can_vote' => true,
@@ -135,7 +135,7 @@ describe('CreateCollege', function () {
 
         $existingCollege = College::factory()->create();
 
-        Livewire::test(CreateCollege::class)
+        livewire(CreateCollege::class)
             ->fillForm([
                 'name' => $existingCollege->name,
                 'can_vote' => true,
@@ -176,7 +176,7 @@ describe('EditCollege', function () {
 
         $college = College::factory()->create();
 
-        Livewire::test(EditCollege::class, [
+        livewire(EditCollege::class, [
             'record' => $college->id,
         ])
             ->assertOk()
@@ -192,7 +192,7 @@ describe('EditCollege', function () {
         $college = College::factory()->create();
         $newName = fake()->unique()->word();
 
-        Livewire::test(EditCollege::class, [
+        livewire(EditCollege::class, [
             'record' => $college->id,
         ])
             ->fillForm([
@@ -212,7 +212,7 @@ describe('EditCollege', function () {
 
         $college = College::factory()->create();
 
-        Livewire::test(EditCollege::class, [
+        livewire(EditCollege::class, [
             'record' => $college->id,
         ])
             ->fillForm($data)

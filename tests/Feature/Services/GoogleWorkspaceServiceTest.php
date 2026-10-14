@@ -38,7 +38,7 @@ function googleErrorResponse(int $status, string $message): Response
 {
     return new Response($status, ['Content-Type' => 'application/json'], json_encode([
         'error' => ['code' => $status, 'message' => $message],
-    ]));
+    ], JSON_THROW_ON_ERROR));
 }
 
 function googleMemberResponse(): Response
@@ -46,7 +46,7 @@ function googleMemberResponse(): Response
     return new Response(200, ['Content-Type' => 'application/json'], json_encode([
         'email' => 'delegate@afges.org',
         'role' => 'MEMBER',
-    ]));
+    ], JSON_THROW_ON_ERROR));
 }
 
 beforeEach(function () {

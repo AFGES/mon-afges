@@ -36,7 +36,10 @@ it('counts only pending volunteers', function () {
     $component = livewire(PendingVolunteerStats::class)
         ->assertSee(__('volunteer.stats.pending_approvals'));
 
-    expect(pendingVolunteerStatValue($component->instance()))->toBe(2);
+    /** @var PendingVolunteerStats $widget */
+    $widget = $component->instance();
+
+    expect(pendingVolunteerStatValue($widget))->toBe(2);
 });
 
 it('shows zero when no volunteer is pending', function () {
@@ -45,7 +48,10 @@ it('shows zero when no volunteer is pending', function () {
 
     $component = livewire(PendingVolunteerStats::class);
 
-    expect(pendingVolunteerStatValue($component->instance()))->toBe(0);
+    /** @var PendingVolunteerStats $widget */
+    $widget = $component->instance();
+
+    expect(pendingVolunteerStatValue($widget))->toBe(0);
 });
 
 it('is visible to users with the View:PendingVolunteerStats permission', function () {

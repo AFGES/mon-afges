@@ -29,11 +29,14 @@ function activeDelegateWithEmail(string $email): Delegate
     return Delegate::factory()->approved()->verified()->create(['email' => $email, 'ended_at' => null]);
 }
 
-function mockedGoogleWorkspaceForCommand(): MockInterface
+function mockedGoogleWorkspaceForCommand(): GoogleWorkspaceServiceInterface&MockInterface
 {
     app()->forgetInstance(DelegateGoogleWorkspaceSyncServiceInterface::class);
 
-    return test()->mock(GoogleWorkspaceServiceInterface::class);
+    /** @var GoogleWorkspaceServiceInterface&MockInterface $googleWorkspaceService */
+    $googleWorkspaceService = test()->mock(GoogleWorkspaceServiceInterface::class);
+
+    return $googleWorkspaceService;
 }
 
 /**

@@ -63,3 +63,14 @@ it('escapes the applicant name in the rendered mail', function () {
         ->toContain('&lt;script&gt;')
         ->not->toContain("<script>alert('xss')</script>");
 });
+
+it('expires the approve and reject links after the configured number of days', function () {
+    $this->freezeTime();
+    $delegate = Delegate::factory()->create();
+
+    $mail = (new DelegateApprovalRequestedNotification($delegate))->toMail(User::factory()->make());
+
+    parse_str((string) parse_url($mail->actionUrl, PHP_URL_QUERY), $query);
+    expect((int) $query['expires'])->toBe(now()->addDays(7)->getTimestamp())
+        ->and(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue();
+});

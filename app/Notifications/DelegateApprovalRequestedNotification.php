@@ -30,13 +30,15 @@ final class DelegateApprovalRequestedNotification extends Notification implement
 
     public function toMail(object $notifiable): MailMessage
     {
-        $approveUrl = URL::signedRoute(
+        $approveUrl = URL::temporarySignedRoute(
             'delegates.approve',
+            now()->addDays(config('approval.link_expiry_days')),
             ['delegate' => $this->delegate->id]
         );
 
-        $rejectUrl = URL::signedRoute(
+        $rejectUrl = URL::temporarySignedRoute(
             'delegates.reject',
+            now()->addDays(config('approval.link_expiry_days')),
             ['delegate' => $this->delegate->id]
         );
 

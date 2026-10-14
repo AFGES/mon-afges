@@ -65,3 +65,14 @@ it('escapes the applicant name and position in the rendered mail', function () {
         ->not->toContain("<script>alert('xss')</script>")
         ->not->toContain('<img src=x');
 });
+
+it('expires the approve and reject links after the configured number of days', function () {
+    $this->freezeTime();
+    $volunteer = Volunteer::factory()->create();
+
+    $mail = (new VolunteerApprovalRequestedNotification($volunteer))->toMail(User::factory()->make());
+
+    parse_str((string) parse_url($mail->actionUrl, PHP_URL_QUERY), $query);
+    expect((int) $query['expires'])->toBe(now()->addDays(7)->getTimestamp())
+        ->and(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue();
+});

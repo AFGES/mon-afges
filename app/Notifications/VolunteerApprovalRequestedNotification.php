@@ -30,13 +30,15 @@ final class VolunteerApprovalRequestedNotification extends Notification implemen
 
     public function toMail(object $notifiable): MailMessage
     {
-        $approveUrl = URL::signedRoute(
+        $approveUrl = URL::temporarySignedRoute(
             'volunteers.approve',
+            now()->addDays(config('approval.link_expiry_days')),
             ['volunteer' => $this->volunteer->id]
         );
 
-        $rejectUrl = URL::signedRoute(
+        $rejectUrl = URL::temporarySignedRoute(
             'volunteers.reject',
+            now()->addDays(config('approval.link_expiry_days')),
             ['volunteer' => $this->volunteer->id]
         );
 

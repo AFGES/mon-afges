@@ -82,3 +82,15 @@ it('redirects a guest opening a valid signed url to the login page and leaves th
     $response->assertRedirect(route('filament.root.auth.login'));
     expect($delegate->refresh()->isPending())->toBeTrue();
 });
+
+it('returns 403 once the signed url has expired and leaves the delegate pending', function () {
+    $delegate = Delegate::factory()->create();
+    $approver = User::factory()->create()->givePermissionTo('Update:Delegate');
+    $url = URL::temporarySignedRoute('delegates.approve', now()->addDays(config('approval.link_expiry_days')), ['delegate' => $delegate->id]);
+
+    $this->travel(8)->days();
+    $response = $this->actingAs($approver)->get($url);
+
+    $response->assertForbidden();
+    expect($delegate->refresh()->isPending())->toBeTrue();
+});

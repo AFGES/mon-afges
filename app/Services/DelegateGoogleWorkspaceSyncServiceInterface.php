@@ -10,6 +10,11 @@ use Closure;
 interface DelegateGoogleWorkspaceSyncServiceInterface
 {
     /**
+     * Whether the delegate is entitled to be in the group: approved, verified email, valid mandate dates.
+     */
+    public function shouldSync(Delegate $delegate): bool;
+
+    /**
      * Add a single delegate to the Google Workspace group.
      */
     public function addDelegate(Delegate $delegate): bool;

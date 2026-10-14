@@ -17,7 +17,8 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
     ) {}
 
     /**
-     * Check if a delegate should be synced to Google Workspace.
+     * A delegate belongs to the Google Workspace group only once approved, with a verified email,
+     * and while its mandate is valid (started, and not ended before today).
      */
     public function shouldSync(Delegate $delegate): bool
     {
@@ -29,11 +30,11 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
             return false;
         }
 
-        if (! $delegate->isCurrentlyActive()) {
+        if (! $delegate->isApproved()) {
             return false;
         }
 
-        return true;
+        return $delegate->isCurrentlyActive();
     }
 
     /**
@@ -62,6 +63,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
                 'email' => $delegate->email,
                 'has_email' => (bool) $delegate->email,
                 'email_verified' => $delegate->hasVerifiedEmail(),
+                'is_approved' => $delegate->isApproved(),
                 'is_active' => $delegate->isCurrentlyActive(),
             ]);
 
@@ -112,7 +114,8 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
     }
 
     /**
-     * Get all active delegate emails that should be in the Google Workspace group.
+     * Get all delegate emails that should be in the Google Workspace group.
+     * Relies on the Delegate global scopes: approved and currently active mandates only.
      *
      * @return Collection<int, string>
      */
@@ -213,9 +216,8 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         }
 
         $report('checking_removals', 0);
-        $allUserEmails = User::whereNotNull('email')->pluck('email')->toArray();
 
-        foreach ($allUserEmails as $email) {
+        foreach ($this->getRemovalCandidateEmails() as $email) {
             if ($activeDelegateEmails->contains($email)) {
                 continue;
             }
@@ -243,6 +245,23 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         }
 
         return $stats;
+    }
+
+    /**
+     * Every email that may sit in the group without being entitled to it: user account emails and
+     * the convocation emails of all delegates, whatever their approval status, dates or deletion state.
+     *
+     * @return Collection<int, string>
+     */
+    private function getRemovalCandidateEmails(): Collection
+    {
+        return Delegate::withoutGlobalScopes()
+            ->withTrashed()
+            ->whereNotNull('email')
+            ->pluck('email')
+            ->merge(User::whereNotNull('email')->pluck('email'))
+            ->unique()
+            ->values();
     }
 
     private function isGoogleWorkspaceConfigured(): bool

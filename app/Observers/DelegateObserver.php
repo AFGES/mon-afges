@@ -13,6 +13,9 @@ use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 final class DelegateObserver
 {
+    /** @var list<string> */
+    private const array SYNC_ATTRIBUTES = ['approval_status', 'started_at', 'ended_at', 'email', 'email_verified_at'];
+
     public function __construct(
         private DelegateGoogleWorkspaceSyncServiceInterface $syncService
     ) {}
@@ -31,17 +34,30 @@ final class DelegateObserver
         $this->addToGroup($delegate);
     }
 
+    /**
+     * The delegate joins the group when it becomes eligible and leaves it when it stops being eligible
+     * (rejected, or mandate ended). A future end date keeps it in place: the daily sync handles that transition.
+     */
     public function updated(Delegate $delegate): void
     {
-        if (! $delegate->wasChanged('ended_at')) {
+        if (! $delegate->wasChanged(self::SYNC_ATTRIBUTES)) {
             return;
         }
 
-        if ($delegate->ended_at === null) {
-            return;
+        $previous = clone $delegate;
+        $previous->setRawAttributes($delegate->getRawOriginal());
+        $wasEligible = $this->syncService->shouldSync($previous);
+        $isEligible = $this->syncService->shouldSync($delegate);
+
+        if ($wasEligible && $delegate->wasChanged('email')) {
+            $this->removeFromGroup($previous);
+        } elseif ($wasEligible && ! $isEligible) {
+            $this->removeFromGroup($delegate);
         }
 
-        $this->removeFromGroup($delegate);
+        if ($isEligible) {
+            $this->addToGroup($delegate);
+        }
     }
 
     public function deleted(Delegate $delegate): void
@@ -77,7 +93,9 @@ final class DelegateObserver
      */
     private function addToGroup(Delegate $delegate): void
     {
-        $this->syncService->addDelegate($delegate);
+        if ($this->syncService->shouldSync($delegate)) {
+            $this->syncService->addDelegate($delegate);
+        }
     }
 
     /**

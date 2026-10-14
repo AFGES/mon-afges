@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Services\DelegateGoogleWorkspaceSyncService;
@@ -18,25 +19,43 @@ function syncServiceWith(GoogleWorkspaceServiceInterface&MockInterface $googleWo
 
 describe('shouldSync', function () {
     it('accepts a current delegate with a verified email', function () {
-        $delegate = Delegate::factory()->verified()->make(['ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->verified()->make(['ended_at' => null]);
+
+        expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeTrue();
+    });
+
+    it('rejects a delegate that is not approved', function (string $state) {
+        $delegate = Delegate::factory()->{$state}()->verified()->make(['ended_at' => null]);
+
+        expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeFalse();
+    })->with(['pending', 'rejected']);
+
+    it('rejects a delegate whose mandate has not started', function () {
+        $delegate = Delegate::factory()->approved()->verified()->make(['started_at' => now()->addDay(), 'ended_at' => null]);
+
+        expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeFalse();
+    });
+
+    it('accepts a delegate whose mandate ends today', function () {
+        $delegate = Delegate::factory()->approved()->verified()->make(['started_at' => now()->subYear(), 'ended_at' => now()]);
 
         expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeTrue();
     });
 
     it('rejects a delegate without email', function () {
-        $delegate = Delegate::factory()->verified()->make(['email' => null, 'ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->verified()->make(['email' => null, 'ended_at' => null]);
 
         expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeFalse();
     });
 
     it('rejects a delegate with an unverified email', function () {
-        $delegate = Delegate::factory()->unverified()->make(['ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->unverified()->make(['ended_at' => null]);
 
         expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeFalse();
     });
 
     it('rejects a delegate whose mandate has ended', function () {
-        $delegate = Delegate::factory()->verified()->make([
+        $delegate = Delegate::factory()->approved()->verified()->make([
             'started_at' => now()->subYear(),
             'ended_at' => now()->subDay(),
         ]);
@@ -47,7 +66,7 @@ describe('shouldSync', function () {
 
 describe('addDelegate', function () {
     it('adds the delegate email to the group', function () {
-        $delegate = Delegate::factory()->verified()->make(['email' => 'delegate@afges.org', 'ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->verified()->make(['email' => 'delegate@afges.org', 'ended_at' => null]);
         $google = mockGoogleWorkspaceService();
         $google->shouldReceive('addToGroup')->once()->with('delegate@afges.org')->andReturnTrue();
 
@@ -55,7 +74,7 @@ describe('addDelegate', function () {
     });
 
     it('returns false when Google fails to add the email', function () {
-        $delegate = Delegate::factory()->verified()->make(['email' => 'delegate@afges.org', 'ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->verified()->make(['email' => 'delegate@afges.org', 'ended_at' => null]);
         $google = mockGoogleWorkspaceService();
         $google->shouldReceive('addToGroup')->once()->with('delegate@afges.org')->andReturnFalse();
 
@@ -64,7 +83,7 @@ describe('addDelegate', function () {
 
     it('does not call Google and logs a warning when the delegate does not qualify', function (array $attributes, array $expectedContext) {
         Log::spy();
-        $delegate = Delegate::factory()->make(['ended_at' => null, ...$attributes]);
+        $delegate = Delegate::factory()->approved()->make(['ended_at' => null, ...$attributes]);
         $google = mockGoogleWorkspaceService();
         $google->shouldNotReceive('addToGroup');
 
@@ -78,6 +97,7 @@ describe('addDelegate', function () {
     })->with([
         'no email' => [['email' => null, 'email_verified_at' => now()], ['has_email' => false]],
         'unverified email' => [['email' => 'a@afges.org', 'email_verified_at' => null], ['email_verified' => false]],
+        'pending approval' => [['email' => 'a@afges.org', 'email_verified_at' => now(), 'approval_status' => ApprovalStatus::Pending], ['is_approved' => false]],
         'ended mandate' => [
             ['email' => 'a@afges.org', 'email_verified_at' => now(), 'started_at' => now()->subYear(), 'ended_at' => now()->subDay()],
             ['is_active' => false],
@@ -87,7 +107,7 @@ describe('addDelegate', function () {
     it('skips the call and succeeds when another active delegate uses the same email', function () {
         Log::spy();
         Delegate::factory()->approved()->verified()->create(['email' => 'shared@afges.org', 'ended_at' => null]);
-        $delegate = Delegate::factory()->verified()->make(['email' => 'shared@afges.org', 'ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->verified()->make(['email' => 'shared@afges.org', 'ended_at' => null]);
         $google = mockGoogleWorkspaceService();
         $google->shouldNotReceive('addToGroup');
 
@@ -223,6 +243,41 @@ describe('syncAll', function () {
             'failed_to_add' => 1,
             'failed_to_remove' => 1,
         ]);
+    });
+
+    it('removes the distinct email of an ended or rejected delegate that no user owns', function () {
+        Delegate::factory()->approved()->verified()->create([
+            'email' => 'ended@afges.org',
+            'started_at' => now()->subYear(),
+            'ended_at' => now()->subDay(),
+        ]);
+        Delegate::factory()->rejected()->verified()->create(['email' => 'rejected@afges.org', 'started_at' => now()->subMonth(), 'ended_at' => null]);
+        $google = mockGoogleWorkspaceService();
+        $google->shouldReceive('isInGroup')->with('ended@afges.org')->andReturnTrue();
+        $google->shouldReceive('isInGroup')->with('rejected@afges.org')->andReturnTrue();
+        $google->shouldReceive('isInGroup')->andReturnFalse();
+        $google->shouldReceive('removeFromGroup')->once()->with('ended@afges.org')->andReturnTrue();
+        $google->shouldReceive('removeFromGroup')->once()->with('rejected@afges.org')->andReturnTrue();
+
+        $stats = syncServiceWith($google)->syncAll();
+
+        expect($stats['removed'])->toBe(2);
+    });
+
+    it('adds approved current delegates and skips pending or future ones', function () {
+        Delegate::factory()->approved()->verified()->create(['email' => 'current@afges.org', 'started_at' => now()->subMonth(), 'ended_at' => null]);
+        Delegate::factory()->pending()->verified()->create(['email' => 'pending@afges.org', 'started_at' => now()->subMonth(), 'ended_at' => null]);
+        Delegate::factory()->approved()->verified()->create(['email' => 'future@afges.org', 'started_at' => now()->addMonth(), 'ended_at' => null]);
+        $google = mockGoogleWorkspaceService();
+        $google->shouldReceive('isInGroup')->with('current@afges.org')->andReturnFalse();
+        $google->shouldReceive('isInGroup')->andReturnFalse();
+        $google->shouldReceive('addToGroup')->once()->with('current@afges.org')->andReturnTrue();
+        $google->shouldNotReceive('addToGroup')->with('pending@afges.org');
+        $google->shouldNotReceive('addToGroup')->with('future@afges.org');
+
+        $stats = syncServiceWith($google)->syncAll();
+
+        expect($stats['added'])->toBe(1)->and($stats['removed'])->toBe(0);
     });
 
     it('reports the changes without applying them in dry-run mode', function () {

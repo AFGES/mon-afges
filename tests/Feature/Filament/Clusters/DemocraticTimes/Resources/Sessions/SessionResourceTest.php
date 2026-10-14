@@ -68,7 +68,14 @@ describe('ListSessions', function () {
     it('can search sessions by location', function () {
         actingAsSuperAdminForSessionResource();
 
-        $sessions = DemocraticTimeSession::factory()->count(3)->create();
+        $sessions = DemocraticTimeSession::factory()
+            ->count(3)
+            ->sequence(
+                ['location' => 'Amphitheatre North'],
+                ['location' => 'Boardroom East'],
+                ['location' => 'Chapel South'],
+            )
+            ->create();
 
         Livewire::test(ListSessions::class)
             ->searchTable($sessions->first()->location)
@@ -81,7 +88,12 @@ describe('ListSessions', function () {
 
         $type = DemocraticTimeType::factory()->create(['name' => 'Special Council Meeting']);
         $session = DemocraticTimeSession::factory()->create(['democratic_time_type_id' => $type->id]);
-        $otherSessions = DemocraticTimeSession::factory()->count(2)->create();
+        $otherType = DemocraticTimeType::factory()->create(['name' => 'Ordinary Plenary']);
+        $otherSessions = DemocraticTimeSession::factory()
+            ->count(2)
+            ->for($otherType, 'democraticTimeType')
+            ->sequence(['location' => 'Dormitory West'], ['location' => 'Eastwing Annex'])
+            ->create();
 
         Livewire::test(ListSessions::class)
             ->searchTable('Special Council')

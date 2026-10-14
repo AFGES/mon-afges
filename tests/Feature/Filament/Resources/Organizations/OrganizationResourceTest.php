@@ -48,7 +48,16 @@ describe('ListOrganizations', function () {
     it('can search organizations by short name', function () {
         actingAsSuperAdminForOrganizationResource();
 
-        $organizations = Organization::factory()->count(5)->create();
+        $organizations = Organization::factory()
+            ->count(5)
+            ->sequence(
+                ['short_name' => 'Alpha', 'legal_name' => 'Association Alpha'],
+                ['short_name' => 'Bravo', 'legal_name' => 'Association Bravo'],
+                ['short_name' => 'Charlie', 'legal_name' => 'Association Charlie'],
+                ['short_name' => 'Delta', 'legal_name' => 'Association Delta'],
+                ['short_name' => 'Echo', 'legal_name' => 'Association Echo'],
+            )
+            ->create();
 
         livewire(ListOrganizations::class)
             ->assertCanSeeTableRecords($organizations)
@@ -60,7 +69,16 @@ describe('ListOrganizations', function () {
     it('can search organizations by legal name', function () {
         actingAsSuperAdminForOrganizationResource();
 
-        $organizations = Organization::factory()->count(5)->create();
+        $organizations = Organization::factory()
+            ->count(5)
+            ->sequence(
+                ['short_name' => 'A1', 'legal_name' => 'Fédération Alpha'],
+                ['short_name' => 'B2', 'legal_name' => 'Fédération Bravo'],
+                ['short_name' => 'C3', 'legal_name' => 'Fédération Charlie'],
+                ['short_name' => 'D4', 'legal_name' => 'Fédération Delta'],
+                ['short_name' => 'E5', 'legal_name' => 'Fédération Echo'],
+            )
+            ->create();
 
         livewire(ListOrganizations::class)
             ->assertCanSeeTableRecords($organizations)

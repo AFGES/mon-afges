@@ -46,7 +46,14 @@ describe('ListDemocraticTimeTypes', function () {
     it('can search democratic time types by name', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
-        $types = DemocraticTimeType::factory()->count(3)->create();
+        $types = DemocraticTimeType::factory()
+            ->count(3)
+            ->sequence(
+                ['name' => 'Alpha Assembly', 'acronym' => 'AAA'],
+                ['name' => 'Bravo Board', 'acronym' => 'BBB'],
+                ['name' => 'Charlie Committee', 'acronym' => 'CCC'],
+            )
+            ->create();
 
         Livewire::test(ListDemocraticTimeTypes::class)
             ->searchTable($types->first()->name)
@@ -57,7 +64,14 @@ describe('ListDemocraticTimeTypes', function () {
     it('can sort democratic time types by name', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
-        $types = DemocraticTimeType::factory()->count(3)->create();
+        $types = DemocraticTimeType::factory()
+            ->count(3)
+            ->sequence(
+                ['name' => 'Bravo Board'],
+                ['name' => 'Charlie Committee'],
+                ['name' => 'Alpha Assembly'],
+            )
+            ->create();
 
         Livewire::test(ListDemocraticTimeTypes::class)
             ->sortTable('name')

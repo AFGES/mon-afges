@@ -12,6 +12,7 @@ use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
@@ -31,6 +32,34 @@ function actingAsSuperAdminForDelegateResource(): User
     actingAs($user);
 
     return $user;
+}
+
+/**
+ * @return Collection<int, Delegate>
+ */
+function createDelegatesWithDistinctSearchableValues(): Collection
+{
+    return Delegate::factory()
+        ->count(3)
+        ->approved()
+        ->sequence(
+            [
+                'email' => 'first@alpha.test',
+                'user_id' => User::factory()->state(['name' => 'Aurelia Voss']),
+                'organization_id' => Organization::factory()->state(['short_name' => 'Zephyr']),
+            ],
+            [
+                'email' => 'second@bravo.test',
+                'user_id' => User::factory()->state(['name' => 'Bastien Corbel']),
+                'organization_id' => Organization::factory()->state(['short_name' => 'Quasar']),
+            ],
+            [
+                'email' => 'third@charlie.test',
+                'user_id' => User::factory()->state(['name' => 'Cyrille Danton']),
+                'organization_id' => Organization::factory()->state(['short_name' => 'Nimbus']),
+            ],
+        )
+        ->create();
 }
 
 describe('ListDelegates', function () {
@@ -67,7 +96,7 @@ describe('ListDelegates', function () {
     it('can search delegates by user name', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(5)->approved()->create();
+        $delegates = createDelegatesWithDistinctSearchableValues();
 
         livewire(ListDelegates::class)
             ->searchTable($delegates->first()->user->name)
@@ -78,7 +107,7 @@ describe('ListDelegates', function () {
     it('can search delegates by email', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(5)->approved()->create();
+        $delegates = createDelegatesWithDistinctSearchableValues();
 
         livewire(ListDelegates::class)
             ->searchTable($delegates->first()->email)
@@ -89,7 +118,7 @@ describe('ListDelegates', function () {
     it('can search delegates by organization', function () {
         actingAsSuperAdminForDelegateResource();
 
-        $delegates = Delegate::factory()->count(5)->approved()->create();
+        $delegates = createDelegatesWithDistinctSearchableValues();
 
         livewire(ListDelegates::class)
             ->searchTable($delegates->first()->organization->short_name)

@@ -50,15 +50,14 @@ describe('ListSessionSignIns', function () {
     it('can search session sign-ins by session location', function () {
         actingAsSuperAdminForSessionSignInResource();
 
-        $session1 = DemocraticTimeSession::factory()->create(['location' => 'Main Hall']);
-        $session2 = DemocraticTimeSession::factory()->create(['location' => 'Conference Room']);
-
         $signIn1 = SessionSignIn::factory()->create([
-            'democratic_time_session_id' => $session1->id,
+            'democratic_time_session_id' => DemocraticTimeSession::factory()->create(['location' => 'Main Hall']),
+            'delegate_id' => Delegate::factory()->approved()->create(['email' => 'first@alpha.test']),
         ]);
 
         $signIn2 = SessionSignIn::factory()->create([
-            'democratic_time_session_id' => $session2->id,
+            'democratic_time_session_id' => DemocraticTimeSession::factory()->create(['location' => 'Conference Room']),
+            'delegate_id' => Delegate::factory()->approved()->create(['email' => 'second@bravo.test']),
         ]);
 
         livewire(ListSessionSignIns::class)
@@ -70,14 +69,18 @@ describe('ListSessionSignIns', function () {
     it('can search session sign-ins by delegate email', function () {
         actingAsSuperAdminForSessionSignInResource();
 
-        $delegate1 = Delegate::factory()->approved()->create(['email' => 'john@example.com']);
-        $delegate2 = Delegate::factory()->approved()->create(['email' => 'jane@example.com']);
+        $signIn1 = SessionSignIn::factory()->create([
+            'democratic_time_session_id' => DemocraticTimeSession::factory()->create(['location' => 'Main Hall']),
+            'delegate_id' => Delegate::factory()->approved()->create(['email' => 'john@alpha.test']),
+        ]);
 
-        $signIn1 = SessionSignIn::factory()->create(['delegate_id' => $delegate1->id]);
-        $signIn2 = SessionSignIn::factory()->create(['delegate_id' => $delegate2->id]);
+        $signIn2 = SessionSignIn::factory()->create([
+            'democratic_time_session_id' => DemocraticTimeSession::factory()->create(['location' => 'Conference Room']),
+            'delegate_id' => Delegate::factory()->approved()->create(['email' => 'jane@bravo.test']),
+        ]);
 
         livewire(ListSessionSignIns::class)
-            ->searchTable('john@example.com')
+            ->searchTable('john@alpha.test')
             ->assertCanSeeTableRecords([$signIn1])
             ->assertCanNotSeeTableRecords([$signIn2]);
     });

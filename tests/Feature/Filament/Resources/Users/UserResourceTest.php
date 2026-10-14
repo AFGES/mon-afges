@@ -48,7 +48,16 @@ describe('ListUsers', function () {
     it('can search users by name', function () {
         actingAsSuperAdminForUserResource();
 
-        $users = User::factory()->count(5)->create();
+        $users = User::factory()
+            ->count(5)
+            ->sequence(
+                ['name' => 'Aurelia Voss', 'email' => 'first@alpha.test'],
+                ['name' => 'Bastien Corbel', 'email' => 'second@bravo.test'],
+                ['name' => 'Cyrille Danton', 'email' => 'third@charlie.test'],
+                ['name' => 'Delphine Ewing', 'email' => 'fourth@delta.test'],
+                ['name' => 'Eloi Fabre', 'email' => 'fifth@echo.test'],
+            )
+            ->create();
 
         livewire(ListUsers::class)
             ->assertCanSeeTableRecords($users)
@@ -60,7 +69,16 @@ describe('ListUsers', function () {
     it('can search users by email', function () {
         actingAsSuperAdminForUserResource();
 
-        $users = User::factory()->count(5)->create();
+        $users = User::factory()
+            ->count(5)
+            ->sequence(
+                ['name' => 'Aurelia Voss', 'email' => 'first@alpha.test'],
+                ['name' => 'Bastien Corbel', 'email' => 'second@bravo.test'],
+                ['name' => 'Cyrille Danton', 'email' => 'third@charlie.test'],
+                ['name' => 'Delphine Ewing', 'email' => 'fourth@delta.test'],
+                ['name' => 'Eloi Fabre', 'email' => 'fifth@echo.test'],
+            )
+            ->create();
 
         livewire(ListUsers::class)
             ->assertCanSeeTableRecords($users)

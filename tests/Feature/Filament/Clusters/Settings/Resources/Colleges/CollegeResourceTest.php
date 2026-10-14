@@ -46,7 +46,14 @@ describe('ListColleges', function () {
     it('can search colleges by name', function () {
         actingAsSuperAdminForCollegeResource();
 
-        $colleges = College::factory()->count(3)->create();
+        $colleges = College::factory()
+            ->count(3)
+            ->sequence(
+                ['name' => 'Bravo College'],
+                ['name' => 'Charlie College'],
+                ['name' => 'Alpha College'],
+            )
+            ->create();
 
         livewire(ListColleges::class)
             ->searchTable($colleges->first()->name)
@@ -57,7 +64,14 @@ describe('ListColleges', function () {
     it('can sort colleges by name', function () {
         actingAsSuperAdminForCollegeResource();
 
-        $colleges = College::factory()->count(3)->create();
+        $colleges = College::factory()
+            ->count(3)
+            ->sequence(
+                ['name' => 'Bravo College'],
+                ['name' => 'Charlie College'],
+                ['name' => 'Alpha College'],
+            )
+            ->create();
 
         livewire(ListColleges::class)
             ->sortTable('name')

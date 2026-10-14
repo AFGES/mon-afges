@@ -28,13 +28,7 @@ it('forbids a user without permissions from listing records', function (string $
     'colleges' => ListColleges::class,
     'democratic time types' => ListDemocraticTimeTypes::class,
     'organizations' => ListOrganizations::class,
+    'proxies' => ListProxies::class,
     'users' => ListUsers::class,
     'volunteers' => ListVolunteers::class,
 ]);
-
-it('forbids a user without permissions from listing proxies', function () {
-    actingAs(User::factory()->create());
-
-    livewire(ListProxies::class)
-        ->assertForbidden();
-})->todo('App bug: no ProxyPolicy exists, so any panel user can list proxies');

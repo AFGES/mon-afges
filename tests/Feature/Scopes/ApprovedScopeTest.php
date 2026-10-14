@@ -21,7 +21,7 @@ test('returns only approved records by default', function (string $model) {
     expect($visibleIds->all())->toBe([$approved->id]);
 })->with('models with the approved scope');
 
-test('returns records of every status once the scope is removed', function (string $model) {
+test('includes records of every status when the approved scope is removed', function (string $model) {
     $model::factory()->pending()->create();
     $model::factory()->rejected()->create();
     $model::factory()->approved()->create();

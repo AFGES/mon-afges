@@ -87,13 +87,13 @@ it('is rejected with the reason, the rejecter and the rejection time', function 
         ->and($proxy->rejection_reason)->toBe('Invalid proxy request');
 });
 
-it('cannot be approved twice', function (): void {
+it('returns false when approving an already approved proxy', function (): void {
     $proxy = Proxy::factory()->approved()->create();
 
     expect($proxy->approve(User::factory()->create()->id))->toBeFalse();
 });
 
-it('cannot be rejected twice', function (): void {
+it('returns false when rejecting an already rejected proxy', function (): void {
     $proxy = Proxy::factory()->rejected()->create();
 
     expect($proxy->reject('Another reason', User::factory()->create()->id))->toBeFalse();

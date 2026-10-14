@@ -113,7 +113,7 @@ test('reads delegate dates without time but volunteer dates with time', function
         ->and($volunteer->refresh()->started_at->toDateTimeString())->toBe('2026-03-01 15:30:00');
 });
 
-test('currentlyActive scope returns records that have started and have not ended', function () {
+test('returns records that have started and have not ended when filtering currently active', function () {
     $noEndDate = Volunteer::factory()->create([
         'started_at' => now()->subDays(5),
         'ended_at' => null,
@@ -141,7 +141,7 @@ test('currentlyActive scope returns records that have started and have not ended
         ->toEqualCanonicalizing([$noEndDate->id, $withinPeriod->id, $endingToday->id]);
 });
 
-test('ended scope returns only records whose end date is before today', function () {
+test('returns only records whose end date is before today when filtering ended', function () {
     $endedYesterday = Volunteer::factory()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => now()->subDay(),
@@ -169,7 +169,7 @@ test('ended scope returns only records whose end date is before today', function
         ->toEqualCanonicalizing([$endedYesterday->id, $endedLongAgo->id]);
 });
 
-test('notStarted scope returns only records starting after now', function () {
+test('returns only records starting after now when filtering not started', function () {
     $startingTomorrow = Volunteer::factory()->create([
         'started_at' => now()->addDay(),
         'ended_at' => null,
@@ -193,7 +193,7 @@ test('notStarted scope returns only records starting after now', function () {
         ->toEqualCanonicalizing([$startingTomorrow->id, $startingNextWeek->id]);
 });
 
-test('startedBy scope returns records started on or before the given date', function () {
+test('returns records started on or before the given date when filtering started by a date', function () {
     $targetDate = now()->subDays(5);
     $before = Volunteer::factory()->create([
         'started_at' => $targetDate->copy()->subDays(2),
@@ -213,7 +213,7 @@ test('startedBy scope returns records started on or before the given date', func
     expect($results->pluck('id')->all())->toEqualCanonicalizing([$before->id, $onDate->id]);
 });
 
-test('endedAfter scope returns records ended on or after the given date', function () {
+test('returns records ended on or after the given date when filtering ended after a date', function () {
     $targetDate = now()->subDays(5);
     Volunteer::factory()->create([
         'started_at' => now()->subDays(10),
@@ -237,7 +237,7 @@ test('endedAfter scope returns records ended on or after the given date', functi
     expect($results->pluck('id')->all())->toEqualCanonicalizing([$onDate->id, $after->id]);
 });
 
-test('period scopes combine', function () {
+test('returns only records matching every period filter when period filters are chained', function () {
     $match = Volunteer::factory()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => now()->addDays(5),

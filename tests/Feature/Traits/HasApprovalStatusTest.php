@@ -141,7 +141,7 @@ test('reports a new record as pending only', function (string $model) {
         ->isRejected()->toBeFalse();
 })->with('approvable models');
 
-test('pending scope returns only pending records', function () {
+test('returns only pending records when filtering pending', function () {
     $pending1 = Volunteer::factory()->pending()->create();
 
     $pending2 = Volunteer::factory()->pending()->create();
@@ -158,7 +158,7 @@ test('pending scope returns only pending records', function () {
     expect($results->pluck('id'))->not->toContain($approved->id, $rejected->id);
 });
 
-test('approved scope returns only approved records', function () {
+test('returns only approved records when filtering approved', function () {
     $approved1 = Volunteer::factory()->approved()->create();
     $approved2 = Volunteer::factory()->approved()->create();
 
@@ -174,7 +174,7 @@ test('approved scope returns only approved records', function () {
     expect($results->pluck('id'))->not->toContain($pending->id, $rejected->id);
 });
 
-test('rejected scope returns only rejected records', function () {
+test('returns only rejected records when filtering rejected', function () {
     $rejected1 = Volunteer::factory()->rejected()->create();
     $rejected2 = Volunteer::factory()->rejected()->create();
 
@@ -190,7 +190,7 @@ test('rejected scope returns only rejected records', function () {
     expect($results->pluck('id'))->not->toContain($pending->id, $approved->id);
 });
 
-test('withApprovalStatus scope returns only records with the given status', function () {
+test('returns only records with the given status when filtering by approval status', function () {
     $pending = Volunteer::factory()->pending()->create();
     $approved = Volunteer::factory()->approved()->create();
     $rejected = Volunteer::factory()->rejected()->create();
@@ -217,7 +217,7 @@ test('withApprovalStatus scope returns only records with the given status', func
     expect($rejectedResults->first()->id)->toBe($rejected->id);
 });
 
-test('approvedBy scope returns only records approved by the given user', function () {
+test('returns only records approved by the given user when filtering approved by a user', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
@@ -245,7 +245,7 @@ test('approvedBy scope returns only records approved by the given user', functio
     expect($results->pluck('id'))->not->toContain($approvedByUser2->id, $rejectedByUser1->id);
 });
 
-test('rejectedBy scope returns only records rejected by the given user', function () {
+test('returns only records rejected by the given user when filtering rejected by a user', function () {
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
 
@@ -273,7 +273,7 @@ test('rejectedBy scope returns only records rejected by the given user', functio
     expect($results->pluck('id'))->not->toContain($rejectedByUser2->id, $approvedByUser1->id);
 });
 
-test('approval scope combines with other query constraints', function () {
+test('returns only records matching both the approval status and other query constraints', function () {
     $org1 = Organization::factory()->create();
     $org2 = Organization::factory()->create();
 
@@ -298,7 +298,7 @@ test('approval scope combines with other query constraints', function () {
     expect($results->first()->id)->toBe($approved->id);
 });
 
-test('approval scope combines with the currentlyActive scope', function () {
+test('returns only records matching both the approval status and the currently active period', function () {
     travelTo('2026-03-15 12:00:00');
     $currentApproved = Volunteer::factory()->approved()->create([
         'started_at' => now()->subDays(5),
@@ -322,7 +322,7 @@ test('approval scope combines with the currentlyActive scope', function () {
     expect($results->first()->id)->toBe($currentApproved->id);
 });
 
-test('approvedBy scope accepts the user id as a string', function () {
+test('returns records approved by the user when the user id is given as a string', function () {
     $user = User::factory()->create();
 
     $approved = Volunteer::factory()->approved()->create([
@@ -337,7 +337,7 @@ test('approvedBy scope accepts the user id as a string', function () {
     expect($results->first()->id)->toBe($approved->id);
 });
 
-test('rejectedBy scope accepts the user id as a string', function () {
+test('returns records rejected by the user when the user id is given as a string', function () {
     $user = User::factory()->create();
 
     $rejected = Volunteer::factory()->rejected()->create([

@@ -7,7 +7,7 @@ use App\Models\Volunteer;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-test('volunteer policy allows user to terminate their own approved active mandate', function () {
+test('allows a user to terminate their own approved active volunteer mandate', function () {
     $user = User::factory()->create();
     $volunteer = Volunteer::factory()->approved()->create([
         'user_id' => $user->id,
@@ -17,7 +17,7 @@ test('volunteer policy allows user to terminate their own approved active mandat
     expect($user->can('terminate', $volunteer))->toBeTrue();
 });
 
-test('volunteer policy denies terminating another users mandate', function () {
+test('forbids terminating the volunteer mandate of another user', function () {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $volunteer = Volunteer::factory()->approved()->create([
@@ -28,7 +28,7 @@ test('volunteer policy denies terminating another users mandate', function () {
     expect($user->can('terminate', $volunteer))->toBeFalse();
 });
 
-test('volunteer policy denies terminating pending mandate', function () {
+test('forbids terminating a pending volunteer mandate', function () {
     $user = User::factory()->create();
     $volunteer = Volunteer::factory()->pending()->create([
         'user_id' => $user->id,
@@ -38,7 +38,7 @@ test('volunteer policy denies terminating pending mandate', function () {
     expect($user->can('terminate', $volunteer))->toBeFalse();
 });
 
-test('volunteer policy denies terminating already ended mandate', function () {
+test('forbids terminating an already ended volunteer mandate', function () {
     $user = User::factory()->create();
     $volunteer = Volunteer::factory()->approved()->create([
         'user_id' => $user->id,
@@ -48,7 +48,7 @@ test('volunteer policy denies terminating already ended mandate', function () {
     expect($user->can('terminate', $volunteer))->toBeFalse();
 });
 
-test('volunteer policy denies terminating rejected mandate', function () {
+test('forbids terminating a rejected volunteer mandate', function () {
     $user = User::factory()->create();
     $volunteer = Volunteer::factory()->rejected()->create([
         'user_id' => $user->id,
@@ -58,7 +58,7 @@ test('volunteer policy denies terminating rejected mandate', function () {
     expect($user->can('terminate', $volunteer))->toBeFalse();
 });
 
-test('volunteer policy allows update only for users holding the update permission', function () {
+test('allows updating a volunteer only for users holding the update permission', function () {
     Permission::create(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
     $approver = User::factory()->create()->givePermissionTo('Update:Volunteer');
     $user = User::factory()->create();
@@ -68,7 +68,7 @@ test('volunteer policy allows update only for users holding the update permissio
         ->and($user->can('update', $volunteer))->toBeFalse();
 });
 
-test('volunteer policy lets a super admin terminate an active mandate of someone else', function () {
+test('allows a super admin to terminate the active volunteer mandate of another user', function () {
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $superAdmin = User::factory()->create()->assignRole('super_admin');
     $volunteer = Volunteer::factory()->approved()->create(['ended_at' => null]);
@@ -77,7 +77,7 @@ test('volunteer policy lets a super admin terminate an active mandate of someone
         ->and($superAdmin->can('update', $volunteer))->toBeTrue();
 });
 
-test('volunteer policy denies a super admin terminating an already ended mandate', function () {
+test('forbids a super admin from terminating an already ended volunteer mandate', function () {
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $superAdmin = User::factory()->create()->assignRole('super_admin');
     $volunteer = Volunteer::factory()->approved()->create(['ended_at' => now()->subDays(5)]);

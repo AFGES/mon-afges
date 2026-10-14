@@ -7,7 +7,7 @@ use App\Models\User;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-test('delegate policy allows user to terminate their own approved active mandate', function () {
+test('allows a user to terminate their own approved active delegate mandate', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->approved()->create([
         'user_id' => $user->id,
@@ -17,7 +17,7 @@ test('delegate policy allows user to terminate their own approved active mandate
     expect($user->can('terminate', $delegate))->toBeTrue();
 });
 
-test('delegate policy denies terminating another users mandate', function () {
+test('forbids terminating the delegate mandate of another user', function () {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $delegate = Delegate::factory()->approved()->create([
@@ -28,7 +28,7 @@ test('delegate policy denies terminating another users mandate', function () {
     expect($user->can('terminate', $delegate))->toBeFalse();
 });
 
-test('delegate policy denies terminating pending mandate', function () {
+test('forbids terminating a pending delegate mandate', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->pending()->create([
         'user_id' => $user->id,
@@ -38,7 +38,7 @@ test('delegate policy denies terminating pending mandate', function () {
     expect($user->can('terminate', $delegate))->toBeFalse();
 });
 
-test('delegate policy denies terminating already ended mandate', function () {
+test('forbids terminating an already ended delegate mandate', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->approved()->create([
         'user_id' => $user->id,
@@ -48,7 +48,7 @@ test('delegate policy denies terminating already ended mandate', function () {
     expect($user->can('terminate', $delegate))->toBeFalse();
 });
 
-test('delegate policy denies terminating rejected mandate', function () {
+test('forbids terminating a rejected delegate mandate', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->rejected()->create([
         'user_id' => $user->id,
@@ -58,7 +58,7 @@ test('delegate policy denies terminating rejected mandate', function () {
     expect($user->can('terminate', $delegate))->toBeFalse();
 });
 
-test('delegate policy allows update only for users holding the update permission', function () {
+test('allows updating a delegate only for users holding the update permission', function () {
     Permission::create(['name' => 'Update:Delegate', 'guard_name' => 'web']);
     $approver = User::factory()->create()->givePermissionTo('Update:Delegate');
     $user = User::factory()->create();
@@ -68,7 +68,7 @@ test('delegate policy allows update only for users holding the update permission
         ->and($user->can('update', $delegate))->toBeFalse();
 });
 
-test('delegate policy lets a super admin terminate an active mandate of someone else', function () {
+test('allows a super admin to terminate the active delegate mandate of another user', function () {
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $superAdmin = User::factory()->create()->assignRole('super_admin');
     $delegate = Delegate::factory()->approved()->create(['ended_at' => null]);
@@ -77,7 +77,7 @@ test('delegate policy lets a super admin terminate an active mandate of someone 
         ->and($superAdmin->can('update', $delegate))->toBeTrue();
 });
 
-test('delegate policy denies a super admin terminating an already ended mandate', function () {
+test('forbids a super admin from terminating an already ended delegate mandate', function () {
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $superAdmin = User::factory()->create()->assignRole('super_admin');
     $delegate = Delegate::factory()->approved()->create(['ended_at' => now()->subDays(5)]);

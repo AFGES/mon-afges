@@ -85,6 +85,10 @@ final class AppServiceProvider extends ServiceProvider
         });
 
         Gate::before(function (User $user, string $ability): ?bool {
+            if ($ability === 'terminate') {
+                return null;
+            }
+
             return $user->hasRole('super_admin') ?: null;
         });
     }

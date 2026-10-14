@@ -69,8 +69,9 @@ final class VolunteerPolicy
 
     public function terminate(AuthUser $authUser, Volunteer $volunteer): bool
     {
-        // User can only terminate their own approved volunteer mandates that haven't ended
-        return $volunteer->user_id === $authUser->id
+        $canManageMandate = $volunteer->user_id === $authUser->id || $authUser->hasRole('super_admin');
+
+        return $canManageMandate
             && $volunteer->isApproved()
             && $volunteer->ended_at === null;
     }

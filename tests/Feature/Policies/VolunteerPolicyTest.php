@@ -68,11 +68,19 @@ test('volunteer policy allows update only for users holding the update permissio
         ->and($user->can('update', $volunteer))->toBeFalse();
 });
 
-test('volunteer policy lets a super admin do anything, even terminating an already ended mandate of someone else', function () {
+test('volunteer policy lets a super admin terminate an active mandate of someone else', function () {
+    Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
+    $superAdmin = User::factory()->create()->assignRole('super_admin');
+    $volunteer = Volunteer::factory()->approved()->create(['ended_at' => null]);
+
+    expect($superAdmin->can('terminate', $volunteer))->toBeTrue()
+        ->and($superAdmin->can('update', $volunteer))->toBeTrue();
+});
+
+test('volunteer policy denies a super admin terminating an already ended mandate', function () {
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $superAdmin = User::factory()->create()->assignRole('super_admin');
     $volunteer = Volunteer::factory()->approved()->create(['ended_at' => now()->subDays(5)]);
 
-    expect($superAdmin->can('terminate', $volunteer))->toBeTrue()
-        ->and($superAdmin->can('update', $volunteer))->toBeTrue();
+    expect($superAdmin->can('terminate', $volunteer))->toBeFalse();
 });

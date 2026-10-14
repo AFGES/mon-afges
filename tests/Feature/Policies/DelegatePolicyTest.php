@@ -68,11 +68,19 @@ test('delegate policy allows update only for users holding the update permission
         ->and($user->can('update', $delegate))->toBeFalse();
 });
 
-test('delegate policy lets a super admin do anything, even terminating an already ended mandate of someone else', function () {
+test('delegate policy lets a super admin terminate an active mandate of someone else', function () {
+    Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
+    $superAdmin = User::factory()->create()->assignRole('super_admin');
+    $delegate = Delegate::factory()->approved()->create(['ended_at' => null]);
+
+    expect($superAdmin->can('terminate', $delegate))->toBeTrue()
+        ->and($superAdmin->can('update', $delegate))->toBeTrue();
+});
+
+test('delegate policy denies a super admin terminating an already ended mandate', function () {
     Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
     $superAdmin = User::factory()->create()->assignRole('super_admin');
     $delegate = Delegate::factory()->approved()->create(['ended_at' => now()->subDays(5)]);
 
-    expect($superAdmin->can('terminate', $delegate))->toBeTrue()
-        ->and($superAdmin->can('update', $delegate))->toBeTrue();
+    expect($superAdmin->can('terminate', $delegate))->toBeFalse();
 });

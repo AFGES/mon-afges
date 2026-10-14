@@ -69,8 +69,9 @@ final class DelegatePolicy
 
     public function terminate(AuthUser $authUser, Delegate $delegate): bool
     {
-        // User can only terminate their own approved delegate mandates that haven't ended
-        return $delegate->user_id === $authUser->id
+        $canManageMandate = $delegate->user_id === $authUser->id || $authUser->hasRole('super_admin');
+
+        return $canManageMandate
             && $delegate->isApproved()
             && $delegate->ended_at === null;
     }

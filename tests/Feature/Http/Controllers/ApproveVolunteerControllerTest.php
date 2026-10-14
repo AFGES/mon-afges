@@ -73,3 +73,12 @@ it('returns 404 for an unknown volunteer', function () {
 
     $response->assertNotFound();
 });
+
+it('redirects a guest opening a valid signed url to the login page and leaves the volunteer pending', function () {
+    $volunteer = Volunteer::factory()->create();
+
+    $response = $this->get(URL::signedRoute('volunteers.approve', ['volunteer' => $volunteer->id]));
+
+    $response->assertRedirect(route('filament.root.auth.login'));
+    expect($volunteer->refresh()->isPending())->toBeTrue();
+});

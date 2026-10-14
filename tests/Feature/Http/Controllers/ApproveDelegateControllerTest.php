@@ -73,3 +73,12 @@ it('returns 404 for an unknown delegate', function () {
 
     $response->assertNotFound();
 });
+
+it('redirects a guest opening a valid signed url to the login page and leaves the delegate pending', function () {
+    $delegate = Delegate::factory()->create();
+
+    $response = $this->get(URL::signedRoute('delegates.approve', ['delegate' => $delegate->id]));
+
+    $response->assertRedirect(route('filament.root.auth.login'));
+    expect($delegate->refresh()->isPending())->toBeTrue();
+});

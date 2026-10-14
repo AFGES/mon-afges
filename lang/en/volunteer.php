@@ -47,6 +47,26 @@ return [
             'title' => 'Registration pending approval',
             'body' => 'Your volunteer registration is pending approval. You will be notified once it has been reviewed.',
         ],
+        'approval_requested' => [
+            'subject' => 'New volunteer mandate approval request',
+            'greeting' => 'Hello :name,',
+            'intro' => 'A new volunteer mandate request requires your approval.',
+            'applicant' => 'Applicant: :name',
+            'organization' => 'Organization: :organization',
+            'position' => 'Position: :position',
+            'started_at' => 'Start date: :date',
+            'approve_action' => 'Approve',
+            'reject_action' => 'Reject',
+            'view_details' => 'View details: :url',
+            'outro' => 'Please process this request as soon as possible.',
+        ],
+        'approval_approved' => [
+            'subject' => 'Your volunteer mandate application has been approved',
+            'greeting' => 'Hello :name,',
+            'intro' => 'We are pleased to inform you that your volunteer mandate application has been approved.',
+            'body' => 'You can now access the features reserved for volunteers.',
+            'outro' => 'Thank you for your commitment.',
+        ],
     ],
 
     'stats' => [

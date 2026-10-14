@@ -51,6 +51,10 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function addDelegate(Delegate $delegate): bool
     {
+        if (! $this->isGoogleWorkspaceConfigured()) {
+            return false;
+        }
+
         if (! $this->shouldSync($delegate)) {
             Log::warning('Cannot sync delegate to Google Workspace: requirements not met', [
                 'delegate_id' => $delegate->id,
@@ -81,6 +85,10 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function removeDelegate(Delegate $delegate): bool
     {
+        if (! $this->isGoogleWorkspaceConfigured()) {
+            return false;
+        }
+
         if (! $delegate->email) {
             Log::warning('Cannot remove delegate from Google Workspace: email missing', [
                 'delegate_id' => $delegate->id,
@@ -153,6 +161,15 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function syncAll(bool $dryRun = false): array
     {
+        if (! $this->isGoogleWorkspaceConfigured()) {
+            Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
+
+            return array_fill_keys(
+                ['already_in_group', 'added', 'removed', 'failed_to_add', 'failed_to_remove'],
+                0,
+            );
+        }
+
         $activeDelegateEmails = $this->getActiveDelegateEmails();
 
         $stats = [
@@ -214,5 +231,10 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         }
 
         return $stats;
+    }
+
+    private function isGoogleWorkspaceConfigured(): bool
+    {
+        return ! $this->googleWorkspaceService instanceof UnconfiguredGoogleWorkspaceService;
     }
 }

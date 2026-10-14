@@ -6,6 +6,8 @@ use App\Models\Delegate;
 use App\Models\User;
 use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\GoogleWorkspaceServiceInterface;
+use App\Services\UnconfiguredGoogleWorkspaceService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Mockery\MockInterface;
 
@@ -247,5 +249,39 @@ describe('syncAll', function () {
             'failed_to_add' => 0,
             'failed_to_remove' => 0,
         ]);
+    });
+});
+
+describe('unconfigured Google Workspace', function () {
+    it('skips add and remove without queries or warnings', function () {
+        Log::spy();
+        $delegate = Delegate::factory()->verified()->make(['email' => 'delegate@afges.org', 'ended_at' => null]);
+        $service = new DelegateGoogleWorkspaceSyncService(new UnconfiguredGoogleWorkspaceService);
+
+        DB::enableQueryLog();
+        $added = $service->addDelegate($delegate);
+        $removed = $service->removeDelegate($delegate);
+
+        expect($added)->toBeFalse()
+            ->and($removed)->toBeFalse()
+            ->and(DB::getQueryLog())->toBeEmpty();
+        Log::shouldNotHaveReceived('warning');
+    });
+
+    it('returns zeroed stats with a single warning when syncing everything', function () {
+        Log::spy();
+        Delegate::factory()->approved()->verified()->create(['email' => 'delegate@afges.org', 'ended_at' => null]);
+        $service = new DelegateGoogleWorkspaceSyncService(new UnconfiguredGoogleWorkspaceService);
+
+        $stats = $service->syncAll();
+
+        expect($stats)->toBe([
+            'already_in_group' => 0,
+            'added' => 0,
+            'removed' => 0,
+            'failed_to_add' => 0,
+            'failed_to_remove' => 0,
+        ]);
+        Log::shouldHaveReceived('warning')->once();
     });
 });

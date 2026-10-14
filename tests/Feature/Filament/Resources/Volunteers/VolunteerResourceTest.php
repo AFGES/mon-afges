@@ -30,14 +30,14 @@ function actingAsSuperAdminForVolunteerResource(): User
 }
 
 describe('ListVolunteers', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForVolunteerResource();
 
         livewire(ListVolunteers::class)
             ->assertOk();
     });
 
-    it('can list volunteers', function () {
+    it('lists the existing volunteers', function () {
         actingAsSuperAdminForVolunteerResource();
 
         $volunteers = Volunteer::factory()->count(5)->approved()->create();
@@ -61,7 +61,7 @@ describe('ListVolunteers', function () {
             ->assertCanNotSeeTableRecords([$pendingVolunteer]);
     });
 
-    it('can search volunteers', function () {
+    it('lists only volunteers matching the searched term', function () {
         actingAsSuperAdminForVolunteerResource();
 
         $volunteers = Volunteer::factory()
@@ -85,14 +85,14 @@ describe('ListVolunteers', function () {
 });
 
 describe('CreateVolunteer', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForVolunteerResource();
 
         livewire(CreateVolunteer::class)
             ->assertOk();
     });
 
-    it('can create a volunteer', function () {
+    it('creates a volunteer from valid form data', function () {
         actingAsSuperAdminForVolunteerResource();
 
         $user = User::factory()->create();
@@ -119,7 +119,7 @@ describe('CreateVolunteer', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on creation', function (array $data, array $errors) {
         actingAsSuperAdminForVolunteerResource();
 
         $user = User::factory()->create();
@@ -155,7 +155,7 @@ describe('CreateVolunteer', function () {
 });
 
 describe('EditVolunteer', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForVolunteerResource();
 
         $volunteer = Volunteer::factory()->approved()->create();
@@ -169,7 +169,7 @@ describe('EditVolunteer', function () {
             ]);
     });
 
-    it('can update a volunteer', function () {
+    it('updates a volunteer from valid form data', function () {
         actingAsSuperAdminForVolunteerResource();
 
         $volunteer = Volunteer::factory()->approved()->create();
@@ -190,7 +190,7 @@ describe('EditVolunteer', function () {
         ]);
     });
 
-    it('can soft delete a volunteer', function () {
+    it('soft deletes the volunteer when the delete action is called', function () {
         actingAsSuperAdminForVolunteerResource();
 
         $volunteer = Volunteer::factory()->approved()->create();

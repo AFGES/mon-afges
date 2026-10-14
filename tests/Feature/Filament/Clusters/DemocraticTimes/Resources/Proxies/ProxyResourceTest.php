@@ -32,14 +32,14 @@ function actingAsSuperAdminForProxyResource(): User
 }
 
 describe('ListProxies', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForProxyResource();
 
         livewire(ListProxies::class)
             ->assertOk();
     });
 
-    it('can list proxies', function () {
+    it('lists the existing proxies', function () {
         actingAsSuperAdminForProxyResource();
 
         $proxies = Proxy::factory()->count(3)->approved()->create();
@@ -68,14 +68,14 @@ describe('ListProxies', function () {
 });
 
 describe('CreateProxy', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForProxyResource();
 
         livewire(CreateProxy::class)
             ->assertOk();
     });
 
-    it('can create a proxy with valid data', function () {
+    it('creates a proxy from valid form data', function () {
         actingAsSuperAdminForProxyResource();
         $this->freezeSecond();
 
@@ -109,7 +109,7 @@ describe('CreateProxy', function () {
         ]);
     });
 
-    it('can create a proxy without start and end times', function () {
+    it('creates a proxy without start and end times from valid form data', function () {
         actingAsSuperAdminForProxyResource();
 
         $college = College::factory()->create([
@@ -138,7 +138,7 @@ describe('CreateProxy', function () {
         ]);
     });
 
-    it('validates required delegator_seat_id', function () {
+    it('rejects the proxy when the delegator seat is missing', function () {
         actingAsSuperAdminForProxyResource();
 
         $college = College::factory()->create(['can_vote' => true]);
@@ -160,7 +160,7 @@ describe('CreateProxy', function () {
             ->assertNoRedirect();
     });
 
-    it('validates required proxy_holder_seat_id', function () {
+    it('rejects the proxy when the proxy holder seat is missing', function () {
         actingAsSuperAdminForProxyResource();
 
         $college = College::factory()->create(['can_vote' => true]);
@@ -180,7 +180,7 @@ describe('CreateProxy', function () {
             ->assertNoRedirect();
     });
 
-    it('validates required democratic_time_session_id', function () {
+    it('rejects the proxy when the session is missing', function () {
         actingAsSuperAdminForProxyResource();
 
         $college = College::factory()->create(['can_vote' => true]);
@@ -200,7 +200,7 @@ describe('CreateProxy', function () {
             ->assertNoRedirect();
     });
 
-    it('validates that proxy holder seat must be from same college when required', function () {
+    it('rejects a proxy holder seat from another college when the college requires the same college', function () {
         actingAsSuperAdminForProxyResource();
 
         $college1 = College::factory()->create([
@@ -229,7 +229,7 @@ describe('CreateProxy', function () {
             ->assertNoRedirect();
     });
 
-    it('allows cross-college proxy when not required to be same college', function () {
+    it('accepts a proxy holder seat from another college when the college does not require the same college', function () {
         actingAsSuperAdminForProxyResource();
 
         $college1 = College::factory()->create([
@@ -262,7 +262,7 @@ describe('CreateProxy', function () {
         ]);
     });
 
-    it('validates that proxy holder college can vote for cross-college proxies', function () {
+    it('rejects a proxy holder seat from a college that cannot vote for cross-college proxies', function () {
         actingAsSuperAdminForProxyResource();
 
         $college1 = College::factory()->create([
@@ -292,7 +292,7 @@ describe('CreateProxy', function () {
 });
 
 describe('EditProxy', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForProxyResource();
 
         $proxy = Proxy::factory()->approved()->create();
@@ -308,7 +308,7 @@ describe('EditProxy', function () {
             ]);
     });
 
-    it('can update a proxy', function () {
+    it('updates a proxy from valid form data', function () {
         actingAsSuperAdminForProxyResource();
 
         $college = College::factory()->create([
@@ -337,7 +337,7 @@ describe('EditProxy', function () {
         ]);
     });
 
-    it('can update proxy start and end times', function () {
+    it('updates the proxy start and end times from valid form data', function () {
         actingAsSuperAdminForProxyResource();
         $this->freezeSecond();
 
@@ -374,7 +374,7 @@ describe('EditProxy', function () {
             ->and($proxy->ended_at)->toEqual($newEndTime);
     });
 
-    it('can delete a proxy', function () {
+    it('deletes a proxy when the delete action is called', function () {
         actingAsSuperAdminForProxyResource();
 
         $proxy = Proxy::factory()->approved()->create();
@@ -388,7 +388,7 @@ describe('EditProxy', function () {
         assertModelMissing($proxy);
     });
 
-    it('validates same college rule when updating proxy holder seat', function () {
+    it('rejects updating the proxy holder seat to another college when the college requires the same college', function () {
         actingAsSuperAdminForProxyResource();
 
         $college1 = College::factory()->create([
@@ -420,7 +420,7 @@ describe('EditProxy', function () {
             ->assertNotNotified();
     });
 
-    it('validates required fields when updating', function (array $data, array $errors) {
+    it('rejects the update when a required field is missing', function (array $data, array $errors) {
         actingAsSuperAdminForProxyResource();
 
         $proxy = Proxy::factory()->approved()->create();

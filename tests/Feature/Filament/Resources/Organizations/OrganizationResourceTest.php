@@ -28,14 +28,14 @@ function actingAsSuperAdminForOrganizationResource(): User
 }
 
 describe('ListOrganizations', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForOrganizationResource();
 
         livewire(ListOrganizations::class)
             ->assertOk();
     });
 
-    it('can list organizations', function () {
+    it('lists the existing organizations', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $organizations = Organization::factory()->count(5)->create();
@@ -45,7 +45,7 @@ describe('ListOrganizations', function () {
             ->assertCanSeeTableRecords($organizations);
     });
 
-    it('can search organizations by short name', function () {
+    it('lists only organizations matching the searched short name', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $organizations = Organization::factory()
@@ -66,7 +66,7 @@ describe('ListOrganizations', function () {
             ->assertCanNotSeeTableRecords($organizations->skip(1));
     });
 
-    it('can search organizations by legal name', function () {
+    it('lists only organizations matching the searched legal name', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $organizations = Organization::factory()
@@ -89,14 +89,14 @@ describe('ListOrganizations', function () {
 });
 
 describe('CreateOrganization', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForOrganizationResource();
 
         livewire(CreateOrganization::class)
             ->assertOk();
     });
 
-    it('can create an organization', function () {
+    it('creates an organization from valid form data', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $newOrgData = Organization::factory()->make();
@@ -117,7 +117,7 @@ describe('CreateOrganization', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on creation', function (array $data, array $errors) {
         actingAsSuperAdminForOrganizationResource();
 
         $newOrgData = Organization::factory()->make();
@@ -163,7 +163,7 @@ describe('CreateOrganization', function () {
 });
 
 describe('EditOrganization', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $organization = Organization::factory()->create();
@@ -178,7 +178,7 @@ describe('EditOrganization', function () {
             ]);
     });
 
-    it('can update an organization', function () {
+    it('updates an organization from valid form data', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $organization = Organization::factory()->create();
@@ -201,7 +201,7 @@ describe('EditOrganization', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on edit', function (array $data, array $errors) {
         actingAsSuperAdminForOrganizationResource();
 
         $organization = Organization::factory()->create();
@@ -225,7 +225,7 @@ describe('EditOrganization', function () {
         '`legal_name` is max 255 characters' => [['legal_name' => Str::random(256)], ['legal_name' => 'max']],
     ]);
 
-    it('can soft delete an organization', function () {
+    it('soft deletes the organization when the delete action is called', function () {
         actingAsSuperAdminForOrganizationResource();
 
         $organization = Organization::factory()->create();

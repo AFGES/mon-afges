@@ -28,14 +28,14 @@ function actingAsSuperAdminForUserResource(): User
 }
 
 describe('ListUsers', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForUserResource();
 
         livewire(ListUsers::class)
             ->assertOk();
     });
 
-    it('can list users', function () {
+    it('lists the existing users', function () {
         actingAsSuperAdminForUserResource();
 
         $users = User::factory()->count(5)->create();
@@ -45,7 +45,7 @@ describe('ListUsers', function () {
             ->assertCanSeeTableRecords($users);
     });
 
-    it('can search users by name', function () {
+    it('lists only users matching the searched name', function () {
         actingAsSuperAdminForUserResource();
 
         $users = User::factory()
@@ -66,7 +66,7 @@ describe('ListUsers', function () {
             ->assertCanNotSeeTableRecords($users->skip(1));
     });
 
-    it('can search users by email', function () {
+    it('lists only users matching the searched email', function () {
         actingAsSuperAdminForUserResource();
 
         $users = User::factory()
@@ -89,14 +89,14 @@ describe('ListUsers', function () {
 });
 
 describe('CreateUser', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForUserResource();
 
         livewire(CreateUser::class)
             ->assertOk();
     });
 
-    it('can create a user', function () {
+    it('creates a user from valid form data', function () {
         actingAsSuperAdminForUserResource();
 
         $newUserData = User::factory()->make();
@@ -117,7 +117,7 @@ describe('CreateUser', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on creation', function (array $data, array $errors) {
         actingAsSuperAdminForUserResource();
 
         livewire(CreateUser::class)
@@ -156,7 +156,7 @@ describe('CreateUser', function () {
 });
 
 describe('EditUser', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForUserResource();
 
         $user = User::factory()->create();
@@ -171,7 +171,7 @@ describe('EditUser', function () {
             ]);
     });
 
-    it('can update a user', function () {
+    it('updates a user from valid form data', function () {
         actingAsSuperAdminForUserResource();
 
         $user = User::factory()->create();
@@ -194,7 +194,7 @@ describe('EditUser', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on edit', function (array $data, array $errors) {
         actingAsSuperAdminForUserResource();
 
         $user = User::factory()->create();
@@ -212,7 +212,7 @@ describe('EditUser', function () {
         '`email` is required' => [['name' => 'Test User', 'email' => null], ['email' => 'required']],
     ]);
 
-    it('can delete a user', function () {
+    it('deletes a user when the delete action is called', function () {
         actingAsSuperAdminForUserResource();
 
         $user = User::factory()->create();

@@ -27,14 +27,14 @@ function actingAsSuperAdminForCollegeResource(): User
 }
 
 describe('ListColleges', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForCollegeResource();
 
         livewire(ListColleges::class)
             ->assertOk();
     });
 
-    it('can list colleges', function () {
+    it('lists the existing colleges', function () {
         actingAsSuperAdminForCollegeResource();
 
         $colleges = College::factory()->count(3)->create();
@@ -43,7 +43,7 @@ describe('ListColleges', function () {
             ->assertCanSeeTableRecords($colleges);
     });
 
-    it('can search colleges by name', function () {
+    it('lists only colleges matching the searched name', function () {
         actingAsSuperAdminForCollegeResource();
 
         $colleges = College::factory()
@@ -61,7 +61,7 @@ describe('ListColleges', function () {
             ->assertCanNotSeeTableRecords($colleges->skip(1));
     });
 
-    it('can sort colleges by name', function () {
+    it('orders colleges by name when sorting that column', function () {
         actingAsSuperAdminForCollegeResource();
 
         $colleges = College::factory()
@@ -82,14 +82,14 @@ describe('ListColleges', function () {
 });
 
 describe('CreateCollege', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForCollegeResource();
 
         livewire(CreateCollege::class)
             ->assertOk();
     });
 
-    it('can create a college', function () {
+    it('creates a college from valid form data', function () {
         actingAsSuperAdminForCollegeResource();
 
         $collegeName = fake()->unique()->word();
@@ -110,7 +110,7 @@ describe('CreateCollege', function () {
         ]);
     });
 
-    it('validates required fields', function (array $data, array $errors) {
+    it('rejects the form when a required field is missing', function (array $data, array $errors) {
         actingAsSuperAdminForCollegeResource();
 
         livewire(CreateCollege::class)
@@ -130,7 +130,7 @@ describe('CreateCollege', function () {
         '`require_same_college_for_proxy` is required' => [['require_same_college_for_proxy' => null], ['require_same_college_for_proxy' => 'required']],
     ]);
 
-    it('validates name uniqueness', function () {
+    it('rejects a college name that already exists', function () {
         actingAsSuperAdminForCollegeResource();
 
         $existingCollege = College::factory()->create();
@@ -171,7 +171,7 @@ describe('CreateCollege', function () {
 });
 
 describe('EditCollege', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForCollegeResource();
 
         $college = College::factory()->create();
@@ -186,7 +186,7 @@ describe('EditCollege', function () {
             ]);
     });
 
-    it('can update a college', function () {
+    it('updates a college from valid form data', function () {
         actingAsSuperAdminForCollegeResource();
 
         $college = College::factory()->create();
@@ -207,7 +207,7 @@ describe('EditCollege', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on edit', function (array $data, array $errors) {
         actingAsSuperAdminForCollegeResource();
 
         $college = College::factory()->create();

@@ -32,7 +32,7 @@ function actingAsSuperAdminForSessionRelationManagers(): User
 }
 
 describe('ProxiesRelationManager', function () {
-    it('can render the relation manager', function () {
+    it('renders the relation manager', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -43,7 +43,7 @@ describe('ProxiesRelationManager', function () {
             ->assertOk();
     });
 
-    it('can list proxies for a session', function () {
+    it('lists only the proxies belonging to the session', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -57,7 +57,7 @@ describe('ProxiesRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherSessionProxy]);
     });
 
-    it('can create a proxy for a session', function () {
+    it('creates a proxy for a session from valid form data', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -98,7 +98,7 @@ describe('ProxiesRelationManager', function () {
 });
 
 describe('SessionSignInsRelationManager', function () {
-    it('can render the relation manager', function () {
+    it('renders the relation manager', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -109,7 +109,7 @@ describe('SessionSignInsRelationManager', function () {
             ->assertOk();
     });
 
-    it('can list sign-ins for a session', function () {
+    it('lists only the sign-ins belonging to the session', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -123,7 +123,7 @@ describe('SessionSignInsRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherSessionSignIn]);
     });
 
-    it('can create a sign-in for a session', function () {
+    it('creates a sign-in for a session from valid form data', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -148,7 +148,7 @@ describe('SessionSignInsRelationManager', function () {
         ]);
     });
 
-    it('can filter signed-in delegates', function () {
+    it('lists only open sign-ins when filtering on signed in', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -169,7 +169,7 @@ describe('SessionSignInsRelationManager', function () {
             ->assertCanNotSeeTableRecords([$signedOut]);
     });
 
-    it('can filter signed-out delegates', function () {
+    it('lists only closed sign-ins when filtering on signed out', function () {
         actingAsSuperAdminForSessionRelationManagers();
 
         $session = DemocraticTimeSession::factory()->create();

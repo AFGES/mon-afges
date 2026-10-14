@@ -30,14 +30,14 @@ function actingAsSuperAdminForSessionResource(): User
 }
 
 describe('ListSessions', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForSessionResource();
 
         Livewire::test(ListSessions::class)
             ->assertOk();
     });
 
-    it('can list sessions', function () {
+    it('lists the existing sessions', function () {
         actingAsSuperAdminForSessionResource();
 
         $sessions = DemocraticTimeSession::factory()->count(3)->create();
@@ -65,7 +65,7 @@ describe('ListSessions', function () {
             ->assertTableColumnFormattedStateSet('sign_in_status', 'not opened yet', $session);
     });
 
-    it('can search sessions by location', function () {
+    it('lists only sessions matching the searched location', function () {
         actingAsSuperAdminForSessionResource();
 
         $sessions = DemocraticTimeSession::factory()
@@ -83,7 +83,7 @@ describe('ListSessions', function () {
             ->assertCanNotSeeTableRecords($sessions->skip(1));
     });
 
-    it('can search sessions by democratic time type name', function () {
+    it('lists only sessions matching the searched democratic time type name', function () {
         actingAsSuperAdminForSessionResource();
 
         $type = DemocraticTimeType::factory()->create(['name' => 'Special Council Meeting']);
@@ -101,7 +101,7 @@ describe('ListSessions', function () {
             ->assertCanNotSeeTableRecords($otherSessions);
     });
 
-    it('can sort sessions by ended_at', function () {
+    it('orders sessions by ended_at when sorting that column', function () {
         actingAsSuperAdminForSessionResource();
 
         $middle = DemocraticTimeSession::factory()->create(['started_at' => '2026-01-01 08:00:00', 'ended_at' => '2026-03-01 10:00:00']);
@@ -115,7 +115,7 @@ describe('ListSessions', function () {
             ->assertCanSeeTableRecords([$latest, $middle, $earliest], inOrder: true);
     });
 
-    it('can sort sessions by started_at', function () {
+    it('orders sessions by started_at when sorting that column', function () {
         actingAsSuperAdminForSessionResource();
 
         $middle = DemocraticTimeSession::factory()->create(['started_at' => '2026-03-01 10:00:00', 'ended_at' => '2026-03-01 12:00:00']);
@@ -131,14 +131,14 @@ describe('ListSessions', function () {
 });
 
 describe('CreateSession', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForSessionResource();
 
         Livewire::test(CreateSession::class)
             ->assertOk();
     });
 
-    it('can create a session', function () {
+    it('creates a session from valid form data', function () {
         actingAsSuperAdminForSessionResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -170,7 +170,7 @@ describe('CreateSession', function () {
         ]);
     });
 
-    it('can create a session without ended_at', function () {
+    it('creates a session without an end date from valid form data', function () {
         actingAsSuperAdminForSessionResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -200,7 +200,7 @@ describe('CreateSession', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on creation', function (array $data, array $errors) {
         actingAsSuperAdminForSessionResource();
 
         $type = DemocraticTimeType::factory()->create();
@@ -255,7 +255,7 @@ describe('CreateSession', function () {
 });
 
 describe('EditSession', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForSessionResource();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -270,7 +270,7 @@ describe('EditSession', function () {
             ]);
     });
 
-    it('can update a session', function () {
+    it('updates a session from valid form data', function () {
         actingAsSuperAdminForSessionResource();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -294,7 +294,7 @@ describe('EditSession', function () {
         ]);
     });
 
-    it('can update session dates', function () {
+    it('updates the session dates from valid form data', function () {
         actingAsSuperAdminForSessionResource();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -317,7 +317,7 @@ describe('EditSession', function () {
             ->and($session->ended_at->toDateTimeString())->toBe($newEndedAt);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on edit', function (array $data, array $errors) {
         actingAsSuperAdminForSessionResource();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -336,7 +336,7 @@ describe('EditSession', function () {
         '`location` is max 255 characters' => [['location' => Str::random(256)], ['location' => 'max']],
     ]);
 
-    it('can delete a session', function () {
+    it('deletes a session when the delete action is called', function () {
         actingAsSuperAdminForSessionResource();
 
         $session = DemocraticTimeSession::factory()->create();

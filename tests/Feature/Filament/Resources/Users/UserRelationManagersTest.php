@@ -28,7 +28,7 @@ function actingAsSuperAdminForUserRelationManagers(): User
 }
 
 describe('DelegatesRelationManager', function () {
-    it('can render the relation manager', function () {
+    it('renders the relation manager', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -40,7 +40,7 @@ describe('DelegatesRelationManager', function () {
             ->assertOk();
     });
 
-    it('can list delegates for a user', function () {
+    it('lists only the delegates belonging to the user', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -55,7 +55,7 @@ describe('DelegatesRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherUserDelegate]);
     });
 
-    it('can create a delegate for a user', function () {
+    it('creates a delegate for a user from valid form data', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -80,7 +80,7 @@ describe('DelegatesRelationManager', function () {
         ]);
     });
 
-    it('can edit a delegate', function () {
+    it('updates the delegate through the edit table action', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -104,7 +104,7 @@ describe('DelegatesRelationManager', function () {
 });
 
 describe('VolunteersRelationManager', function () {
-    it('can render the relation manager', function () {
+    it('renders the relation manager', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -116,7 +116,7 @@ describe('VolunteersRelationManager', function () {
             ->assertOk();
     });
 
-    it('can list volunteers for a user', function () {
+    it('lists only the volunteers belonging to the user', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -131,7 +131,7 @@ describe('VolunteersRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherUserVolunteer]);
     });
 
-    it('can create a volunteer for a user', function () {
+    it('creates a volunteer for a user from valid form data', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();
@@ -154,7 +154,7 @@ describe('VolunteersRelationManager', function () {
         ]);
     });
 
-    it('can edit a volunteer', function () {
+    it('updates the volunteer through the edit table action', function () {
         actingAsSuperAdminForUserRelationManagers();
 
         $user = User::factory()->create();

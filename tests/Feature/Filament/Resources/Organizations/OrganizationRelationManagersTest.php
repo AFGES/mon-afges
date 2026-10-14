@@ -28,7 +28,7 @@ function actingAsSuperAdminForOrganizationRelationManagers(): User
 }
 
 describe('DelegatesRelationManager', function () {
-    it('can render the relation manager', function () {
+    it('renders the relation manager', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -40,7 +40,7 @@ describe('DelegatesRelationManager', function () {
             ->assertOk();
     });
 
-    it('can list delegates for an organization', function () {
+    it('lists only the delegates belonging to the organization', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -55,7 +55,7 @@ describe('DelegatesRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherOrgDelegate]);
     });
 
-    it('can create a delegate for an organization', function () {
+    it('creates a delegate for an organization from valid form data', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -80,7 +80,7 @@ describe('DelegatesRelationManager', function () {
         ]);
     });
 
-    it('can edit a delegate', function () {
+    it('updates the delegate through the edit table action', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -104,7 +104,7 @@ describe('DelegatesRelationManager', function () {
 });
 
 describe('VolunteersRelationManager', function () {
-    it('can render the relation manager', function () {
+    it('renders the relation manager', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -116,7 +116,7 @@ describe('VolunteersRelationManager', function () {
             ->assertOk();
     });
 
-    it('can list volunteers for an organization', function () {
+    it('lists only the volunteers belonging to the organization', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -131,7 +131,7 @@ describe('VolunteersRelationManager', function () {
             ->assertCanNotSeeTableRecords([$otherOrgVolunteer]);
     });
 
-    it('can create a volunteer for an organization', function () {
+    it('creates a volunteer for an organization from valid form data', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();
@@ -154,7 +154,7 @@ describe('VolunteersRelationManager', function () {
         ]);
     });
 
-    it('can edit a volunteer', function () {
+    it('updates the volunteer through the edit table action', function () {
         actingAsSuperAdminForOrganizationRelationManagers();
 
         $organization = Organization::factory()->create();

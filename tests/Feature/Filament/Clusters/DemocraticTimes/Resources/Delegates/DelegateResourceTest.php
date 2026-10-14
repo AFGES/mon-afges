@@ -63,14 +63,14 @@ function createDelegatesWithDistinctSearchableValues(): Collection
 }
 
 describe('ListDelegates', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForDelegateResource();
 
         livewire(ListDelegates::class)
             ->assertOk();
     });
 
-    it('can list delegates', function () {
+    it('lists the existing delegates', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegates = Delegate::factory()->count(5)->approved()->create();
@@ -93,7 +93,7 @@ describe('ListDelegates', function () {
             ->assertCanNotSeeTableRecords([$pendingDelegate]);
     });
 
-    it('can search delegates by user name', function () {
+    it('lists only delegates matching the searched user name', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegates = createDelegatesWithDistinctSearchableValues();
@@ -104,7 +104,7 @@ describe('ListDelegates', function () {
             ->assertCanNotSeeTableRecords($delegates->skip(1));
     });
 
-    it('can search delegates by email', function () {
+    it('lists only delegates matching the searched email', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegates = createDelegatesWithDistinctSearchableValues();
@@ -115,7 +115,7 @@ describe('ListDelegates', function () {
             ->assertCanNotSeeTableRecords($delegates->skip(1));
     });
 
-    it('can search delegates by organization', function () {
+    it('lists only delegates matching the searched organization', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegates = createDelegatesWithDistinctSearchableValues();
@@ -187,14 +187,14 @@ describe('ListDelegates', function () {
 });
 
 describe('CreateDelegate', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForDelegateResource();
 
         livewire(CreateDelegate::class)
             ->assertOk();
     });
 
-    it('can create a delegate', function () {
+    it('creates a delegate from valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
@@ -221,7 +221,7 @@ describe('CreateDelegate', function () {
         ]);
     });
 
-    it('can create a delegate with minimal data', function () {
+    it('creates a delegate from the minimal valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
@@ -247,7 +247,7 @@ describe('CreateDelegate', function () {
         ]);
     });
 
-    it('validates required fields', function (array $data, array $errors) {
+    it('rejects the form when a required field is missing', function (array $data, array $errors) {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
@@ -275,7 +275,7 @@ describe('CreateDelegate', function () {
         '`seat_id` is required' => [['seat_id' => null], ['seat_id' => 'required']],
     ]);
 
-    it('validates email format', function () {
+    it('rejects an email that is not a valid address', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
@@ -296,7 +296,7 @@ describe('CreateDelegate', function () {
             ->assertNoRedirect();
     });
 
-    it('validates ended_at is after started_at', function () {
+    it('rejects an end date before the start date', function () {
         actingAsSuperAdminForDelegateResource();
 
         $user = User::factory()->create();
@@ -331,7 +331,7 @@ describe('CreateDelegate', function () {
 });
 
 describe('EditDelegate', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -349,7 +349,7 @@ describe('EditDelegate', function () {
             ]);
     });
 
-    it('can update a delegate', function () {
+    it('updates a delegate from valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -373,7 +373,7 @@ describe('EditDelegate', function () {
         ]);
     });
 
-    it('can update delegate dates', function () {
+    it('updates the delegate dates from valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -396,7 +396,7 @@ describe('EditDelegate', function () {
         expect($delegate->ended_at->format('Y-m-d'))->toBe($newEndedAt->format('Y-m-d'));
     });
 
-    it('can update delegate organization and seat', function () {
+    it('updates the delegate organization and seat from valid form data', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -420,7 +420,7 @@ describe('EditDelegate', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on edit', function (array $data, array $errors) {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -441,7 +441,7 @@ describe('EditDelegate', function () {
         '`seat_id` is required' => [['seat_id' => null], ['seat_id' => 'required']],
     ]);
 
-    it('can soft delete a delegate', function () {
+    it('soft deletes the delegate when the delete action is called', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -458,7 +458,7 @@ describe('EditDelegate', function () {
         ]);
     });
 
-    it('can restore a soft deleted delegate', function () {
+    it('restores the delegate when the restore action is called on a soft deleted record', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();
@@ -476,7 +476,7 @@ describe('EditDelegate', function () {
         ]);
     });
 
-    it('can force delete a delegate', function () {
+    it('permanently deletes the delegate when the force delete action is called', function () {
         actingAsSuperAdminForDelegateResource();
 
         $delegate = Delegate::factory()->approved()->create();

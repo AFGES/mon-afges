@@ -27,14 +27,14 @@ function actingAsSuperAdminForDemocraticTimeTypeResource(): User
 }
 
 describe('ListDemocraticTimeTypes', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         Livewire::test(ListDemocraticTimeTypes::class)
             ->assertOk();
     });
 
-    it('can list democratic time types', function () {
+    it('lists the existing democratic time types', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $types = DemocraticTimeType::factory()->count(3)->create();
@@ -43,7 +43,7 @@ describe('ListDemocraticTimeTypes', function () {
             ->assertCanSeeTableRecords($types);
     });
 
-    it('can search democratic time types by name', function () {
+    it('lists only democratic time types matching the searched name', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $types = DemocraticTimeType::factory()
@@ -61,7 +61,7 @@ describe('ListDemocraticTimeTypes', function () {
             ->assertCanNotSeeTableRecords($types->skip(1));
     });
 
-    it('can sort democratic time types by name', function () {
+    it('orders democratic time types by name when sorting that column', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $types = DemocraticTimeType::factory()
@@ -82,14 +82,14 @@ describe('ListDemocraticTimeTypes', function () {
 });
 
 describe('CreateDemocraticTimeType', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         Livewire::test(CreateDemocraticTimeType::class)
             ->assertOk();
     });
 
-    it('can create a democratic time type', function () {
+    it('creates a democratic time type from valid form data', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $name = fake()->unique()->words(3, true);
@@ -115,7 +115,7 @@ describe('CreateDemocraticTimeType', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on creation', function (array $data, array $errors) {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         Livewire::test(CreateDemocraticTimeType::class)
@@ -155,7 +155,7 @@ describe('CreateDemocraticTimeType', function () {
 });
 
 describe('EditDemocraticTimeType', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $type = DemocraticTimeType::factory()->create();
@@ -171,7 +171,7 @@ describe('EditDemocraticTimeType', function () {
             ]);
     });
 
-    it('can update a democratic time type', function () {
+    it('updates a democratic time type from valid form data', function () {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $type = DemocraticTimeType::factory()->create();
@@ -192,7 +192,7 @@ describe('EditDemocraticTimeType', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on edit', function (array $data, array $errors) {
         actingAsSuperAdminForDemocraticTimeTypeResource();
 
         $type = DemocraticTimeType::factory()->create();

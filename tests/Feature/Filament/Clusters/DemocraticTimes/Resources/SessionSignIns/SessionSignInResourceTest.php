@@ -31,14 +31,14 @@ function actingAsSuperAdminForSessionSignInResource(): User
 }
 
 describe('ListSessionSignIns', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         livewire(ListSessionSignIns::class)
             ->assertOk();
     });
 
-    it('can list session sign-ins', function () {
+    it('lists the existing session sign-ins', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $sessionSignIns = SessionSignIn::factory()->count(3)->create();
@@ -47,7 +47,7 @@ describe('ListSessionSignIns', function () {
             ->assertCanSeeTableRecords($sessionSignIns);
     });
 
-    it('can search session sign-ins by session location', function () {
+    it('lists only session sign-ins matching the searched session location', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $signIn1 = SessionSignIn::factory()->create([
@@ -66,7 +66,7 @@ describe('ListSessionSignIns', function () {
             ->assertCanNotSeeTableRecords([$signIn2]);
     });
 
-    it('can search session sign-ins by delegate email', function () {
+    it('lists only session sign-ins matching the searched delegate email', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $signIn1 = SessionSignIn::factory()->create([
@@ -85,7 +85,7 @@ describe('ListSessionSignIns', function () {
             ->assertCanNotSeeTableRecords([$signIn2]);
     });
 
-    it('can filter session sign-ins by session', function () {
+    it('lists only sign-ins of the filtered session', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $session1 = DemocraticTimeSession::factory()->create();
@@ -105,7 +105,7 @@ describe('ListSessionSignIns', function () {
             ->assertCanNotSeeTableRecords([$signIn2]);
     });
 
-    it('can filter session sign-ins by signed in status', function (string $filterValue, string $visibleSignIn, string $hiddenSignIn) {
+    it('lists only sign-ins matching the signed in status filter', function (string $filterValue, string $visibleSignIn, string $hiddenSignIn) {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -128,14 +128,14 @@ describe('ListSessionSignIns', function () {
 });
 
 describe('CreateSessionSignIn', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         livewire(CreateSessionSignIn::class)
             ->assertOk();
     });
 
-    it('can create a session sign-in', function () {
+    it('creates a session sign-in from valid form data', function () {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -163,7 +163,7 @@ describe('CreateSessionSignIn', function () {
         ]);
     });
 
-    it('can create a session sign-in with proxy', function () {
+    it('creates a session sign-in on behalf of a proxy seat from valid form data', function () {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -193,7 +193,7 @@ describe('CreateSessionSignIn', function () {
         ]);
     });
 
-    it('can create a session sign-in with sign out time', function () {
+    it('creates a session sign-in with a sign-out time from valid form data', function () {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -222,7 +222,7 @@ describe('CreateSessionSignIn', function () {
         ]);
     });
 
-    it('validates the form data', function (array $data, array $errors) {
+    it('rejects invalid form data on creation', function (array $data, array $errors) {
         actingAsSuperAdminForSessionSignInResource();
 
         $session = DemocraticTimeSession::factory()->create();
@@ -266,7 +266,7 @@ describe('CreateSessionSignIn', function () {
 });
 
 describe('EditSessionSignIn', function () {
-    it('can load the page', function () {
+    it('renders the page', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $sessionSignIn = SessionSignIn::factory()->create();
@@ -282,7 +282,7 @@ describe('EditSessionSignIn', function () {
             ]);
     });
 
-    it('can update a session sign-in', function () {
+    it('updates a session sign-in from valid form data', function () {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -303,7 +303,7 @@ describe('EditSessionSignIn', function () {
         expect($sessionSignIn->fresh()->signed_out_at)->toEqual($newSignedOutAt);
     });
 
-    it('can update session sign-in to add proxy seat', function () {
+    it('stores the proxy seat when it is added on edit', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $sessionSignIn = SessionSignIn::factory()->create([
@@ -327,7 +327,7 @@ describe('EditSessionSignIn', function () {
         ]);
     });
 
-    it('can update session sign-in to remove sign out time', function () {
+    it('clears the sign-out time when it is emptied on edit', function () {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -351,7 +351,7 @@ describe('EditSessionSignIn', function () {
         ]);
     });
 
-    it('validates that signed_out_at is after signed_in_at', function () {
+    it('rejects a sign-out before the sign-in', function () {
         actingAsSuperAdminForSessionSignInResource();
         $this->travelTo('2026-01-15 12:00:00');
 
@@ -375,7 +375,7 @@ describe('EditSessionSignIn', function () {
             ->assertNotNotified();
     });
 
-    it('can delete a session sign-in', function () {
+    it('deletes a session sign-in when the delete action is called', function () {
         actingAsSuperAdminForSessionSignInResource();
 
         $sessionSignIn = SessionSignIn::factory()->create();

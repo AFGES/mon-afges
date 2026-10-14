@@ -83,7 +83,6 @@ describe('ProxiesRelationManager', function () {
             'record' => $session->getKey(),
         ])
             ->callTableAction('create', data: [
-                'democratic_time_session_id' => $session->id,
                 'delegator_seat_id' => $delegatorSeat->id,
                 'proxy_holder_seat_id' => $proxyHolderSeat->id,
                 'started_at' => $startedAt,
@@ -136,7 +135,6 @@ describe('SessionSignInsRelationManager', function () {
             'record' => $session->getKey(),
         ])
             ->callTableAction('create', data: [
-                'democratic_time_session_id' => $session->id,
                 'seat_id' => $seat->id,
                 'delegate_id' => $delegate->id,
                 'signed_in_at' => $signedInAt,

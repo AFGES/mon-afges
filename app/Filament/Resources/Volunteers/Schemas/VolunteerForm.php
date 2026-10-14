@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Volunteers\Schemas;
 
+use App\Filament\Resources\Organizations\RelationManagers\VolunteersRelationManager as OrganizationsVolunteersRelationManager;
+use App\Filament\Resources\Users\RelationManagers\VolunteersRelationManager as UsersVolunteersRelationManager;
 use App\Filament\Schemas\Components\ApprovalField;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -26,11 +28,13 @@ final class VolunteerForm
                                     ->label(__('volunteer.fields.user'))
                                     ->relationship('user', 'name')
                                     ->disabled(fn ($record) => $record !== null)
+                                    ->hiddenOn(UsersVolunteersRelationManager::class)
                                     ->required(),
                                 Select::make('organization_id')
                                     ->label(__('volunteer.fields.organization'))
                                     ->relationship('organization', 'short_name')
                                     ->disabled(fn ($record) => $record !== null)
+                                    ->hiddenOn(OrganizationsVolunteersRelationManager::class)
                                     ->required(),
                             ]),
                         TextInput::make('position_title')

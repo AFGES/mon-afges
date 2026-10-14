@@ -68,7 +68,6 @@ describe('DelegatesRelationManager', function () {
         ])
             ->callTableAction('create', data: [
                 'user_id' => $user->id,
-                'organization_id' => $organization->id,
                 'seat_id' => $seat->id,
                 'email' => fake()->email(),
                 'started_at' => now()->toDateString(),
@@ -144,7 +143,6 @@ describe('VolunteersRelationManager', function () {
         ])
             ->callTableAction('create', data: [
                 'user_id' => $user->id,
-                'organization_id' => $organization->id,
                 'position_title' => fake()->jobTitle(),
                 'started_at' => now()->toDateString(),
             ])

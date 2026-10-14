@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Schemas;
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionProxies;
 use App\Rules\ProxyDelegatesFromSameCollege;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -36,6 +37,7 @@ final class ProxyForm
                     ->label(__('proxy.fields.democratic_time_session'))
                     ->helperText(__('proxy.fields.democratic_time_session_helper'))
                     ->relationship('democraticTimeSession', 'id')
+                    ->hiddenOn(ManageSessionProxies::class)
                     ->required(),
                 DateTimePicker::make('started_at')
                     ->label(__('proxy.fields.started_at'))

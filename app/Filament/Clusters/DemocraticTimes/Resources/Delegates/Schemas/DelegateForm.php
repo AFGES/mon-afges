@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Schemas;
 
+use App\Filament\Resources\Organizations\RelationManagers\DelegatesRelationManager as OrganizationsDelegatesRelationManager;
+use App\Filament\Resources\Users\RelationManagers\DelegatesRelationManager as UsersDelegatesRelationManager;
 use App\Filament\Schemas\Components\ApprovalField;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -41,6 +43,7 @@ final class DelegateForm
                             ->searchable()
                             ->preload()
                             ->default(auth()->id())
+                            ->hiddenOn(UsersDelegatesRelationManager::class)
                             ->required(),
                         TextInput::make('email')
                             ->label(__('delegate.fields.email'))
@@ -53,6 +56,7 @@ final class DelegateForm
                             ->relationship(name: 'organization', titleAttribute: 'short_name')
                             ->searchable()
                             ->preload()
+                            ->hiddenOn(OrganizationsDelegatesRelationManager::class)
                             ->required(),
                         Select::make('seat_id')
                             ->label(__('delegate.fields.seat'))

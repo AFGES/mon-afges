@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\DemocraticTimes\Resources\SessionSignIns\Schemas;
 
+use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionSignIns;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
@@ -23,6 +24,7 @@ final class SessionSignInForm
                             ->relationship('democraticTimeSession', 'location')
                             ->searchable()
                             ->preload()
+                            ->hiddenOn(ManageSessionSignIns::class)
                             ->required()
                             ->columnSpan(2),
 

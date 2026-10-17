@@ -247,6 +247,17 @@ describe('ApproveDelegateAction', function () {
             ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
     });
 
+    it('offers and pre-ticks a delegate whose mandate starts later in the period of the request', function () {
+        actingAsSuperAdminForApprovalActions();
+        $seat = seatWithCapacityForApprovalActions(1);
+        $future = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->addMonth()->startOfDay(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => null]);
+
+        livewire(ListDelegates::class)
+            ->mountTableAction('approve', $record)
+            ->assertSchemaStateSet(['terminated_delegate_ids' => [$future->id]]);
+    });
+
     it('checks the current delegates by default only when the seat is full', function (int $perSeat, array $expectedChecked) {
         actingAsSuperAdminForApprovalActions();
         $collegeOrganization = CollegeOrganization::factory()->create(['delegates_per_seat' => $perSeat]);
@@ -308,6 +319,27 @@ describe('BulkApproveDelegatesAction', function () {
 
         expect($record->refresh()->isPending())->toBeTrue()
             ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
+    });
+});
+
+describe('BulkApproveDelegatesAction within one batch', function () {
+    it('never ends a delegate approved earlier in the same batch', function () {
+        actingAsSuperAdminForApprovalActions();
+        Notification::fake();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+        $seat = seatWithCapacityForApprovalActions(1);
+        $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $first = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->subDays(2)->startOfDay(), 'ended_at' => null]);
+        $second = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->subDay()->startOfDay(), 'ended_at' => null]);
+
+        livewire(ListDelegates::class)
+            ->callTableBulkAction('bulkApprove', [$first, $second], ['terminate_current_delegates' => true])
+            ->assertNotified(__('delegate.approval.bulk_skipped_title'));
+
+        expect($first->refresh()->isApproved())->toBeTrue()
+            ->and($first->ended_at)->toBeNull()
+            ->and($second->refresh()->isPending())->toBeTrue()
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateString())->toBe(now()->subDays(2)->toDateString());
     });
 });
 

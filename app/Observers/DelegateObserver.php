@@ -8,10 +8,15 @@ use App\Models\Delegate;
 use App\Models\User;
 use App\Notifications\DelegateApprovalRequestedNotification;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
-final class DelegateObserver
+/**
+ * Handled after the surrounding database transaction commits, so the Google Workspace group and approver
+ * notifications never reflect changes that end up rolled back.
+ */
+final class DelegateObserver implements ShouldHandleEventsAfterCommit
 {
     /** @var list<string> */
     private const array SYNC_ATTRIBUTES = ['approval_status', 'started_at', 'ended_at', 'email', 'email_verified_at'];

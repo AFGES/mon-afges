@@ -152,3 +152,78 @@ describe('createApproved', function () {
             ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at)->toBeNull();
     });
 });
+
+describe('capacity over the whole period', function () {
+    it('counts approved delegates whose mandate starts in the future', function () {
+        $seat = seatWithCapacityForApprovalService(1);
+        $future = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->addMonth()->startOfDay(), 'ended_at' => null]);
+        $pending = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => null]);
+        $service = new DelegateApprovalService;
+
+        expect($service->minimumTerminations($pending))->toBe(1)
+            ->and($service->currentDelegatesOfSeat($pending)->modelKeys())->toBe([$future->id])
+            ->and(fn () => $service->approve($pending, []))->toThrow(ValidationException::class);
+    });
+
+    it('ignores approved delegates whose mandate does not overlap the period', function () {
+        $seat = seatWithCapacityForApprovalService(1);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->addYear()->startOfDay(), 'ended_at' => null]);
+        $pending = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => now()->addMonth()->startOfDay()]);
+
+        expect((new DelegateApprovalService)->minimumTerminations($pending))->toBe(0);
+    });
+
+    it('uses the peak of concurrent delegates so sequential mandates do not add up', function () {
+        $seat = seatWithCapacityForApprovalService(2);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subMonths(6)->startOfDay(), 'ended_at' => now()->addMonth()->startOfDay()]);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->addMonths(2)->startOfDay(), 'ended_at' => now()->addMonths(4)->startOfDay()]);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->addMonths(5)->startOfDay(), 'ended_at' => null]);
+        $pending = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => null]);
+
+        expect((new DelegateApprovalService)->minimumTerminations($pending))->toBe(0);
+    });
+
+    it('reports the excess when a mandate overlaps the busiest moment', function () {
+        $seat = seatWithCapacityForApprovalService(2);
+        Delegate::factory()->approved()->count(2)->create(['seat_id' => $seat->id, 'started_at' => now()->addMonth()->startOfDay(), 'ended_at' => null]);
+
+        $violation = (new DelegateApprovalService)->capacityViolation($seat->id, now()->startOfDay(), null);
+
+        expect($violation)->toBe(1);
+    });
+
+    it('never ends a delegate before it started', function () {
+        $seat = seatWithCapacityForApprovalService(1);
+        $future = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->addMonth()->startOfDay(), 'ended_at' => null]);
+        $pending = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => null]);
+
+        (new DelegateApprovalService)->approve($pending, [$future->id]);
+
+        $future = Delegate::withoutGlobalScopes()->find($future->id);
+
+        expect($future->ended_at->toDateString())->toBe($future->started_at->toDateString());
+    });
+
+    it('ends every overlapping delegate except the protected ones', function () {
+        $seat = seatWithCapacityForApprovalService(2);
+        $protected = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $other = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $pending = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => null]);
+
+        (new DelegateApprovalService)->approveAndTerminateCurrentDelegates($pending, [$protected->id]);
+
+        expect(Delegate::withoutGlobalScopes()->find($protected->id)->ended_at)->toBeNull()
+            ->and(Delegate::withoutGlobalScopes()->find($other->id)->ended_at)->not->toBeNull();
+    });
+
+    it('refuses when the seat cannot fit the delegate without ending a protected one', function () {
+        $seat = seatWithCapacityForApprovalService(1);
+        $protected = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $pending = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->startOfDay(), 'ended_at' => null]);
+
+        expect(fn () => (new DelegateApprovalService)->approveAndTerminateCurrentDelegates($pending, [$protected->id]))
+            ->toThrow(ValidationException::class);
+
+        expect($pending->refresh()->isPending())->toBeTrue();
+    });
+});

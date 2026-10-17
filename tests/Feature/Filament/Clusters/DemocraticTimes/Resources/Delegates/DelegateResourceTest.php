@@ -455,6 +455,54 @@ describe('EditDelegate', function () {
         ]);
     });
 
+    it('refuses to move an approved delegate to a full seat', function () {
+        actingAsSuperAdminForDelegateResource();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+
+        $collegeOrganization = CollegeOrganization::factory()->create(['delegates_per_seat' => 1]);
+        $fullSeat = Seat::factory()->create(['college_organization_id' => $collegeOrganization->id]);
+        $freeSeat = Seat::factory()->create(['college_organization_id' => $collegeOrganization->id]);
+        Delegate::factory()->approved()->create(['seat_id' => $fullSeat->id, 'organization_id' => $collegeOrganization->organization_id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $delegate = Delegate::factory()->approved()->create(['seat_id' => $freeSeat->id, 'organization_id' => $collegeOrganization->organization_id, 'started_at' => now()->subMonth()->startOfDay(), 'ended_at' => null]);
+
+        livewire(EditDelegate::class, ['record' => $delegate->id])
+            ->fillForm(['seat_id' => $fullSeat->id])
+            ->call('save')
+            ->assertHasFormErrors(['seat_id']);
+
+        expect($delegate->refresh()->seat_id)->toBe($freeSeat->id);
+    });
+
+    it('refuses to clear the end date of an approved delegate when a later mandate would overlap', function () {
+        actingAsSuperAdminForDelegateResource();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+
+        $collegeOrganization = CollegeOrganization::factory()->create(['delegates_per_seat' => 1]);
+        $seat = Seat::factory()->create(['college_organization_id' => $collegeOrganization->id]);
+        $delegate = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'organization_id' => $collegeOrganization->organization_id, 'started_at' => now()->subYear()->startOfDay(), 'ended_at' => now()->addMonth()->startOfDay()]);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'organization_id' => $collegeOrganization->organization_id, 'started_at' => now()->addMonths(2)->startOfDay(), 'ended_at' => null]);
+
+        livewire(EditDelegate::class, ['record' => $delegate->id])
+            ->fillForm(['ended_at' => null])
+            ->call('save')
+            ->assertHasFormErrors(['seat_id']);
+    });
+
+    it('does not check the capacity when other fields of an approved delegate change', function () {
+        actingAsSuperAdminForDelegateResource();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+
+        $collegeOrganization = CollegeOrganization::factory()->create(['delegates_per_seat' => 1]);
+        $seat = Seat::factory()->create(['college_organization_id' => $collegeOrganization->id]);
+        $delegate = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'organization_id' => $collegeOrganization->organization_id, 'started_at' => now()->subYear()->startOfDay(), 'ended_at' => null]);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'organization_id' => $collegeOrganization->organization_id, 'started_at' => now()->subYear()->startOfDay(), 'ended_at' => null]);
+
+        livewire(EditDelegate::class, ['record' => $delegate->id])
+            ->fillForm(['email' => 'changed@example.org'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+    });
+
     it('saves the user fiche fields through the user relationship', function () {
         actingAsSuperAdminForDelegateResource();
 

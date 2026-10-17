@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\ValidationException;
 
 final class BulkApproveDelegatesAction extends Action
 {
@@ -36,6 +37,7 @@ final class BulkApproveDelegatesAction extends Action
                 $terminate = (bool) ($data['terminate_current_delegates'] ?? false);
                 $count = 0;
                 $skippedCount = 0;
+                $approvedInBatchIds = [];
 
                 /** @var Delegate $record */
                 foreach ($selectedRecords as $record) {
@@ -44,7 +46,13 @@ final class BulkApproveDelegatesAction extends Action
                     }
 
                     if ($terminate) {
-                        $service->approveAndTerminateCurrentDelegates($record);
+                        try {
+                            $service->approveAndTerminateCurrentDelegates($record, $approvedInBatchIds);
+                        } catch (ValidationException) {
+                            $skippedCount++;
+
+                            continue;
+                        }
                     } elseif ($service->minimumTerminations($record) > 0) {
                         $skippedCount++;
 
@@ -53,6 +61,7 @@ final class BulkApproveDelegatesAction extends Action
                         $service->approve($record);
                     }
 
+                    $approvedInBatchIds[] = $record->getKey();
                     $count++;
                 }
 

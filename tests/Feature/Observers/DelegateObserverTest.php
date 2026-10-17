@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\DelegateApprovalRequestedNotification;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceServiceInterface;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Mockery\MockInterface;
 use Spatie\Permission\Models\Permission;
@@ -230,5 +231,39 @@ describe('Google Workspace group sync', function () {
         $google->shouldNotReceive('addToGroup');
 
         $delegate->restore();
+    });
+});
+
+describe('after commit', function () {
+    it('syncs the Google Workspace group only once the surrounding transaction commits', function () {
+        $google = googleWorkspaceForObserver();
+        $calls = 0;
+        $google->shouldReceive('addToGroup')->andReturnUsing(function () use (&$calls): bool {
+            $calls++;
+
+            return true;
+        });
+
+        DB::transaction(function () use (&$calls): void {
+            eligibleDelegate();
+
+            expect($calls)->toBe(0);
+        });
+
+        expect($calls)->toBe(1);
+    });
+
+    it('never syncs the Google Workspace group when the surrounding transaction rolls back', function () {
+        $google = googleWorkspaceForObserver();
+        $google->shouldNotReceive('addToGroup');
+
+        try {
+            DB::transaction(function (): void {
+                eligibleDelegate();
+
+                throw new RuntimeException('rollback');
+            });
+        } catch (RuntimeException) {
+        }
     });
 });

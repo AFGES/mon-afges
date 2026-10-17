@@ -24,14 +24,16 @@ final class ApproveDelegateAction extends Action
             ->modalHeading(__('approval.modal.approve.heading'))
             ->modalDescription(__('approval.modal.approve.description'))
             ->authorize('update')
-            ->visible(fn ($record): bool => $record->isPending())
+            ->visible(fn (Delegate $record): bool => $record->isPending())
             ->fillForm(fn (Delegate $record): array => [
-                'terminated_delegate_ids' => TerminatedDelegatesField::defaultState($record->seat_id, $record->getKey()),
+                'terminated_delegate_ids' => TerminatedDelegatesField::defaultState($record->seat_id, $record->getKey(), $record->started_at, $record->ended_at),
             ])
             ->schema(fn (Delegate $record): array => [
                 TerminatedDelegatesField::make(
                     fn (): ?string => $record->seat_id,
                     fn (): ?string => $record->getKey(),
+                    fn (): mixed => $record->started_at,
+                    fn (): mixed => $record->ended_at,
                 ),
             ])
             ->action(function (Delegate $record, array $data): void {

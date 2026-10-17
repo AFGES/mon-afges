@@ -26,6 +26,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -110,19 +111,19 @@ final class RequestDelegateSeat extends Page
                                 ->label(__('profile.form.seat.label'))
                                 ->prefixIcon(Heroicon::OutlinedUserGroup)
                                 ->helperText(__('profile.form.seat.helper'))
-                                ->options(function (Get $get) {
+                                ->options(function (Get $get): array|Collection {
                                     $organizationId = $get('organization_id');
                                     if (! $organizationId) {
                                         return [];
                                     }
 
                                     return Seat::query()
-                                        ->whereHas('collegeOrganization', function (Builder $query) use ($organizationId) {
+                                        ->whereHas('collegeOrganization', function (Builder $query) use ($organizationId): void {
                                             $query->where('organization_id', $organizationId);
                                         })
                                         ->with(['collegeOrganization.college', 'collegeOrganization.organization'])
                                         ->get()
-                                        ->mapWithKeys(fn (Seat $seat) => [$seat->id => $seat->label()]);
+                                        ->mapWithKeys(fn (Seat $seat): array => [$seat->id => $seat->label()]);
                                 })
                                 ->searchable()
                                 ->preload()
@@ -134,7 +135,7 @@ final class RequestDelegateSeat extends Page
                                             ->whereKey($value)
                                             ->whereHas(
                                                 'collegeOrganization',
-                                                fn (Builder $query) => $query->where('organization_id', $get('organization_id')),
+                                                fn (Builder $query): Builder => $query->where('organization_id', $get('organization_id')),
                                             )
                                             ->exists();
 

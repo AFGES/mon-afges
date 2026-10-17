@@ -98,7 +98,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
 
     public function canRequestDelegateSeat(): bool
     {
-        return $this->delegateEligibleOrganizations()->exists();
+        return once(fn (): bool => $this->delegateEligibleOrganizations()->exists());
     }
 
     /**

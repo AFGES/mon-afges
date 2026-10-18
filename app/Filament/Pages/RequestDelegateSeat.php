@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Pages;
 
+use App\Actions\SubmitDelegateSeatRequest;
 use App\Filament\Schemas\DelegateFormFields;
-use App\Models\Delegate;
 use App\Models\Seat;
 use App\Models\User;
+use App\Rules\SeatBelongsToOrganization;
 use BackedEnum;
 use Closure;
 use Filament\Actions\Action;
@@ -24,26 +25,14 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @property-read Schema $form
  */
 final class RequestDelegateSeat extends Page
 {
-    private const array USER_FIELDS = [
-        'last_name',
-        'first_name',
-        'study_program',
-        'birth_date',
-        'phone',
-        'postal_address',
-        'elected_mandates',
-    ];
-
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
@@ -128,10 +117,7 @@ final class RequestDelegateSeat extends Page
                                         return [];
                                     }
 
-                                    return Seat::query()
-                                        ->whereHas('collegeOrganization', function (Builder $query) use ($organizationId): void {
-                                            $query->where('organization_id', $organizationId);
-                                        })
+                                    return DelegateFormFields::seatsOfOrganization($organizationId)
                                         ->with(['collegeOrganization.college', 'collegeOrganization.organization'])
                                         ->get()
                                         ->mapWithKeys(fn (Seat $seat): array => [$seat->id => $seat->label()]);
@@ -141,19 +127,7 @@ final class RequestDelegateSeat extends Page
                                 ->live()
                                 ->required()
                                 ->rules([
-                                    fn (Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get): void {
-                                        $seatBelongsToOrganization = Seat::query()
-                                            ->whereKey($value)
-                                            ->whereHas(
-                                                'collegeOrganization',
-                                                fn (Builder $query): Builder => $query->where('organization_id', $get('organization_id')),
-                                            )
-                                            ->exists();
-
-                                        if (! $seatBelongsToOrganization) {
-                                            $fail(__('validation.exists', ['attribute' => $attribute]));
-                                        }
-                                    },
+                                    fn (Get $get): SeatBelongsToOrganization => new SeatBelongsToOrganization($get('organization_id')),
                                 ])
                                 ->validationMessages([
                                     'required' => __('profile.form.seat.required'),
@@ -204,23 +178,12 @@ final class RequestDelegateSeat extends Page
             ->statePath('data');
     }
 
-    public function submit(): void
+    public function submit(SubmitDelegateSeatRequest $submitDelegateSeatRequest): void
     {
-        $data = $this->form->getState();
-
+        /** @var User $user */
         $user = auth()->user();
 
-        DB::transaction(function () use ($data, $user): void {
-            $user->update(Arr::only($data, self::USER_FIELDS));
-
-            Delegate::create([
-                'user_id' => $user->id,
-                'organization_id' => $data['organization_id'],
-                'seat_id' => $data['seat_id'],
-                'email' => $data['email'],
-                'started_at' => $data['started_at'],
-            ]);
-        });
+        $submitDelegateSeatRequest->handle($user, $this->form->getState());
 
         Notification::make()
             ->title(__('delegate_form.notifications.submitted.title'))
@@ -248,7 +211,7 @@ final class RequestDelegateSeat extends Page
         $eligibleOrganizations = $this->eligibleOrganizations();
 
         return [
-            ...Arr::only($user->attributesToArray(), self::USER_FIELDS),
+            ...Arr::only($user->attributesToArray(), SubmitDelegateSeatRequest::USER_FIELDS),
             'birth_date' => $user->birth_date?->toDateString(),
             'email' => $user->email,
             'started_at' => now()->toDateString(),

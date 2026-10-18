@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Filament\Schemas;
 
+use App\Models\Seat;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Fields of the "Fiche Délégué-e" shared by the seat request form and the admin delegate form.
@@ -57,6 +59,28 @@ final class DelegateFormFields
                 ->rows(2)
                 ->required($requirePersonalDetails),
         ];
+    }
+
+    /**
+     * Seats attached to the given organization through any of its colleges.
+     *
+     * @return Builder<Seat>
+     */
+    public static function seatsOfOrganization(int|string|null $organizationId): Builder
+    {
+        return self::restrictToOrganization(Seat::query(), $organizationId);
+    }
+
+    /**
+     * @param  Builder<Seat>  $seats
+     * @return Builder<Seat>
+     */
+    public static function restrictToOrganization(Builder $seats, int|string|null $organizationId): Builder
+    {
+        return $seats->whereHas(
+            'collegeOrganization',
+            fn (Builder $query): Builder => $query->where('organization_id', $organizationId),
+        );
     }
 
     public static function electedMandatesComponent(): Textarea

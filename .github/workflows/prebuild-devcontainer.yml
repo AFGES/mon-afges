@@ -8,7 +8,7 @@ on:
     paths:
       - '.devcontainer/**'
       - 'docker/**'      # Trigger if you change the Dockerfile
-      - 'docker-compose.yml'
+      - 'compose.yml'
 
 jobs:
   build:
@@ -19,10 +19,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -32,16 +34,16 @@ jobs:
         run: cp .env.example .env
 
       - name: Prebuild Dev Container
-        uses: devcontainers/ci@v0.3
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
         with:
           # Point to your devcontainer folder
           subFolder: .
 
-          # The name of the image to push (matches the one in docker-compose.yml)
-          imageName: ghcr.io/${{ github.repository }}/sail
+          # The name of the image to push (matches the one in compose.yml, must be lowercase)
+          imageName: ghcr.io/afges/mon-afges/sail
 
           # Cache usually speeds up re-builds
-          cacheFrom: ghcr.io/${{ github.repository }}/sail
+          cacheFrom: ghcr.io/afges/mon-afges/sail
 
           # Always push the result to the registry
           push: always

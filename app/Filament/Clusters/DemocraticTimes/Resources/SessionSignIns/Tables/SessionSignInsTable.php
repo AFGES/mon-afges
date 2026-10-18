@@ -97,7 +97,8 @@ final class SessionSignInsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ])
             ->defaultSort('signed_in_at', 'desc');

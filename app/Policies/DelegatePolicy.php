@@ -47,6 +47,11 @@ final class DelegatePolicy implements RestrictsSuperAdmin
         return $authUser->can('Delete:Delegate');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:Delegate');
+    }
+
     public function restore(AuthUser $authUser, Delegate $delegate): bool
     {
         return $authUser->can('Restore:Delegate');

@@ -37,6 +37,11 @@ final class OrganizationPolicy
         return $authUser->can('Delete:Organization');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:Organization');
+    }
+
     public function restore(AuthUser $authUser, Organization $organization): bool
     {
         return $authUser->can('Restore:Organization');

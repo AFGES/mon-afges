@@ -34,6 +34,11 @@ final class SessionSignInPolicy
         return $authUser->can('Delete:SessionSignIn');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:SessionSignIn');
+    }
+
     public function restore(AuthUser $authUser, SessionSignIn $sessionSignIn): bool
     {
         return $authUser->can('Restore:SessionSignIn');
@@ -42,5 +47,25 @@ final class SessionSignInPolicy
     public function forceDelete(AuthUser $authUser, SessionSignIn $sessionSignIn): bool
     {
         return $authUser->can('ForceDelete:SessionSignIn');
+    }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:SessionSignIn');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:SessionSignIn');
+    }
+
+    public function replicate(AuthUser $authUser, SessionSignIn $sessionSignIn): bool
+    {
+        return $authUser->can('Replicate:SessionSignIn');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:SessionSignIn');
     }
 }

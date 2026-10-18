@@ -102,6 +102,7 @@ final class RootPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->topbar(false)
             ->viteTheme('resources/css/filament/root/theme.css')
+            ->strictAuthorization()
             ->spa();
     }
 }

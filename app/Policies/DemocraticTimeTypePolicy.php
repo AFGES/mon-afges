@@ -37,6 +37,11 @@ final class DemocraticTimeTypePolicy
         return $authUser->can('Delete:DemocraticTimeType');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:DemocraticTimeType');
+    }
+
     public function restore(AuthUser $authUser, DemocraticTimeType $democraticTimeType): bool
     {
         return $authUser->can('Restore:DemocraticTimeType');
@@ -45,5 +50,25 @@ final class DemocraticTimeTypePolicy
     public function forceDelete(AuthUser $authUser, DemocraticTimeType $democraticTimeType): bool
     {
         return $authUser->can('ForceDelete:DemocraticTimeType');
+    }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:DemocraticTimeType');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:DemocraticTimeType');
+    }
+
+    public function replicate(AuthUser $authUser, DemocraticTimeType $democraticTimeType): bool
+    {
+        return $authUser->can('Replicate:DemocraticTimeType');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:DemocraticTimeType');
     }
 }

@@ -110,7 +110,8 @@ final class DelegatesTable
                 BulkActionGroup::make([
                     BulkApproveDelegatesAction::make(),
                     BulkRejectAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),

@@ -37,6 +37,11 @@ final class CollegePolicy
         return $authUser->can('Delete:College');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:College');
+    }
+
     public function restore(AuthUser $authUser, College $college): bool
     {
         return $authUser->can('Restore:College');

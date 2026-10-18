@@ -106,6 +106,7 @@ final class SessionsTable
                     ->label(__('emargement.actions.open_sign_in'))
                     ->icon(Heroicon::OutlinedLockOpen)
                     ->color('success')
+                    ->authorize('update')
                     ->visible(fn ($record) => $record->sign_in_opens_at === null)
                     ->requiresConfirmation()
                     ->action(function ($record) {
@@ -117,6 +118,7 @@ final class SessionsTable
                     ->label(__('emargement.actions.close_sign_in'))
                     ->icon(Heroicon::OutlinedLockClosed)
                     ->color('danger')
+                    ->authorize('update')
                     ->visible(fn ($record) => $record->sign_in_opens_at !== null && $record->sign_in_closes_at === null)
                     ->requiresConfirmation()
                     ->action(function ($record) {
@@ -128,7 +130,8 @@ final class SessionsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

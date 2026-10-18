@@ -47,6 +47,11 @@ final class VolunteerPolicy implements RestrictsSuperAdmin
         return $authUser->can('Delete:Volunteer');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:Volunteer');
+    }
+
     public function restore(AuthUser $authUser, Volunteer $volunteer): bool
     {
         return $authUser->can('Restore:Volunteer');

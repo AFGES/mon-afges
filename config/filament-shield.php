@@ -121,6 +121,7 @@ return [
         'path' => app_path('Policies'),
         'merge' => true,
         'generate' => true,
+        // deleteAny is hand-written in policies (maps to Delete:X); shield:generate must preserve it.
         'methods' => [
             'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             'forceDelete', 'forceDeleteAny', 'restoreAny', 'replicate', 'reorder',

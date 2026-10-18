@@ -37,6 +37,11 @@ final class ProxyPolicy
         return $authUser->can('Delete:Proxy');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('Delete:Proxy');
+    }
+
     public function restore(AuthUser $authUser, Proxy $proxy): bool
     {
         return $authUser->can('Restore:Proxy');

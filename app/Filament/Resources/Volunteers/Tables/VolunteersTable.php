@@ -116,7 +116,8 @@ final class VolunteersTable
                 BulkActionGroup::make([
                     BulkApproveAction::make(),
                     BulkRejectAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),

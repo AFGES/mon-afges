@@ -85,7 +85,8 @@ final class OrganizationsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),

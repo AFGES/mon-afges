@@ -1,4 +1,10 @@
 [tools]
 claude = "latest"
+gh = "latest"
 "github:PHPantom-dev/phpantom_lsp" = "latest"
+jactionlint = "latest"
+jq = "latest"
 rtk = "latest"
+
+[env]
+_.path = ["vendor/bin", "."]

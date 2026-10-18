@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Exceptions\SeatReductionNotAllowedException;
 use App\Models\CollegeOrganization;
 use App\Models\Organization;
 use App\Models\Seat;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 final class OrganizationCollegeSyncService
@@ -17,7 +17,7 @@ final class OrganizationCollegeSyncService
      *
      * @param  array<string, array{delegates_per_seat: int, seats?: int}>  $collegesData
      *
-     * @throws Exception
+     * @throws SeatReductionNotAllowedException
      */
     public function sync(Organization $organization, array $collegesData): void
     {
@@ -35,7 +35,7 @@ final class OrganizationCollegeSyncService
      *
      * @param  array{delegates_per_seat: int, seats?: int}  $data
      *
-     * @throws Exception
+     * @throws SeatReductionNotAllowedException
      */
     private function syncCollege(Organization $organization, string $collegeId, array $data): void
     {
@@ -62,7 +62,7 @@ final class OrganizationCollegeSyncService
     /**
      * Adjust the number of seats for a college organization.
      *
-     * @throws Exception
+     * @throws SeatReductionNotAllowedException
      */
     private function adjustSeats(CollegeOrganization $collegeOrg, int $desiredSeats): void
     {
@@ -94,7 +94,7 @@ final class OrganizationCollegeSyncService
     /**
      * Remove empty seats from a college organization.
      *
-     * @throws Exception
+     * @throws SeatReductionNotAllowedException
      */
     private function removeSeats(CollegeOrganization $collegeOrg, int $count): void
     {
@@ -112,7 +112,7 @@ final class OrganizationCollegeSyncService
                 'requested' => $count,
             ]);
 
-            throw new Exception($message);
+            throw new SeatReductionNotAllowedException($message);
         }
 
         foreach ($emptySeats as $seat) {

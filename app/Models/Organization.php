@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Services\OrganizationCollegeSyncService;
 use Database\Factories\OrganizationFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,15 +46,5 @@ final class Organization extends Model
     public function volunteers(): HasMany
     {
         return $this->hasMany(Volunteer::class);
-    }
-
-    /**
-     * Sync colleges with seat creation.
-     *
-     * @param  array<string, array{delegates_per_seat: int, seats?: int}>  $collegesData
-     */
-    public function syncCollegesWithSeats(array $collegesData): void
-    {
-        app(OrganizationCollegeSyncService::class)->sync($this, $collegesData);
     }
 }

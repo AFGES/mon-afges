@@ -16,6 +16,13 @@ final class Login extends BaseLogin
 {
     public bool $showMagicLinkForm = true;
 
+    private SendMagicLink $sendMagicLink;
+
+    public function boot(SendMagicLink $sendMagicLink): void
+    {
+        $this->sendMagicLink = $sendMagicLink;
+    }
+
     /**
      * Override the form schema to conditionally show/hide fields.
      */
@@ -31,12 +38,12 @@ final class Login extends BaseLogin
             ]);
     }
 
-    public function sendMagicLink(SendMagicLink $sendMagicLink): void
+    public function sendMagicLink(): void
     {
         $data = $this->form->getState();
 
         try {
-            $sendMagicLink->handle($data['email'], request()->ip());
+            $this->sendMagicLink->handle($data['email'], request()->ip());
         } catch (TooManyRequestsException $exception) {
             $this->getRateLimitedNotification($exception)?->send();
 
@@ -61,7 +68,7 @@ final class Login extends BaseLogin
     public function authenticate(): ?LoginResponse
     {
         if ($this->showMagicLinkForm) {
-            $this->sendMagicLink(app(SendMagicLink::class));
+            $this->sendMagicLink();
 
             return null;
         }

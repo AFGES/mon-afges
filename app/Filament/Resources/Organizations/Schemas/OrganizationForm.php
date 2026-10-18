@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Organizations\Schemas;
 
+use App\Exceptions\SeatReductionNotAllowedException;
 use App\Models\College;
-use Exception;
+use App\Services\OrganizationCollegeSyncService;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -50,7 +51,7 @@ final class OrganizationForm
                                 Select::make('college_id')
                                     ->label(__('college.label'))
                                     ->prefixIcon(Heroicon::OutlinedAcademicCap)
-                                    ->options(College::pluck('name', 'id'))
+                                    ->options(fn (): array => College::pluck('name', 'id')->all())
                                     ->required()
                                     ->searchable()
                                     ->preload()
@@ -104,7 +105,7 @@ final class OrganizationForm
                             ->addActionLabel(__('organization.repeater.add_action'))
                             ->reorderable(false)
                             ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => College::find($state['college_id'])?->name ?? __('organization.repeater.new_allocation')
+                            ->itemLabel(fn (array $state): ?string => self::findCollege($state['college_id'] ?? null)?->name ?? __('organization.repeater.new_allocation')
                             )
                             ->defaultItems(0)
                             ->afterStateHydrated(function (Repeater $component, $record) {
@@ -122,7 +123,7 @@ final class OrganizationForm
 
                                 $component->state($data);
                             })
-                            ->saveRelationshipsUsing(function (Repeater $component, $record, $state) {
+                            ->saveRelationshipsUsing(function (Repeater $component, $record, $state, OrganizationCollegeSyncService $syncService) {
                                 try {
                                     $collegesData = collect($state)->mapWithKeys(function ($item) {
                                         return [$item['college_id'] => [
@@ -131,14 +132,14 @@ final class OrganizationForm
                                         ]];
                                     })->toArray();
 
-                                    $record->syncCollegesWithSeats($collegesData);
+                                    $syncService->sync($record, $collegesData);
 
                                     Notification::make()
                                         ->title(__('organization.notifications.seats_updated.title'))
                                         ->body(__('organization.notifications.seats_updated.body'))
                                         ->success()
                                         ->send();
-                                } catch (Exception $e) {
+                                } catch (SeatReductionNotAllowedException $e) {
                                     Notification::make()
                                         ->title(__('organization.notifications.seats_update_failed.title'))
                                         ->body($e->getMessage())

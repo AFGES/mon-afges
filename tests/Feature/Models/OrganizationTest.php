@@ -5,12 +5,13 @@ declare(strict_types=1);
 use App\Models\College;
 use App\Models\CollegeOrganization;
 use App\Models\Organization;
+use App\Services\OrganizationCollegeSyncService;
 
 test('creates the college link and its seats when syncing colleges with seats', function () {
     $organization = Organization::factory()->create();
     $college = College::factory()->create();
 
-    $organization->syncCollegesWithSeats([
+    app(OrganizationCollegeSyncService::class)->sync($organization, [
         $college->id => ['delegates_per_seat' => 2, 'seats' => 5],
     ]);
 
@@ -28,7 +29,7 @@ test('creates the college link and its seats when syncing colleges with seats', 
 test('exposes the seat count on the colleges pivot', function () {
     $organization = Organization::factory()->create();
     $college = College::factory()->create();
-    $organization->syncCollegesWithSeats([
+    app(OrganizationCollegeSyncService::class)->sync($organization, [
         $college->id => ['delegates_per_seat' => 2, 'seats' => 3],
     ]);
 

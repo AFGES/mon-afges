@@ -4,6 +4,12 @@ pre-commit:
     format:
       run: vendor/bin/pint --dirty
       stage_fixed: true
+    lint:
+      glob: "*.php"
+      run: vendor/bin/mago lint {staged_files}
+    analyse:
+      glob: "{app,config,database,routes}/**/*.php"
+      run: vendor/bin/phpstan analyse --memory-limit=2G --no-progress {staged_files}
   scripts:
     "related-tests.sh":
       runner: bash

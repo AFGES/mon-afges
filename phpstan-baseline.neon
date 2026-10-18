@@ -1,0 +1,475 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Filament\\Actions\\ApproveAction\:\:getDefaultName\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Actions/ApproveAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Actions/ApproveDelegateAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Actions/ApproveDelegateAction.php
+
+		-
+			message: '#^Method App\\Filament\\Actions\\ApproveDelegateAction\:\:getDefaultName\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Actions/ApproveDelegateAction.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:approve\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Actions/BulkApproveAction.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isPending\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Actions/BulkApproveAction.php
+
+		-
+			message: '#^Method App\\Filament\\Actions\\BulkApproveAction\:\:getDefaultName\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Actions/BulkApproveAction.php
+
+		-
+			message: '#^Method App\\Filament\\Actions\\BulkApproveDelegatesAction\:\:getDefaultName\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Actions/BulkApproveDelegatesAction.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isPending\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Actions/BulkRejectAction.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:reject\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Actions/BulkRejectAction.php
+
+		-
+			message: '#^Method App\\Filament\\Actions\\BulkRejectAction\:\:getDefaultName\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Actions/BulkRejectAction.php
+
+		-
+			message: '#^Method App\\Filament\\Actions\\RejectAction\:\:getDefaultName\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Actions/RejectAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Schemas/DelegateForm.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Schemas/DelegateForm.php
+
+		-
+			message: '#^Parameter \$endedAt of static method App\\Filament\\Schemas\\TerminatedDelegatesField\:\:make\(\) expects \(Closure\(\)\: mixed\)\|null, Closure\(Filament\\Schemas\\Components\\Utilities\\Get\)\: mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Schemas/DelegateForm.php
+
+		-
+			message: '#^Parameter \$seatId of static method App\\Filament\\Schemas\\TerminatedDelegatesField\:\:make\(\) expects Closure\(\)\: \(string\|null\), Closure\(Filament\\Schemas\\Components\\Utilities\\Get\)\: \(string\|null\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Schemas/DelegateForm.php
+
+		-
+			message: '#^Parameter \$startedAt of static method App\\Filament\\Schemas\\TerminatedDelegatesField\:\:make\(\) expects \(Closure\(\)\: mixed\)\|null, Closure\(Filament\\Schemas\\Components\\Utilities\\Get\)\: mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Schemas/DelegateForm.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:currentlyActive\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Tables/DelegatesTable.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:ended\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Tables/DelegatesTable.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:notStarted\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Tables/DelegatesTable.php
+
+		-
+			message: '#^Method App\\Filament\\Clusters\\DemocraticTimes\\Resources\\SessionSignIns\\Pages\\ListSessionSignIns\:\:getTableQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/SessionSignIns/Pages/ListSessionSignIns.php
+
+		-
+			message: '#^Method App\\Filament\\Clusters\\DemocraticTimes\\Resources\\SessionSignIns\\Pages\\ListSessionSignIns\:\:getTableQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\Relation does not specify its types\: TRelatedModel, TDeclaringModel, TResult$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/SessionSignIns/Pages/ListSessionSignIns.php
+
+		-
+			message: '#^Method App\\Filament\\Clusters\\DemocraticTimes\\Resources\\Sessions\\Widgets\\SessionQuorumStatusWidget\:\:getHeading\(\) never returns Illuminate\\Contracts\\Support\\Htmlable so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Clusters/DemocraticTimes/Resources/Sessions/Widgets/SessionQuorumStatusWidget.php
+
+		-
+			message: '#^Cannot call method toDateString\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Filament/Pages/RequestDelegateSeat.php
+
+		-
+			message: '#^Method App\\Filament\\Pages\\RequestDelegateSeat\:\:getTitle\(\) never returns Illuminate\\Contracts\\Support\\Htmlable so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Pages/RequestDelegateSeat.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$domain\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Organizations/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$legal_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Organizations/OrganizationResource.php
+
+		-
+			message: '#^Anonymous function never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Filament/Resources/Organizations/Schemas/OrganizationForm.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Filament/Resources/Organizations/Schemas/OrganizationForm.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Filament/Resources/Organizations/Schemas/OrganizationForm.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Filament/Resources/Organizations/Schemas/OrganizationForm.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/Users/UserResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:currentlyActive\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/Volunteers/Tables/VolunteersTable.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:ended\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/Volunteers/Tables/VolunteersTable.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:notStarted\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/Volunteers/Tables/VolunteersTable.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Schemas/TerminatedDelegatesField.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/Auth/MagicLinkLoginsController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Jobs/ManageSessionSignIns.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Jobs/ManageSessionSignIns.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Profile\\ManageVolunteers\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Livewire/Profile/ManageVolunteers.php
+
+		-
+			message: '#^Anonymous function never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: app/Livewire/Profile/ManageVolunteers.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>short_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Profile/ManageVolunteers.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$approval_status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/Delegate.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Delegate.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Delegate.php
+
+		-
+			message: '#^Property App\\Models\\Delegate\:\:\$email_verified_at \(string\|null\) does not accept Illuminate\\Support\\Carbon\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Models/Delegate.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Cannot call method isAfter\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Cannot call method isBefore\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Cannot call method isSameMinute\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>calculate_quorum_per_college" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>include_proxies_in_quorum" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>quorum_percentage" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/DemocraticTimeSession.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Proxy\:\:\$approval_status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/Proxy.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<covariant Illuminate\\Database\\Eloquent\\Model\>\:\:approved\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/Scopes/ApprovedScope.php
+
+		-
+			message: '#^Class App\\Models\\Scopes\\ApprovedScope implements generic interface Illuminate\\Database\\Eloquent\\Scope but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Scopes/ApprovedScope.php
+
+		-
+			message: '#^Class App\\Models\\Scopes\\CurrentlyScope implements generic interface Illuminate\\Database\\Eloquent\\Scope but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Scopes/CurrentlyScope.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/SessionSignIn.php
+
+		-
+			message: '#^Cannot call method isBefore\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/SessionSignIn.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$approval_status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/Volunteer.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Volunteer.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Volunteer.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/DelegateApprovalRequestedNotification.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/VolunteerApprovalRequestedNotification.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Observers/DemocraticTimeSessionObserver.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Proxy\:\:\$approval_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Observers/ProxyObserver.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/DelegatePolicy.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/VolunteerPolicy.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:after\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Providers/AppServiceProvider.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$ended_at\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Services/DelegateApprovalService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Delegate\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 7
+			path: app/Services/DelegateApprovalService.php
+
+		-
+			message: '#^Method Illuminate\\Database\\Migrations\\Migration@anonymous/database/migrations/2025_07_19_132623_create_socialite_users_table\.php\:9\:\:down\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: database/migrations/2025_07_19_132623_create_socialite_users_table.php
+
+		-
+			message: '#^Method Illuminate\\Database\\Migrations\\Migration@anonymous/database/migrations/2025_07_19_132623_create_socialite_users_table\.php\:9\:\:up\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: database/migrations/2025_07_19_132623_create_socialite_users_table.php
+
+		-
+			message: '#^Method Illuminate\\Database\\Migrations\\Migration@anonymous/database/migrations/2025_12_19_100551_create_breezy_sessions_table\.php\:9\:\:down\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: database/migrations/2025_12_19_100551_create_breezy_sessions_table.php
+
+		-
+			message: '#^Method Illuminate\\Database\\Migrations\\Migration@anonymous/database/migrations/2025_12_19_100551_create_breezy_sessions_table\.php\:9\:\:up\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: database/migrations/2025_12_19_100551_create_breezy_sessions_table.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:comment\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: database/migrations/2026_01_12_193549_create_session_sign_ins_table.php
+
+		-
+			message: '#^Static method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Organization\>\:\:firstOrCreate\(\) invoked with 3 parameters, 0\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: database/seeders/OrganizationSeeder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\DemocraticTimeSession\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: database/seeders/SessionSignInSeeder.php

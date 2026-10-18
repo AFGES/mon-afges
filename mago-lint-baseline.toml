@@ -1,0 +1,457 @@
+variant = "loose"
+
+[[issues]]
+file = "app/Actions/SendMagicLink.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "app/Console/Commands/SyncDelegatesToGoogleWorkspaceCommand.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 1
+
+[[issues]]
+file = "app/Filament/Actions/ApproveDelegateAction.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "app/Filament/Actions/BulkApproveAction.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "app/Filament/Actions/BulkApproveDelegatesAction.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "app/Filament/Actions/BulkApproveDelegatesAction.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "app/Filament/Actions/BulkRejectAction.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/DemocraticTimes/Resources/Delegates/DelegateResource.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/DemocraticTimes/Resources/Delegates/Tables/DelegatesTable.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/DemocraticTimes/Resources/Proxies/ProxyResource.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/DemocraticTimes/Resources/Proxies/Tables/ProxiesTable.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/DemocraticTimes/Resources/SessionSignIns/SessionSignInResource.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/DemocraticTimes/Resources/Sessions/Tables/SessionsTable.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/Settings/Resources/Colleges/CollegeResource.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/Settings/Resources/Colleges/Tables/CollegesTable.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/Settings/Resources/Colleges/Tables/CollegesTable.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/Settings/Resources/DemocraticTimeTypes/DemocraticTimeTypeResource.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Clusters/Settings/Resources/DemocraticTimeTypes/Tables/DemocraticTimeTypesTable.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Pages/RequestDelegateSeat.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "app/Filament/Resources/Organizations/Schemas/OrganizationForm.php"
+code = "no-redundant-nullsafe"
+message = "The nullsafe operator (`?->`) is redundant when used with `??`."
+count = 1
+
+[[issues]]
+file = "app/Filament/Resources/Organizations/Schemas/OrganizationForm.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 6
+
+[[issues]]
+file = "app/Filament/Resources/Organizations/Tables/OrganizationsTable.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 2
+
+[[issues]]
+file = "app/Filament/Resources/Users/Tables/UsersTable.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Filament/Resources/Volunteers/Tables/VolunteersTable.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 1
+
+[[issues]]
+file = "app/Filament/Resources/Volunteers/VolunteerResource.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/Auth/MagicLinkLoginsController.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "app/Http/Controllers/Auth/MagicLinkLoginsController.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
+file = "app/Jobs/ManageSessionSignIns.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "app/Livewire/Profile/ManageVolunteers.php"
+code = "no-redundant-nullsafe"
+message = "The nullsafe operator (`?->`) is redundant when used with `??`."
+count = 1
+
+[[issues]]
+file = "app/Models/DemocraticTimeSession.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 1
+
+[[issues]]
+file = "app/Models/DemocraticTimeSession.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "app/Models/DemocraticTimeSession.php"
+code = "no-redundant-nullsafe"
+message = "The nullsafe operator (`?->`) is redundant when used with `??`."
+count = 3
+
+[[issues]]
+file = "app/Models/Proxy.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "app/Models/Proxy.php"
+code = "use-compound-assignment"
+message = "Use a compound assignment for clarity and performance."
+count = 1
+
+[[issues]]
+file = "app/Models/Seat.php"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 1
+
+[[issues]]
+file = "app/Models/User.php"
+code = "no-redundant-final"
+message = "The `final` modifier on method `canAccessPanel` is redundant as the class is already final."
+count = 1
+
+[[issues]]
+file = "app/Models/User.php"
+code = "no-redundant-final"
+message = "The `final` modifier on method `casts` is redundant as the class is already final."
+count = 1
+
+[[issues]]
+file = "app/Notifications/MagicLinkNotification.php"
+code = "sensitive-parameter"
+message = "Parameters that may contain sensitive information should be marked with the `#[SensitiveParameter]` attribute."
+count = 1
+
+[[issues]]
+file = "app/Observers/DelegateObserver.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "app/Observers/DelegateObserver.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "app/Observers/ProxyObserver.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "app/Observers/VolunteerObserver.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "app/Providers/AppServiceProvider.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "app/Providers/TelescopeServiceProvider.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "app/Providers/TelescopeServiceProvider.php"
+code = "prefer-arrow-function"
+message = "This closure can be simplified to a more concise arrow function."
+count = 2
+
+[[issues]]
+file = "app/Providers/TelescopeServiceProvider.php"
+code = "strict-behavior"
+message = "Call to `in_array` must enforce strict comparison."
+count = 1
+
+[[issues]]
+file = "app/Services/DelegateApprovalService.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 2
+
+[[issues]]
+file = "app/Services/DelegateGoogleWorkspaceSyncService.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 1
+
+[[issues]]
+file = "app/Services/DelegateGoogleWorkspaceSyncService.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 2
+
+[[issues]]
+file = "app/Services/DelegateGoogleWorkspaceSyncServiceInterface.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 1
+
+[[issues]]
+file = "app/Services/OrganizationCollegeSyncService.php"
+code = "no-else-clause"
+message = "Avoid `elseif` clauses."
+count = 1
+
+[[issues]]
+file = "app/Services/OrganizationCollegeSyncService.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "app/Services/OrganizationCollegeSyncService.php"
+code = "no-isset"
+message = "Use of the `isset` construct."
+count = 1
+
+[[issues]]
+file = "config/approval.php"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 1
+
+[[issues]]
+file = "config/auth.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "config/cache.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 1
+
+[[issues]]
+file = "config/database.php"
+code = "readable-literal"
+message = "Numeric literal could use underscore separators for readability."
+count = 2
+
+[[issues]]
+file = "config/filament-shield.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "config/telescope.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1
+
+[[issues]]
+file = "database/migrations/2025_07_24_205915_create_permission_tables.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 3
+
+[[issues]]
+file = "database/migrations/2026_01_07_231416_create_proxies_table.php"
+code = "no-else-clause"
+message = "Avoid `else` clauses."
+count = 1
+
+[[issues]]
+file = "database/migrations/2026_10_14_195414_split_user_name_into_first_and_last_name.php"
+code = "no-shorthand-ternary"
+message = "Use of the shorthand ternary operator."
+count = 1
+
+[[issues]]
+file = "database/seeders/DelegateSeeder.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 2
+
+[[issues]]
+file = "database/seeders/DelegateSeeder.php"
+code = "prefer-early-continue"
+message = "Consider using early continue pattern to reduce nesting."
+count = 1
+
+[[issues]]
+file = "database/seeders/ProxySeeder.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "database/seeders/SeatSeeder.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "database/seeders/SessionSignInSeeder.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 2
+
+[[issues]]
+file = "tests/Feature/Filament/Actions/ApprovalActionsTest.php"
+code = "no-boolean-flag-parameter"
+message = "Avoid boolean flag parameters."
+count = 2
+
+[[issues]]
+file = "tests/Feature/Filament/Resources/Volunteers/Widgets/PendingVolunteerStatsTest.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "tests/Feature/Listeners/AssignOrganizationOnRegistrationListenerTest.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 2
+
+[[issues]]
+file = "tests/Feature/Models/CollegeOrganizationTest.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 1
+
+[[issues]]
+file = "tests/Feature/Observers/DelegateObserverTest.php"
+code = "no-empty-catch-clause"
+message = "Do not use empty `catch` blocks."
+count = 1
+
+[[issues]]
+file = "tests/Feature/Services/OrganizationCollegeSyncServiceTest.php"
+code = "no-implicit-model-query"
+message = "Query-builder methods on a model should be reached through an explicit `query()` call."
+count = 3
+
+[[issues]]
+file = "tests/Feature/Services/OrganizationCollegeSyncServiceTest.php"
+code = "prefer-first-class-callable"
+message = "Use first-class callable syntax `...` instead of a arrow function."
+count = 1
+
+[[issues]]
+file = "tests/Pest.php"
+code = "inline-variable-return"
+message = "Variable assignment can be inlined into the return statement."
+count = 1
+
+[[issues]]
+file = "tests/TestCase.php"
+code = "no-empty-comment"
+message = "Empty comments are not allowed."
+count = 1

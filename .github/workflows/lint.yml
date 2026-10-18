@@ -40,6 +40,12 @@ jobs:
       - name: Run Pint
         run: vendor/bin/pint
 
+      - name: Run Mago lint
+        run: vendor/bin/mago lint --reporting-format=github
+
+      - name: Run Larastan
+        run: vendor/bin/phpstan analyse --memory-limit=2G --error-format=github --no-progress
+
       # - name: Commit Changes
       #   uses: stefanzweifel/git-auto-commit-action@v7
       #   with:

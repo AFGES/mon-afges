@@ -9,6 +9,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 final class SessionSignInForm
 {
@@ -21,6 +22,7 @@ final class SessionSignInForm
                     ->schema([
                         Select::make('democratic_time_session_id')
                             ->label(__('democratic_time_session.label'))
+                            ->prefixIcon(Heroicon::OutlinedPresentationChartBar)
                             ->relationship('democraticTimeSession', 'location')
                             ->searchable()
                             ->preload()
@@ -30,6 +32,7 @@ final class SessionSignInForm
 
                         Select::make('seat_id')
                             ->label(__('emargement.fields.seat'))
+                            ->prefixIcon(Heroicon::OutlinedUserGroup)
                             ->relationship(
                                 'seat',
                                 modifyQueryUsing: fn ($query) => $query->with('collegeOrganization.college')
@@ -43,6 +46,7 @@ final class SessionSignInForm
 
                         Select::make('delegate_id')
                             ->label(__('emargement.fields.delegate'))
+                            ->prefixIcon(Heroicon::OutlinedUser)
                             ->relationship(
                                 'delegate',
                                 'email',
@@ -58,6 +62,7 @@ final class SessionSignInForm
 
                         Select::make('signed_in_by_seat_id')
                             ->label(__('emargement.fields.signed_in_by_seat'))
+                            ->prefixIcon(Heroicon::OutlinedUserGroup)
                             ->relationship(
                                 'signedInBySeat',
                                 modifyQueryUsing: fn ($query) => $query->with('collegeOrganization.college')
@@ -70,6 +75,7 @@ final class SessionSignInForm
 
                         DateTimePicker::make('signed_in_at')
                             ->label(__('emargement.fields.signed_in_at'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->required()
                             ->seconds(false)
                             ->native(false)
@@ -77,6 +83,7 @@ final class SessionSignInForm
 
                         DateTimePicker::make('signed_out_at')
                             ->label(__('emargement.fields.signed_out_at'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->seconds(false)
                             ->native(false)
                             ->after('signed_in_at')

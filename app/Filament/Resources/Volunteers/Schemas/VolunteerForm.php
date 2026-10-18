@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 final class VolunteerForm
 {
@@ -26,12 +27,14 @@ final class VolunteerForm
                             ->schema([
                                 Select::make('user_id')
                                     ->label(__('volunteer.fields.user'))
+                                    ->prefixIcon(Heroicon::OutlinedUser)
                                     ->relationship('user', 'name')
                                     ->disabled(fn ($record) => $record !== null)
                                     ->hiddenOn(UsersVolunteersRelationManager::class)
                                     ->required(),
                                 Select::make('organization_id')
                                     ->label(__('volunteer.fields.organization'))
+                                    ->prefixIcon(Heroicon::OutlinedBuildingOffice2)
                                     ->relationship('organization', 'short_name')
                                     ->disabled(fn ($record) => $record !== null)
                                     ->hiddenOn(OrganizationsVolunteersRelationManager::class)
@@ -39,16 +42,19 @@ final class VolunteerForm
                             ]),
                         TextInput::make('position_title')
                             ->label(__('volunteer.fields.position_title'))
+                            ->prefixIcon(Heroicon::OutlinedBriefcase)
                             ->maxLength(255),
                         Grid::make(2)
                             ->schema([
                                 DatePicker::make('started_at')
                                     ->label(__('volunteer.fields.started_at'))
+                                    ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->native(false)
                                     ->displayFormat('d/m/Y')
                                     ->required(),
                                 DatePicker::make('ended_at')
                                     ->label(__('volunteer.fields.ended_at'))
+                                    ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->native(false)
                                     ->displayFormat('d/m/Y')
                                     ->after('started_at'),

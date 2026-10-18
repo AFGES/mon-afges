@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 final class OrganizationForm
 {
@@ -23,18 +24,20 @@ final class OrganizationForm
                     ->schema([
                         TextInput::make('short_name')
                             ->label(__('organization.fields.short_name'))
+                            ->prefixIcon(Heroicon::OutlinedBuildingOffice2)
                             ->required()
                             ->maxLength(255),
                         TextInput::make('legal_name')
                             ->label(__('organization.fields.legal_name'))
+                            ->prefixIcon(Heroicon::OutlinedBuildingOffice2)
                             ->required()
                             ->maxLength(255),
                         TextInput::make('domain')
                             ->label(__('organization.fields.domain'))
+                            ->prefixIcon(Heroicon::OutlinedGlobeAlt)
                             ->maxLength(255)
                             ->placeholder('example.org')
-                            ->helperText(__('organization.helpers.domain'))
-                            ->suffixIcon('heroicon-o-globe-alt'),
+                            ->helperText(__('organization.helpers.domain')),
                     ])
                     ->columns(2),
 
@@ -46,6 +49,7 @@ final class OrganizationForm
                             ->schema([
                                 Select::make('college_id')
                                     ->label(__('college.label'))
+                                    ->prefixIcon(Heroicon::OutlinedAcademicCap)
                                     ->options(College::pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
@@ -69,6 +73,7 @@ final class OrganizationForm
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                                 TextInput::make('seats')
                                     ->label(__('college.fields.seats'))
+                                    ->prefixIcon(Heroicon::OutlinedHashtag)
                                     ->numeric()
                                     ->required()
                                     ->minValue(0)
@@ -82,6 +87,7 @@ final class OrganizationForm
                                     }),
                                 TextInput::make('delegates_per_seat')
                                     ->label(__('college.fields.delegates_per_seat'))
+                                    ->prefixIcon(Heroicon::OutlinedHashtag)
                                     ->numeric()
                                     ->required()
                                     ->minValue(1)

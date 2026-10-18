@@ -10,6 +10,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 final class SessionForm
 {
@@ -22,6 +23,7 @@ final class SessionForm
                     ->schema([
                         Select::make('democratic_time_type_id')
                             ->label(__('democratic_time_session.fields.democratic_time_type'))
+                            ->prefixIcon(Heroicon::OutlinedRectangleStack)
                             ->relationship('democraticTimeType', 'name')
                             ->searchable()
                             ->preload()
@@ -30,18 +32,21 @@ final class SessionForm
 
                         DateTimePicker::make('started_at')
                             ->label(__('democratic_time_session.fields.started_at'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->required()
                             ->seconds(false)
                             ->native(false),
 
                         DateTimePicker::make('ended_at')
                             ->label(__('democratic_time_session.fields.ended_at'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->seconds(false)
                             ->native(false)
                             ->after('started_at'),
 
                         TextInput::make('location')
                             ->label(__('democratic_time_session.fields.location'))
+                            ->prefixIcon(Heroicon::OutlinedMapPin)
                             ->required()
                             ->maxLength(255)
                             ->columnSpan(2),
@@ -59,6 +64,7 @@ final class SessionForm
 
                         TextInput::make('minutes_before_start')
                             ->label(__('democratic_time_session.fields.minutes_before_start'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->helperText(__('emargement.help.minutes_before_start'))
                             ->numeric()
                             ->default(15)
@@ -69,6 +75,7 @@ final class SessionForm
 
                         DateTimePicker::make('sign_in_opens_at')
                             ->label(__('democratic_time_session.fields.sign_in_opens_at'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->helperText(__('emargement.help.sign_in_opens_at'))
                             ->seconds(false)
                             ->native(false)
@@ -76,6 +83,7 @@ final class SessionForm
 
                         DateTimePicker::make('sign_in_closes_at')
                             ->label(__('democratic_time_session.fields.sign_in_closes_at'))
+                            ->prefixIcon(Heroicon::OutlinedClock)
                             ->helperText(__('emargement.help.sign_in_closes_at'))
                             ->seconds(false)
                             ->native(false)
@@ -89,6 +97,7 @@ final class SessionForm
                     ->schema([
                         TextInput::make('calculate_quorum_per_college_display')
                             ->label(__('democratic_time_session.fields.calculate_quorum_per_college'))
+                            ->prefixIcon(Heroicon::OutlinedChartPie)
                             ->default(fn ($record) => $record?->calculate_quorum_per_college
                                 ? __('democratic_time_type.fields.calculate_quorum_per_college')
                                 : __('emargement.quorum.combined'))
@@ -97,12 +106,14 @@ final class SessionForm
 
                         TextInput::make('quorum_percentage_display')
                             ->label(__('democratic_time_session.fields.quorum_percentage'))
+                            ->prefixIcon(Heroicon::OutlinedChartPie)
                             ->default(fn ($record) => $record?->quorum_percentage ? "{$record->quorum_percentage}%" : '-')
                             ->disabled()
                             ->dehydrated(false),
 
                         TextInput::make('include_proxies_in_quorum_display')
                             ->label(__('democratic_time_session.fields.include_proxies_in_quorum'))
+                            ->prefixIcon(Heroicon::OutlinedChartPie)
                             ->default(fn ($record) => $record?->include_proxies_in_quorum ? __('common.yes') : __('common.no'))
                             ->disabled()
                             ->dehydrated(false),

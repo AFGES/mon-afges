@@ -9,6 +9,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -22,25 +23,31 @@ final class UserForm
             ->components([
                 TextInput::make('first_name')
                     ->label(__('user.fields.first_name'))
+                    ->prefixIcon(Heroicon::OutlinedUser)
                     ->required()
                     ->maxLength(255),
                 TextInput::make('last_name')
                     ->label(__('user.fields.last_name'))
+                    ->prefixIcon(Heroicon::OutlinedUser)
                     ->required()
                     ->maxLength(255),
                 TextInput::make('email')
                     ->label(__('user.fields.email'))
+                    ->prefixIcon(Heroicon::OutlinedEnvelope)
                     ->email()
                     ->required(),
                 DateTimePicker::make('email_verified_at')
                     ->label(__('user.fields.email_verified_at'))
+                    ->prefixIcon(Heroicon::OutlinedCheckBadge)
                     ->disabled(),
                 TextInput::make('password')
                     ->label(__('user.fields.password'))
+                    ->prefixIcon(Heroicon::OutlinedLockClosed)
                     ->password()
                     ->disabled(),
                 Select::make('roles')
                     ->label(__('user.fields.roles'))
+                    ->prefixIcon(Heroicon::OutlinedShieldCheck)
                     ->relationship(
                         name: 'roles',
                         titleAttribute: 'name',

@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
@@ -56,6 +57,7 @@ final class ManageVolunteers extends MyProfileComponent
                     ->schema([
                         Select::make('organization_id')
                             ->label(__('profile.form.organization.label'))
+                            ->prefixIcon(Heroicon::OutlinedBuildingOffice2)
                             ->options(Organization::query()->pluck('short_name', 'id'))
                             ->required()
                             ->searchable()
@@ -66,11 +68,13 @@ final class ManageVolunteers extends MyProfileComponent
                             ]),
                         TextInput::make('position_title')
                             ->label(__('profile.form.position_title.label'))
+                            ->prefixIcon(Heroicon::OutlinedBriefcase)
                             ->placeholder(__('profile.form.position_title.placeholder'))
                             ->default('Membre')
                             ->maxLength(255),
                         DatePicker::make('started_at')
                             ->label(__('profile.form.started_at.label'))
+                            ->prefixIcon(Heroicon::OutlinedCalendarDays)
                             ->default(now())
                             ->required()
                             ->maxDate(now())

@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 final class DemocraticTimeTypeForm
 {
@@ -18,18 +19,21 @@ final class DemocraticTimeTypeForm
             ->components([
                 TextInput::make('name')
                     ->label(__('democratic_time_type.fields.name'))
+                    ->prefixIcon(Heroicon::OutlinedRectangleStack)
                     ->required()
                     ->maxLength(255)
                     ->columnSpan(2),
 
                 TextInput::make('acronym')
                     ->label(__('democratic_time_type.fields.acronym'))
+                    ->prefixIcon(Heroicon::OutlinedHashtag)
                     ->required()
                     ->maxLength(255)
                     ->columnSpan(1),
 
                 TextInput::make('convocation_interval_days')
                     ->label(__('democratic_time_type.fields.convocation_interval_days'))
+                    ->prefixIcon(Heroicon::OutlinedClock)
                     ->required()
                     ->numeric()
                     ->minValue(1)
@@ -45,6 +49,7 @@ final class DemocraticTimeTypeForm
 
                         TextInput::make('quorum_percentage')
                             ->label(__('democratic_time_type.fields.quorum_percentage'))
+                            ->prefixIcon(Heroicon::OutlinedChartPie)
                             ->required()
                             ->numeric()
                             ->minValue(0)

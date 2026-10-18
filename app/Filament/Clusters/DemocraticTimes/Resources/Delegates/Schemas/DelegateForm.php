@@ -22,6 +22,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -40,6 +41,7 @@ final class DelegateForm
                             ->schema([
                                 DatePicker::make('started_at')
                                     ->label(__('delegate.started_at'))
+                                    ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->default(today())
                                     ->native(false)
                                     ->displayFormat('d/m/Y')
@@ -48,6 +50,7 @@ final class DelegateForm
                                     ->required(),
                                 DatePicker::make('ended_at')
                                     ->label(__('delegate.ended_at'))
+                                    ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->native(false)
                                     ->displayFormat('d/m/Y')
                                     ->live()
@@ -56,6 +59,7 @@ final class DelegateForm
                             ]),
                         Select::make('user_id')
                             ->label(Str::ucfirst(__('user.label')))
+                            ->prefixIcon(Heroicon::OutlinedUser)
                             ->relationship(name: 'user', titleAttribute: 'name')
                             ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->name)
                             ->searchable()
@@ -65,12 +69,14 @@ final class DelegateForm
                             ->required(),
                         TextInput::make('email')
                             ->label(__('delegate.fields.email'))
+                            ->prefixIcon(Heroicon::OutlinedEnvelope)
                             ->email()
                             ->required()
                             ->maxLength(255)
                             ->helperText(__('delegate.fields.email_helper')),
                         Select::make('organization_id')
                             ->label(Str::ucfirst(__('organization.label')))
+                            ->prefixIcon(Heroicon::OutlinedBuildingOffice2)
                             ->relationship(name: 'organization', titleAttribute: 'short_name')
                             ->searchable()
                             ->preload()
@@ -80,6 +86,7 @@ final class DelegateForm
                             ->required(),
                         Select::make('seat_id')
                             ->label(__('delegate.fields.seat'))
+                            ->prefixIcon(Heroicon::OutlinedUserGroup)
                             ->relationship(
                                 name: 'seat',
                                 modifyQueryUsing: fn (Builder $query, Component $livewire, Get $get): Builder => $query

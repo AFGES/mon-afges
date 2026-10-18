@@ -10,22 +10,33 @@ on:
       - develop
       - main
 
-permissions:
-  contents: read
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     environment: Testing
+    timeout-minutes: 20
+    permissions:
+      contents: read
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: 8.4
           tools: composer:v2
@@ -39,7 +50,7 @@ jobs:
           COMPOSER_AUTH: '{"http-basic":{"packages.filamentphp.com":{"username":"${{ secrets.FILAMENT_BLUEPRINT_EMAIL }}","password":"${{ secrets.FILAMENT_BLUEPRINT_LICENSE_KEY }}"}}}'
         run: |
           composer install --no-interaction --prefer-dist --optimize-autoloader
-          bun install
+          bun install --frozen-lockfile
 
       - name: Copy Environment File
         run: cp .env.example .env

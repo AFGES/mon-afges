@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Schemas;
 
 use App\Models\Delegate;
-use App\Services\DelegateApprovalService;
+use App\Services\SeatCapacityCalculator;
 use Carbon\CarbonInterface;
 use Closure;
 use Filament\Forms\Components\CheckboxList;
@@ -75,7 +75,7 @@ final class TerminatedDelegatesField
             return [];
         }
 
-        $service = app(DelegateApprovalService::class);
+        $service = app(SeatCapacityCalculator::class);
         $start = self::toDate($startedAt);
         $end = self::toDate($endedAt);
 
@@ -99,7 +99,7 @@ final class TerminatedDelegatesField
      */
     private static function resolveOccupancy(string $seatId, ?string $exceptDelegateId, ?Carbon $startedAt, ?Carbon $endedAt): array
     {
-        $service = app(DelegateApprovalService::class);
+        $service = app(SeatCapacityCalculator::class);
 
         return [
             'delegates' => $service->currentDelegatesOfSeatId($seatId, $exceptDelegateId, $startedAt, $endedAt),

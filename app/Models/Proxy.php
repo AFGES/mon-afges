@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\ApprovalStatus;
+use App\Models\Contracts\Approvable;
 use App\Models\Scopes\ApprovedScope;
-use App\Notifications\ProxyApprovedNotification;
 use App\Traits\HasApprovalStatus;
 use Database\Factories\ProxyFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[ScopedBy([ApprovedScope::class])]
-final class Proxy extends Model
+/**
+ * @property \Illuminate\Support\Carbon|null $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ */
+final class Proxy extends Model implements Approvable
 {
     use HasApprovalStatus;
 
@@ -34,10 +36,6 @@ final class Proxy extends Model
         'democratic_time_session_id',
         'started_at',
         'ended_at',
-        'approval_status',
-        'approved_by',
-        'approved_at',
-        'rejection_reason',
     ];
 
     protected $table = 'proxies';
@@ -98,34 +96,12 @@ final class Proxy extends Model
         return $this->delegatorSeat->isSameCollegeAs($this->proxyHolderSeat);
     }
 
-    /**
-     * Send approval notification to the delegator seat's current delegate(s).
-     */
-    public function notifyDelegatesOfApproval(): void
-    {
-        $delegates = $this->delegatorSeat->delegates()
-            ->where('started_at', '<=', now())
-            ->where(function (Builder $query): void {
-                $query->whereNull('ended_at')
-                    ->orWhere('ended_at', '>=', now());
-            })
-            ->get();
-
-        foreach ($delegates as $delegate) {
-            if ($delegate->user) {
-                $delegate->user->notify(new ProxyApprovedNotification($this));
-            }
-        }
-    }
-
     /** @return array<string, string> */
     protected function casts(): array
     {
         return [
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
-            'approval_status' => ApprovalStatus::class,
-            'approved_at' => 'datetime',
         ];
     }
 }

@@ -4,34 +4,29 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Models\User;
 use App\Models\Volunteer;
-use App\Notifications\VolunteerApprovalRequestedNotification;
-use Illuminate\Support\Facades\Notification;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use App\Notifications\ApprovalApprovedNotification;
+use App\Notifications\ApprovalRequestedNotification;
+use App\Observers\Concerns\NotifiesApprovers;
 
 final class VolunteerObserver
 {
+    use NotifiesApprovers;
+
     public function created(Volunteer $volunteer): void
     {
-        $this->notifyApprovers($volunteer);
+        $this->notifyApprovers('Update:Volunteer', new ApprovalRequestedNotification($volunteer));
     }
 
     /**
-     * Notify users with approval permissions about the new volunteer application.
+     * Notify the volunteer's user once their application is approved.
      */
-    private function notifyApprovers(Volunteer $volunteer): void
+    public function updated(Volunteer $volunteer): void
     {
-        try {
-            $approvers = User::permission('Update:Volunteer')->get();
-
-            if ($approvers->isEmpty()) {
-                return;
-            }
-
-            Notification::send($approvers, new VolunteerApprovalRequestedNotification($volunteer));
-        } catch (PermissionDoesNotExist) {
-            // Permission doesn't exist yet, skip notification
+        if (! $volunteer->wasChanged('approval_status') || ! $volunteer->isApproved()) {
+            return;
         }
+
+        $volunteer->user?->notify(new ApprovalApprovedNotification($volunteer));
     }
 }

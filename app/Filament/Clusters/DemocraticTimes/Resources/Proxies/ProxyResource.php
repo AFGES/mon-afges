@@ -11,6 +11,7 @@ use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Pages\ListProxies;
 use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Schemas\ProxyForm;
 use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\Tables\ProxiesTable;
 use App\Models\Proxy;
+use App\Models\Scopes\ApprovedScope;
 use BackedEnum;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\RelationManagers\RelationGroup;
@@ -20,6 +21,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 final class ProxyResource extends Resource
 {
@@ -48,7 +51,9 @@ final class ProxyResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return Proxy::getNavigationBadge();
+        $count = Proxy::pendingCount();
+
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function form(Schema $schema): Schema
@@ -81,5 +86,22 @@ final class ProxyResource extends Resource
             'create' => CreateProxy::route('/create'),
             'edit' => EditProxy::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                ApprovedScope::class,
+            ]);
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+                ApprovedScope::class,
+            ]);
     }
 }

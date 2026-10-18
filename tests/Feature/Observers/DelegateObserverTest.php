@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Delegate;
 use App\Models\User;
-use App\Notifications\DelegateApprovalRequestedNotification;
+use App\Notifications\ApprovalRequestedNotification;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceServiceInterface;
 use Illuminate\Support\Facades\DB;
@@ -49,21 +49,21 @@ describe('approver notification', function () {
         Permission::create(['name' => 'Update:Delegate', 'guard_name' => 'web']);
         $firstApprover = User::factory()->create()->givePermissionTo('Update:Delegate');
         $secondApprover = User::factory()->create()->givePermissionTo('Update:Delegate');
-        Notification::fake([DelegateApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         $delegate = Delegate::factory()->create();
 
         Notification::assertSentTo(
             [$firstApprover, $secondApprover],
-            DelegateApprovalRequestedNotification::class,
-            fn (DelegateApprovalRequestedNotification $notification): bool => $notification->delegate->is($delegate),
+            ApprovalRequestedNotification::class,
+            fn (ApprovalRequestedNotification $notification): bool => $notification->approvable->is($delegate),
         );
     });
 
     it('does not notify approvers when the delegate is created already approved', function () {
         Permission::create(['name' => 'Update:Delegate', 'guard_name' => 'web']);
         User::factory()->create()->givePermissionTo('Update:Delegate');
-        Notification::fake([DelegateApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         Delegate::factory()->approved()->create();
 
@@ -73,16 +73,16 @@ describe('approver notification', function () {
     it('does not notify a user without the update permission', function () {
         Permission::create(['name' => 'Update:Delegate', 'guard_name' => 'web']);
         $userWithoutPermission = User::factory()->create();
-        Notification::fake([DelegateApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         Delegate::factory()->create();
 
-        Notification::assertNotSentTo($userWithoutPermission, DelegateApprovalRequestedNotification::class);
+        Notification::assertNotSentTo($userWithoutPermission, ApprovalRequestedNotification::class);
     });
 
     it('sends nothing when nobody holds the update permission', function () {
         Permission::create(['name' => 'Update:Delegate', 'guard_name' => 'web']);
-        Notification::fake([DelegateApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         Delegate::factory()->create();
 
@@ -90,7 +90,7 @@ describe('approver notification', function () {
     });
 
     it('sends nothing when the update permission does not exist', function () {
-        Notification::fake([DelegateApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         $delegate = Delegate::factory()->create();
 

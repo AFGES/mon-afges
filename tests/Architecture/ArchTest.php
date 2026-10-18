@@ -12,7 +12,8 @@ arch()->preset()->laravel()
 arch('models')
     ->expect('App\Models')
     ->toExtend('Illuminate\Database\Eloquent\Model')
-    ->ignoring('App\Models\Scopes');
+    ->ignoring('App\Models\Scopes')
+    ->ignoring('App\Models\Contracts');
 
 arch('service providers')
     ->expect('App\Providers')

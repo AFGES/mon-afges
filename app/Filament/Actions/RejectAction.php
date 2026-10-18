@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Actions;
 
+use App\Models\Contracts\Approvable;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -22,7 +23,7 @@ final class RejectAction extends Action
             ->modalHeading(__('approval.modal.reject.heading'))
             ->modalDescription(__('approval.modal.reject.description'))
             ->authorize('update')
-            ->visible(fn ($record): bool => $record->isPending())
+            ->visible(fn (Approvable $record): bool => $record->isPending())
             ->schema([
                 Textarea::make('rejection_reason')
                     ->label(__('approval.fields.rejection_reason'))
@@ -30,8 +31,8 @@ final class RejectAction extends Action
                     ->rows(3)
                     ->maxLength(1000),
             ])
-            ->action(function ($record, array $data): void {
-                $record->reject($data['rejection_reason']);
+            ->action(function (Approvable $record, array $data): void {
+                $record->reject($data['rejection_reason'], auth()->id());
 
                 Notification::make()
                     ->success()
@@ -41,7 +42,7 @@ final class RejectAction extends Action
             });
     }
 
-    public static function getDefaultName(): ?string
+    public static function getDefaultName(): string
     {
         return 'reject';
     }

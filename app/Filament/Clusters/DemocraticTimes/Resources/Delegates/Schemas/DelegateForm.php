@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Schemas;
 
-use App\Filament\Resources\Organizations\RelationManagers\DelegatesRelationManager as OrganizationsDelegatesRelationManager;
-use App\Filament\Resources\Users\RelationManagers\DelegatesRelationManager as UsersDelegatesRelationManager;
+use App\Filament\RelationManagers\BaseDelegatesRelationManager;
 use App\Filament\Schemas\Components\ApprovalField;
 use App\Filament\Schemas\DelegateFormFields;
 use App\Filament\Schemas\TerminatedDelegatesField;
 use App\Models\Delegate;
 use App\Models\Seat;
 use App\Models\User;
-use App\Services\DelegateApprovalService;
+use App\Rules\SeatBelongsToOrganization;
+use App\Services\SeatCapacityCalculator;
 use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -65,7 +65,7 @@ final class DelegateForm
                             ->searchable()
                             ->preload()
                             ->default(auth()->id())
-                            ->hiddenOn(UsersDelegatesRelationManager::class)
+                            ->hidden(fn (Component $livewire): bool => self::isOwnerField($livewire, 'user_id'))
                             ->required(),
                         TextInput::make('email')
                             ->label(__('delegate.fields.email'))
@@ -80,7 +80,7 @@ final class DelegateForm
                             ->relationship(name: 'organization', titleAttribute: 'short_name')
                             ->searchable()
                             ->preload()
-                            ->hiddenOn(OrganizationsDelegatesRelationManager::class)
+                            ->hidden(fn (Component $livewire): bool => self::isOwnerField($livewire, 'organization_id'))
                             ->live()
                             ->afterStateUpdated(fn (Set $set): mixed => $set('seat_id', null))
                             ->required(),
@@ -89,15 +89,13 @@ final class DelegateForm
                             ->prefixIcon(Heroicon::OutlinedUserGroup)
                             ->relationship(
                                 name: 'seat',
-                                modifyQueryUsing: fn (Builder $query, Component $livewire, Get $get): Builder => $query
-                                    ->with([
+                                modifyQueryUsing: fn (Builder $query, Component $livewire, Get $get): Builder => DelegateFormFields::restrictToOrganization(
+                                    $query->with([
                                         'collegeOrganization.college',
                                         'delegates.user',
-                                    ])
-                                    ->whereHas(
-                                        'collegeOrganization',
-                                        fn (Builder $collegeOrganizationQuery) => $collegeOrganizationQuery->where('organization_id', self::organizationId($livewire, $get)),
-                                    ),
+                                    ]),
+                                    self::organizationId($livewire, $get),
+                                ),
                             )
                             ->getOptionLabelFromRecordUsing(fn (Seat $record): string => $record->label())
                             ->searchable()
@@ -106,25 +104,9 @@ final class DelegateForm
                             ->afterStateUpdated(self::refreshTerminatedDelegates(...))
                             ->required()
                             ->rules([
-                                fn (Component $livewire, Get $get): Closure => function (string $attribute, mixed $value, Closure $fail) use ($livewire, $get): void {
-                                    if ($value === null) {
-                                        return;
-                                    }
-
-                                    $seatBelongsToOrganization = Seat::query()
-                                        ->whereKey($value)
-                                        ->whereHas(
-                                            'collegeOrganization',
-                                            fn (Builder $query) => $query->where('organization_id', self::organizationId($livewire, $get)),
-                                        )
-                                        ->exists();
-
-                                    if (! $seatBelongsToOrganization) {
-                                        $fail(__('validation.exists', ['attribute' => $attribute]));
-                                    }
-                                },
-                                fn (Get $get, ?Model $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $record): void {
-                                    $violation = self::capacityViolationOnEdit($record, $value, $get('started_at'), $get('ended_at'));
+                                fn (Component $livewire, Get $get): SeatBelongsToOrganization => new SeatBelongsToOrganization(self::organizationId($livewire, $get)),
+                                fn (Get $get, ?Model $record, SeatCapacityCalculator $seatCapacity): Closure => function (string $attribute, mixed $value, Closure $fail) use ($get, $record, $seatCapacity): void {
+                                    $violation = self::capacityViolationOnEdit($seatCapacity, $record, $value, $get('started_at'), $get('ended_at'));
 
                                     if ($violation > 0) {
                                         $fail(trans_choice('delegate.approval.capacity_exceeded_on_edit', $violation, ['count' => $violation]));
@@ -166,7 +148,7 @@ final class DelegateForm
      * By how many delegates the seat would exceed its capacity once an approved delegate is moved to it
      * or its dates change. Pending, rejected and unchanged records, and creations, are not checked here.
      */
-    private static function capacityViolationOnEdit(?Model $record, mixed $seatId, mixed $startedAt, mixed $endedAt): int
+    private static function capacityViolationOnEdit(SeatCapacityCalculator $seatCapacity, ?Model $record, mixed $seatId, mixed $startedAt, mixed $endedAt): int
     {
         if (! $record instanceof Delegate || ! $record->isApproved() || ! is_string($seatId) || blank($startedAt)) {
             return 0;
@@ -183,7 +165,15 @@ final class DelegateForm
             return 0;
         }
 
-        return app(DelegateApprovalService::class)->capacityViolation($seatId, $start, $end, $record->getKey());
+        return $seatCapacity->capacityViolation($seatId, $start, $end, $record->getKey());
+    }
+
+    /**
+     * Whether the form is rendered inside a delegates relation manager whose owner record fixes the given field.
+     */
+    private static function isOwnerField(Component $livewire, string $field): bool
+    {
+        return $livewire instanceof BaseDelegatesRelationManager && $livewire->ownerField() === $field;
     }
 
     /**
@@ -192,7 +182,7 @@ final class DelegateForm
      */
     private static function organizationId(Component $livewire, Get $get): int|string|null
     {
-        if ($livewire instanceof OrganizationsDelegatesRelationManager) {
+        if ($livewire instanceof BaseDelegatesRelationManager && $livewire->ownerField() === 'organization_id') {
             return $livewire->getOwnerRecord()->getKey();
         }
 

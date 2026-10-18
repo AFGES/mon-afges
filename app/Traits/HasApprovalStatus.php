@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace App\Traits;
 
 use App\Enums\ApprovalStatus;
+use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use App\Models\User;
-use App\Notifications\ApprovalApprovedNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasApprovalStatus
 {
-    public static function getNavigationBadge(): ?string
+    /**
+     * Count pending records regardless of the approval and period scopes (soft deletes stay applied).
+     */
+    public static function pendingCount(): int
     {
-        $count = self::withoutGlobalScopes()
+        return self::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
             ->pending()
             ->count();
-
-        return $count > 0 ? (string) $count : null;
     }
 
     /**
@@ -104,7 +106,7 @@ trait HasApprovalStatus
         return $this->approval_status === ApprovalStatus::Rejected;
     }
 
-    public function approve(?string $approvedBy = null): bool
+    public function approve(int|string|null $approvedBy = null): bool
     {
         if ($this->isApproved()) {
             return false;
@@ -117,12 +119,10 @@ trait HasApprovalStatus
             'rejection_reason' => null,
         ]);
 
-        $this->sendApprovalNotification();
-
         return true;
     }
 
-    public function reject(?string $reason = null, ?string $rejectedBy = null): bool
+    public function reject(?string $reason = null, int|string|null $rejectedBy = null): bool
     {
         if ($this->isRejected()) {
             return false;
@@ -151,30 +151,5 @@ trait HasApprovalStatus
             'approval_status' => ApprovalStatus::class,
             'approved_at' => 'datetime',
         ], $this->getCasts()));
-    }
-
-    /**
-     * Send a notification to the user when their request is approved.
-     */
-    protected function sendApprovalNotification(): void
-    {
-        $notifiable = $this->getApprovalNotifiable();
-
-        if ($notifiable !== null) {
-            $notifiable->notify(new ApprovalApprovedNotification($this));
-        }
-    }
-
-    /**
-     * Get the notifiable user for approval notifications.
-     * Override this method if the model has a different relationship name.
-     */
-    protected function getApprovalNotifiable(): ?object
-    {
-        if (! method_exists($this, 'user')) {
-            return null;
-        }
-
-        return $this->user;
     }
 }

@@ -48,6 +48,16 @@ describe('ListProxies', function () {
             ->assertCanSeeTableRecords($proxies);
     });
 
+    it('lists pending proxies although they are not approved', function () {
+        actingAsSuperAdminForProxyResource();
+
+        $pendingProxy = Proxy::factory()->create();
+        $approvedProxy = Proxy::factory()->approved()->create();
+
+        livewire(ListProxies::class)
+            ->assertCanSeeTableRecords([$pendingProxy, $approvedProxy]);
+    });
+
     it('displays proxy delegator seat information', function () {
         actingAsSuperAdminForProxyResource();
 
@@ -306,6 +316,15 @@ describe('EditProxy', function () {
                 'proxy_holder_seat_id' => $proxy->proxy_holder_seat_id,
                 'democratic_time_session_id' => $proxy->democratic_time_session_id,
             ]);
+    });
+
+    it('renders the page for a pending proxy', function () {
+        actingAsSuperAdminForProxyResource();
+
+        $proxy = Proxy::factory()->create();
+
+        livewire(EditProxy::class, ['record' => $proxy->id])
+            ->assertOk();
     });
 
     it('updates a proxy from valid form data', function () {

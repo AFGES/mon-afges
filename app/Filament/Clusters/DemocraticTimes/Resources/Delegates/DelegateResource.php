@@ -44,7 +44,9 @@ final class DelegateResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return Delegate::getNavigationBadge();
+        $count = Delegate::pendingCount();
+
+        return $count > 0 ? (string) $count : null;
     }
 
     public static function form(Schema $schema): Schema

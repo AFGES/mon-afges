@@ -7,6 +7,8 @@ use App\Models\Delegate;
 use App\Models\Seat;
 use App\Models\User;
 use App\Notifications\ApprovalApprovedNotification;
+use Illuminate\Database\Events\TransactionBeginning;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -46,6 +48,21 @@ it('redirects to the edit page without approving when the seat already has a cur
 
     $response->assertRedirect(DelegateResource::getUrl('edit', ['record' => $delegate]).'?approve=1');
     expect($delegate->refresh()->isPending())->toBeTrue();
+});
+
+it('approves inside the transaction of the approval service', function () {
+    $delegate = Delegate::factory()->pending()->create();
+    $approver = User::factory()->create()->givePermissionTo('Update:Delegate');
+    Notification::fake([ApprovalApprovedNotification::class]);
+    $transactions = 0;
+    Event::listen(TransactionBeginning::class, function () use (&$transactions): void {
+        $transactions++;
+    });
+
+    $this->actingAs($approver)->get(URL::signedRoute('delegates.approve', ['delegate' => $delegate->id]));
+
+    expect($transactions)->toBeGreaterThan(0)
+        ->and($delegate->refresh()->isApproved())->toBeTrue();
 });
 
 it('returns 403 when the url is not signed', function () {

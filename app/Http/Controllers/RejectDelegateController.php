@@ -12,7 +12,7 @@ final class RejectDelegateController
 {
     public function __invoke(Delegate $delegate): RedirectResponse
     {
-        $delegate->reject();
+        $delegate->reject(null, auth()->id());
 
         return redirect()
             ->to(DelegateResource::getUrl('edit', ['record' => $delegate]))

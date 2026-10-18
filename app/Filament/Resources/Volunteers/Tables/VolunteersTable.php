@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Volunteers\Tables;
 
-use App\Enums\ApprovalStatus;
 use App\Filament\Actions\ApproveAction;
 use App\Filament\Actions\BulkApproveAction;
 use App\Filament\Actions\BulkRejectAction;
 use App\Filament\Actions\RejectAction;
+use App\Filament\Tables\Filters\ApprovalFilters;
 use App\Models\Volunteer;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -17,9 +17,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 final class VolunteersTable
 {
@@ -72,36 +71,9 @@ final class VolunteersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('approval_status')
-                    ->label(__('volunteer.filters.status'))
-                    ->multiple()
-                    ->options(ApprovalStatus::class)
-                    ->default(function () {
-                        $pendingCount = Volunteer::withoutGlobalScopes()
-                            ->pending()
-                            ->count();
-
-                        return $pendingCount > 0
-                            ? [ApprovalStatus::Pending]
-                            : [ApprovalStatus::Approved];
-                    }),
-                SelectFilter::make('period')
-                    ->label(__('volunteer.filters.period'))
-                    ->multiple()
-                    ->options([
-                        'current' => __('volunteer.filters.current'),
-                        'old' => __('volunteer.filters.old'),
-                        'future' => __('volunteer.filters.future'),
-                    ])
-                    ->default(['current'])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return match ($data['value'] ?? null) {
-                            'current' => $query->currentlyActive(),
-                            'old' => $query->ended(),
-                            'future' => $query->notStarted(),
-                            default => $query,
-                        };
-                    }),
+                TrashedFilter::make(),
+                ApprovalFilters::approvalStatus(Volunteer::class, __('volunteer.filters.status')),
+                ApprovalFilters::period(__('volunteer.filters.period'), 'volunteer.filters'),
             ])
             ->deferFilters(false)
             ->recordActions([

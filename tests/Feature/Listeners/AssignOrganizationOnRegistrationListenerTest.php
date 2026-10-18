@@ -6,7 +6,7 @@ use App\Enums\ApprovalStatus;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
-use App\Notifications\VolunteerApprovalRequestedNotification;
+use App\Notifications\ApprovalRequestedNotification;
 use Filament\Auth\Events\Registered;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
@@ -25,7 +25,7 @@ it('creates an approved current volunteer without asking approvers when the emai
     Permission::create(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
     User::factory()->create()->givePermissionTo('Update:Volunteer');
     $organization = Organization::factory()->create(['domain' => 'afges.org']);
-    Notification::fake([VolunteerApprovalRequestedNotification::class]);
+    Notification::fake([ApprovalRequestedNotification::class]);
 
     $user = registerUser('jane@afges.org');
 

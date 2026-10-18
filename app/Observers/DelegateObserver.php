@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Models\Delegate;
-use App\Models\User;
-use App\Notifications\DelegateApprovalRequestedNotification;
+use App\Notifications\ApprovalApprovedNotification;
+use App\Notifications\ApprovalRequestedNotification;
+use App\Observers\Concerns\NotifiesApprovers;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
-use Illuminate\Support\Facades\Notification;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 
 /**
  * Handled after the surrounding database transaction commits, so the Google Workspace group and approver
@@ -18,6 +17,8 @@ use Spatie\Permission\Exceptions\PermissionDoesNotExist;
  */
 final class DelegateObserver implements ShouldHandleEventsAfterCommit
 {
+    use NotifiesApprovers;
+
     /** @var list<string> */
     private const array SYNC_ATTRIBUTES = ['approval_status', 'started_at', 'ended_at', 'email', 'email_verified_at'];
 
@@ -33,7 +34,7 @@ final class DelegateObserver implements ShouldHandleEventsAfterCommit
     public function created(Delegate $delegate): void
     {
         if (! $delegate->isApproved()) {
-            $this->notifyApprovers($delegate);
+            $this->notifyApprovers('Update:Delegate', new ApprovalRequestedNotification($delegate));
         }
 
         $this->addToGroup($delegate);
@@ -45,6 +46,10 @@ final class DelegateObserver implements ShouldHandleEventsAfterCommit
      */
     public function updated(Delegate $delegate): void
     {
+        if ($delegate->wasChanged('approval_status') && $delegate->isApproved()) {
+            $delegate->user?->notify(new ApprovalApprovedNotification($delegate));
+        }
+
         if (! $delegate->wasChanged(self::SYNC_ATTRIBUTES)) {
             return;
         }
@@ -73,24 +78,6 @@ final class DelegateObserver implements ShouldHandleEventsAfterCommit
     public function restored(Delegate $delegate): void
     {
         $this->addToGroup($delegate);
-    }
-
-    /**
-     * Notify users with approval permissions about the new delegate application.
-     */
-    private function notifyApprovers(Delegate $delegate): void
-    {
-        try {
-            $approvers = User::permission('Update:Delegate')->get();
-
-            if ($approvers->isEmpty()) {
-                return;
-            }
-
-            Notification::send($approvers, new DelegateApprovalRequestedNotification($delegate));
-        } catch (PermissionDoesNotExist) {
-            // Permission doesn't exist yet, skip notification
-        }
     }
 
     /**

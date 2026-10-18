@@ -12,7 +12,7 @@ final class RejectVolunteerController
 {
     public function __invoke(Volunteer $volunteer): RedirectResponse
     {
-        $volunteer->reject();
+        $volunteer->reject(null, auth()->id());
 
         return redirect()
             ->to(VolunteerResource::getUrl('edit', ['record' => $volunteer]))

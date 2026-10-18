@@ -61,6 +61,19 @@ describe('ListVolunteers', function () {
             ->assertCanNotSeeTableRecords([$pendingVolunteer]);
     });
 
+    it('hides soft-deleted volunteers unless the trashed filter is set', function () {
+        actingAsSuperAdminForVolunteerResource();
+
+        $trashed = Volunteer::factory()->pending()->create();
+        $trashed->delete();
+
+        livewire(ListVolunteers::class)
+            ->assertCanNotSeeTableRecords([$trashed])
+            ->removeTableFilters()
+            ->filterTable('trashed', '0')
+            ->assertCanSeeTableRecords([$trashed]);
+    });
+
     it('lists only volunteers matching the searched term', function () {
         actingAsSuperAdminForVolunteerResource();
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ApprovalStatus;
+use App\Models\Contracts\Approvable;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
@@ -18,7 +19,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
-final class Volunteer extends Model
+/**
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ */
+final class Volunteer extends Model implements Approvable
 {
     use HasApprovalStatus;
 

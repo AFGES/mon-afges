@@ -4,37 +4,16 @@ declare(strict_types=1);
 
 namespace App\Filament\Actions;
 
-use Filament\Actions\Action;
-use Filament\Notifications\Notification;
+use App\Models\Contracts\Approvable;
+use App\Models\Delegate;
 
-final class ApproveAction extends Action
+/**
+ * Generic approval action. Delegates need ApproveDelegateAction (seat capacity checks).
+ */
+final class ApproveAction extends BaseApproveAction
 {
-    protected function setUp(): void
+    protected function supports(Approvable $record): bool
     {
-        parent::setUp();
-
-        $this->label(__('approval.actions.approve'))
-            ->tooltip(__('approval.actions.approve_tooltip'))
-            ->color('success')
-            ->icon('heroicon-o-check-circle')
-            ->requiresConfirmation()
-            ->modalHeading(__('approval.modal.approve.heading'))
-            ->modalDescription(__('approval.modal.approve.description'))
-            ->authorize('update')
-            ->visible(fn ($record): bool => $record->isPending())
-            ->action(function ($record): void {
-                $record->approve();
-
-                Notification::make()
-                    ->success()
-                    ->title(__('approval.notifications.approved.title'))
-                    ->body(__('approval.notifications.approved.body'))
-                    ->send();
-            });
-    }
-
-    public static function getDefaultName(): ?string
-    {
-        return 'approve';
+        return ! $record instanceof Delegate;
     }
 }

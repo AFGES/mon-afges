@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use App\Models\Volunteer;
-use App\Notifications\VolunteerApprovalRequestedNotification;
+use App\Notifications\ApprovalRequestedNotification;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -13,30 +13,30 @@ describe('approver notification', function () {
         Permission::create(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
         $firstApprover = User::factory()->create()->givePermissionTo('Update:Volunteer');
         $secondApprover = User::factory()->create()->givePermissionTo('Update:Volunteer');
-        Notification::fake([VolunteerApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         $volunteer = Volunteer::factory()->create();
 
         Notification::assertSentTo(
             [$firstApprover, $secondApprover],
-            VolunteerApprovalRequestedNotification::class,
-            fn (VolunteerApprovalRequestedNotification $notification): bool => $notification->volunteer->is($volunteer),
+            ApprovalRequestedNotification::class,
+            fn (ApprovalRequestedNotification $notification): bool => $notification->approvable->is($volunteer),
         );
     });
 
     it('does not notify a user without the update permission', function () {
         Permission::create(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
         $userWithoutPermission = User::factory()->create();
-        Notification::fake([VolunteerApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         Volunteer::factory()->create();
 
-        Notification::assertNotSentTo($userWithoutPermission, VolunteerApprovalRequestedNotification::class);
+        Notification::assertNotSentTo($userWithoutPermission, ApprovalRequestedNotification::class);
     });
 
     it('sends nothing when nobody holds the update permission', function () {
         Permission::create(['name' => 'Update:Volunteer', 'guard_name' => 'web']);
-        Notification::fake([VolunteerApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         Volunteer::factory()->create();
 
@@ -44,7 +44,7 @@ describe('approver notification', function () {
     });
 
     it('sends nothing when the update permission does not exist', function () {
-        Notification::fake([VolunteerApprovalRequestedNotification::class]);
+        Notification::fake([ApprovalRequestedNotification::class]);
 
         $volunteer = Volunteer::factory()->create();
 

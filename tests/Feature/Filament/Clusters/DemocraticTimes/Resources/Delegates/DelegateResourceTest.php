@@ -10,7 +10,7 @@ use App\Models\Delegate;
 use App\Models\Organization;
 use App\Models\Seat;
 use App\Models\User;
-use App\Notifications\DelegateApprovalRequestedNotification;
+use App\Notifications\ApprovalRequestedNotification;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
@@ -81,6 +81,19 @@ describe('ListDelegates', function () {
 
         livewire(ListDelegates::class)
             ->assertCanSeeTableRecords($delegates);
+    });
+
+    it('hides soft-deleted delegates unless the trashed filter is set', function () {
+        actingAsSuperAdminForDelegateResource();
+
+        $trashed = Delegate::factory()->pending()->create();
+        $trashed->delete();
+
+        livewire(ListDelegates::class)
+            ->assertCanNotSeeTableRecords([$trashed])
+            ->removeTableFilters()
+            ->filterTable('trashed', '0')
+            ->assertCanSeeTableRecords([$trashed]);
     });
 
     it('lists pending delegates although they are not approved', function () {
@@ -250,7 +263,7 @@ describe('CreateDelegate', function () {
         expect($delegate->isApproved())->toBeTrue()
             ->and($delegate->approved_by)->toBe($admin->id)
             ->and($delegate->approved_at)->not->toBeNull();
-        Notification::assertNotSentTo(User::permission('Update:Delegate')->get(), DelegateApprovalRequestedNotification::class);
+        Notification::assertNotSentTo(User::permission('Update:Delegate')->get(), ApprovalRequestedNotification::class);
     });
 
     it('refuses a delegate on a full seat when no current delegate is ended', function () {

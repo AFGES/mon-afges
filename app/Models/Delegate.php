@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ApprovalStatus;
+use App\Models\Contracts\Approvable;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
 use App\Traits\HasApprovalStatus;
@@ -19,8 +20,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ */
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
-final class Delegate extends Model implements MustVerifyEmail
+final class Delegate extends Model implements Approvable, MustVerifyEmail
 {
     use AuthMustVerifyEmail;
     use HasApprovalStatus;

@@ -35,7 +35,7 @@ final class BulkRejectAction extends Action
 
                 foreach ($selectedRecords as $record) {
                     if ($record->isPending()) {
-                        $record->reject($data['rejection_reason']);
+                        $record->reject($data['rejection_reason'], auth()->id());
                         $count++;
                     }
                 }
@@ -48,7 +48,7 @@ final class BulkRejectAction extends Action
             });
     }
 
-    public static function getDefaultName(): ?string
+    public static function getDefaultName(): string
     {
         return 'bulkReject';
     }

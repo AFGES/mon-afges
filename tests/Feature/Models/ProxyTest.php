@@ -111,7 +111,7 @@ it('counts pending proxies in the navigation badge', function (): void {
     Proxy::factory()->count(2)->create();
     Proxy::factory()->approved()->create();
 
-    expect(Proxy::getNavigationBadge())->toBe('2');
+    expect(Proxy::pendingCount())->toBe(2);
 });
 
 describe('approval notification', function (): void {
@@ -124,7 +124,7 @@ describe('approval notification', function (): void {
             'ended_at' => null,
         ]);
 
-        $proxy->notifyDelegatesOfApproval();
+        $proxy->approve();
 
         Notification::assertSentTo($currentUser, ProxyApprovedNotification::class, fn (ProxyApprovedNotification $notification): bool => $notification->proxy->is($proxy));
     });
@@ -138,7 +138,7 @@ describe('approval notification', function (): void {
             'ended_at' => '2026-03-09 12:00:00',
         ]);
 
-        $proxy->notifyDelegatesOfApproval();
+        $proxy->approve();
 
         Notification::assertNotSentTo($formerUser, ProxyApprovedNotification::class);
     });
@@ -152,7 +152,7 @@ describe('approval notification', function (): void {
             'ended_at' => null,
         ]);
 
-        $proxy->notifyDelegatesOfApproval();
+        $proxy->approve();
 
         Notification::assertNotSentTo($futureUser, ProxyApprovedNotification::class);
     });

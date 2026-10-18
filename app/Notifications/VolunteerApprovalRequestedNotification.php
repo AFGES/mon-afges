@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Filament\Resources\Volunteers\VolunteerResource;
 use App\Models\Volunteer;
+use App\Traits\EscapesMarkdown;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\URL;
 
 final class VolunteerApprovalRequestedNotification extends Notification implements ShouldQueue
 {
+    use EscapesMarkdown;
     use Queueable;
 
     public function __construct(
@@ -46,16 +48,16 @@ final class VolunteerApprovalRequestedNotification extends Notification implemen
 
         return (new MailMessage)
             ->subject(__('volunteer.notifications.approval_requested.subject'))
-            ->greeting(__('volunteer.notifications.approval_requested.greeting', ['name' => $notifiable->name]))
+            ->greeting(__('volunteer.notifications.approval_requested.greeting', ['name' => $this->escapeMarkdown($notifiable->name)]))
             ->line(__('volunteer.notifications.approval_requested.intro'))
             ->line(__('volunteer.notifications.approval_requested.applicant', [
-                'name' => $this->volunteer->user->name,
+                'name' => $this->escapeMarkdown($this->volunteer->user->name),
             ]))
             ->line(__('volunteer.notifications.approval_requested.organization', [
-                'organization' => $this->volunteer->organization->short_name,
+                'organization' => $this->escapeMarkdown($this->volunteer->organization->short_name),
             ]))
             ->line(__('volunteer.notifications.approval_requested.position', [
-                'position' => $this->volunteer->position_title,
+                'position' => $this->escapeMarkdown((string) $this->volunteer->position_title),
             ]))
             ->line(__('volunteer.notifications.approval_requested.started_at', [
                 'date' => $this->volunteer->started_at->format('d/m/Y'),

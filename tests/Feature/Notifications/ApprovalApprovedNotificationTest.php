@@ -82,3 +82,11 @@ it('escapes the recipient name in the rendered mail', function () {
         ->toContain('&lt;script&gt;')
         ->not->toContain("<script>alert('xss')</script>");
 });
+
+it('does not turn a Markdown link in the recipient name into a link', function () {
+    $recipient = User::factory()->make(['first_name' => '[click](https://evil.example)', 'last_name' => 'Doe']);
+
+    $content = (new ApprovalApprovedNotification(Delegate::factory()->make()))->toMail($recipient)->render();
+
+    expect((string) $content)->not->toContain('<a href="https://evil.example"');
+});

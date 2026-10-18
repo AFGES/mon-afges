@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\ProxyResource;
 use App\Models\Proxy;
+use App\Traits\EscapesMarkdown;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,6 +14,7 @@ use Illuminate\Notifications\Notification;
 
 final class ProxyApprovalNotification extends Notification implements ShouldQueue
 {
+    use EscapesMarkdown;
     use Queueable;
 
     public function __construct(public Proxy $proxy) {}
@@ -33,9 +35,9 @@ final class ProxyApprovalNotification extends Notification implements ShouldQueu
             ->subject(__('proxy.notifications.approval_needed.subject'))
             ->line(__('proxy.notifications.approval_needed.line1'))
             ->line(__('proxy.notifications.approval_needed.line2', [
-                'delegator' => $this->proxy->delegatorSeat->label(),
-                'proxy_holder' => $this->proxy->proxyHolderSeat->label(),
-                'session' => $this->proxy->democraticTimeSession->democraticTimeType->name,
+                'delegator' => $this->escapeMarkdown($this->proxy->delegatorSeat->label()),
+                'proxy_holder' => $this->escapeMarkdown($this->proxy->proxyHolderSeat->label()),
+                'session' => $this->escapeMarkdown($this->proxy->democraticTimeSession->democraticTimeType->name),
             ]))
             ->action(__('proxy.notifications.approval_needed.action'), ProxyResource::getUrl('index'));
     }

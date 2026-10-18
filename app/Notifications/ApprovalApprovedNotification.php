@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Traits\EscapesMarkdown;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Support\Str;
 
 final class ApprovalApprovedNotification extends Notification implements ShouldQueue
 {
+    use EscapesMarkdown;
     use Queueable;
 
     /**
@@ -41,7 +43,7 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
     {
         return (new MailMessage)
             ->subject(__("{$this->translationKey}.notifications.approval_approved.subject"))
-            ->greeting(__("{$this->translationKey}.notifications.approval_approved.greeting", ['name' => $notifiable->name]))
+            ->greeting(__("{$this->translationKey}.notifications.approval_approved.greeting", ['name' => $this->escapeMarkdown($notifiable->name)]))
             ->line(__("{$this->translationKey}.notifications.approval_approved.intro"))
             ->line(__("{$this->translationKey}.notifications.approval_approved.body"))
             ->line(__("{$this->translationKey}.notifications.approval_approved.outro"));

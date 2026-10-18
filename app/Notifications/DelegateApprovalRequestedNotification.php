@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Models\Delegate;
+use App\Traits\EscapesMarkdown;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\URL;
 
 final class DelegateApprovalRequestedNotification extends Notification implements ShouldQueue
 {
+    use EscapesMarkdown;
     use Queueable;
 
     public function __construct(
@@ -46,16 +48,16 @@ final class DelegateApprovalRequestedNotification extends Notification implement
 
         return (new MailMessage)
             ->subject(__('delegate.notifications.approval_requested.subject'))
-            ->greeting(__('delegate.notifications.approval_requested.greeting', ['name' => $notifiable->name]))
+            ->greeting(__('delegate.notifications.approval_requested.greeting', ['name' => $this->escapeMarkdown($notifiable->name)]))
             ->line(__('delegate.notifications.approval_requested.intro'))
             ->line(__('delegate.notifications.approval_requested.applicant', [
-                'name' => $this->delegate->user->name,
+                'name' => $this->escapeMarkdown($this->delegate->user->name),
             ]))
             ->line(__('delegate.notifications.approval_requested.organization', [
-                'organization' => $this->delegate->organization->short_name,
+                'organization' => $this->escapeMarkdown($this->delegate->organization->short_name),
             ]))
             ->line(__('delegate.notifications.approval_requested.seat', [
-                'seat' => $this->delegate->seat->name ?? 'N/A',
+                'seat' => $this->escapeMarkdown($this->delegate->seat->name ?? 'N/A'),
             ]))
             ->line(__('delegate.notifications.approval_requested.started_at', [
                 'date' => $this->delegate->started_at->format('d/m/Y'),

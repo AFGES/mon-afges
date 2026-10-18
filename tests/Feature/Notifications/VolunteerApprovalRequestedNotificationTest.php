@@ -76,3 +76,21 @@ it('expires the approve and reject links after the configured number of days', f
     expect((int) $query['expires'])->toBe(now()->addDays(7)->getTimestamp())
         ->and(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue();
 });
+
+it('does not turn a Markdown link in the applicant name or position into a link', function () {
+    $applicant = User::factory()->create(['first_name' => '[x](https://evil.example)', 'last_name' => 'Doe']);
+    $volunteer = Volunteer::factory()->for($applicant)->create(['position_title' => '[y](https://evil.example)']);
+
+    $content = (string) (new VolunteerApprovalRequestedNotification($volunteer))->toMail(User::factory()->make())->render();
+
+    expect($content)->not->toContain('<a href="https://evil.example"');
+});
+
+it('does not turn a Markdown link in the approver name into a link', function () {
+    $approver = User::factory()->make(['first_name' => '[click](https://evil.example)', 'last_name' => 'Doe']);
+    $volunteer = Volunteer::factory()->create();
+
+    $content = (string) (new VolunteerApprovalRequestedNotification($volunteer))->toMail($approver)->render();
+
+    expect($content)->not->toContain('<a href="https://evil.example"');
+});

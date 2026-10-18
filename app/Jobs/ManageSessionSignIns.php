@@ -26,10 +26,7 @@ final class ManageSessionSignIns implements ShouldQueue
             ->get();
 
         foreach ($sessionsToOpen as $session) {
-            $opensAt = $session->started_at->copy()->subMinutes($session->minutes_before_start);
-
-            if ($opensAt->isPast() || $opensAt->isSameMinute(now())) {
-                $session->autoOpenSignIn();
+            if ($session->autoOpenSignIn()) {
                 Log::info("Opened sign-in for session: {$session->location} (ID: {$session->id})");
                 $openedCount++;
             }

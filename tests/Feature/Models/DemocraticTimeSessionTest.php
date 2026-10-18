@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\DemocraticTimeSession;
 use App\Models\DemocraticTimeType;
 use App\Models\SessionSignIn;
+use App\Services\QuorumCalculator;
 
 beforeEach(function (): void {
     $this->travelTo('2026-03-10 12:00:00');
@@ -36,7 +37,7 @@ it('falls back to the quorum settings of its type when it has none', function (b
         'include_proxies_in_quorum' => null,
     ]);
 
-    $status = $session->getQuorumStatus();
+    $status = resolve(QuorumCalculator::class)->status($session);
 
     expect($status['type'])->toBe($expectedType);
 })->with([
@@ -48,7 +49,7 @@ it('reports the type quorum percentage as required when it has none', function (
     $type = DemocraticTimeType::factory()->create(['calculate_quorum_per_college' => false, 'quorum_percentage' => 60.00]);
     $session = DemocraticTimeSession::factory()->for($type)->createQuietly(['quorum_percentage' => null]);
 
-    expect($session->getQuorumStatus()['required_percentage'])->toBe('60.00');
+    expect(resolve(QuorumCalculator::class)->status($session)['required_percentage'])->toBe('60.00');
 });
 
 describe('isSignInOpen', function (): void {

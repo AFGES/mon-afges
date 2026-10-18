@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Tables;
 
+use App\Enums\SessionStatus;
+use App\Enums\SignInStatus;
+use App\Models\DemocraticTimeSession;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -43,22 +46,7 @@ final class SessionsTable
                 TextColumn::make('sign_in_status')
                     ->label(__('emargement.label'))
                     ->badge()
-                    ->getStateUsing(function ($record): string {
-                        if ($record->isSignInOpen()) {
-                            return 'open';
-                        }
-                        if ($record->sign_in_closes_at !== null) {
-                            return 'closed';
-                        }
-
-                        return 'not_opened';
-                    })
-                    ->formatStateUsing(fn (string $state): string => __("emargement.status.{$state}"))
-                    ->color(fn (string $state): string => match ($state) {
-                        'open' => 'success',
-                        'closed' => 'gray',
-                        default => 'warning',
-                    }),
+                    ->getStateUsing(fn (DemocraticTimeSession $record): SignInStatus => $record->signInStatus()),
 
                 TextColumn::make('signIns_count')
                     ->label(__('emargement.plural'))
@@ -68,22 +56,7 @@ final class SessionsTable
                 TextColumn::make('status')
                     ->label(__('democratic_time_session.fields.status'))
                     ->badge()
-                    ->getStateUsing(function ($record): string {
-                        if ($record->isCurrentlyActive()) {
-                            return 'ongoing';
-                        }
-                        if ($record->hasEnded()) {
-                            return 'ended';
-                        }
-
-                        return 'upcoming';
-                    })
-                    ->formatStateUsing(fn (string $state): string => __("democratic_time_session.status.{$state}"))
-                    ->color(fn (string $state): string => match ($state) {
-                        'ongoing' => 'success',
-                        'ended' => 'gray',
-                        default => 'info',
-                    }),
+                    ->getStateUsing(fn (DemocraticTimeSession $record): SessionStatus => $record->sessionStatus()),
 
                 TextColumn::make('created_at')
                     ->label(__('common.created_at'))

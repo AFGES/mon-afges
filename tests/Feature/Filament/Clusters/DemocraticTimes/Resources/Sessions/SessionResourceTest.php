@@ -59,9 +59,9 @@ describe('ListSessions', function () {
         ]);
 
         Livewire::test(ListSessions::class)
-            ->assertTableColumnStateSet('status', 'ongoing', $session)
+            ->assertTableColumnStateSet('status', App\Enums\SessionStatus::Ongoing, $session)
             ->assertTableColumnFormattedStateSet('status', 'Ongoing', $session)
-            ->assertTableColumnStateSet('sign_in_status', 'not_opened', $session)
+            ->assertTableColumnStateSet('sign_in_status', App\Enums\SignInStatus::NotOpened, $session)
             ->assertTableColumnFormattedStateSet('sign_in_status', 'not opened yet', $session);
     });
 

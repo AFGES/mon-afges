@@ -4,15 +4,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\SessionStatus;
+use App\Enums\SignInStatus;
 use App\Traits\HasPeriod;
+use Carbon\Carbon;
 use Database\Factories\DemocraticTimeSessionFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property \Illuminate\Support\Carbon $started_at
+ * @property \Illuminate\Support\Carbon|null $ended_at
+ */
 final class DemocraticTimeSession extends Model
 {
     /** @use HasFactory<DemocraticTimeSessionFactory> */
@@ -53,140 +59,35 @@ final class DemocraticTimeSession extends Model
     }
 
     /**
-     * Get total number of seats eligible for quorum (by college if specified).
+     * Current sign-in status derived from the sign-in window.
      */
-    public function getTotalEligibleSeats(?string $collegeId = null): int
+    public function signInStatus(): SignInStatus
     {
-        $query = Seat::query()
-            ->whereHas('collegeOrganization.college', function (Builder $q): void {
-                $q->where('can_vote', true);
-            });
-
-        if ($collegeId) {
-            $query->whereHas('collegeOrganization', function (Builder $q) use ($collegeId): void {
-                $q->where('college_id', $collegeId);
-            });
+        if ($this->isSignInOpen()) {
+            return SignInStatus::Open;
         }
 
-        return $query->count();
+        if ($this->sign_in_closes_at !== null) {
+            return SignInStatus::Closed;
+        }
+
+        return SignInStatus::NotOpened;
     }
 
     /**
-     * Get number of present seats (seats with at least one signed-in delegate).
+     * Current session status derived from its period.
      */
-    public function getPresentSeatsCount(?string $collegeId = null, bool $includeProxies = true): int
+    public function sessionStatus(): SessionStatus
     {
-        // Count distinct seats with signed-in delegates
-        $query = $this->signIns()
-            ->whereNull('signed_out_at')
-            ->select('seat_id')
-            ->distinct();
-
-        if ($collegeId) {
-            $query->whereHas('seat.collegeOrganization', function (Builder $q) use ($collegeId): void {
-                $q->where('college_id', $collegeId);
-            });
+        if ($this->isCurrentlyActive()) {
+            return SessionStatus::Ongoing;
         }
 
-        $seats = $query->get();
-
-        if (! $includeProxies) {
-            return $seats->count();
+        if ($this->hasEnded()) {
+            return SessionStatus::Ended;
         }
 
-        // Add seats with approved proxies (if they're not already counted)
-        $proxyQuery = $this->proxies()
-            ->whereNotIn('delegator_seat_id', $seats->pluck('seat_id'))
-            ->distinct();
-
-        if ($collegeId) {
-            $proxyQuery->whereHas('delegatorSeat.collegeOrganization', function (Builder $q) use ($collegeId): void {
-                $q->where('college_id', $collegeId);
-            });
-        }
-
-        return $seats->count() + $proxyQuery->count();
-    }
-
-    /**
-     * Check if quorum is met for the session.
-     */
-    public function hasQuorum(?string $collegeId = null): bool
-    {
-        ['quorumPercentage' => $quorumPercentage, 'includeProxies' => $includeProxies] = $this->resolveQuorumSettings();
-
-        $totalEligible = $this->getTotalEligibleSeats($collegeId);
-
-        if ($totalEligible === 0) {
-            return false;
-        }
-
-        $presentCount = $this->getPresentSeatsCount($collegeId, $includeProxies);
-        $attendancePercentage = ($presentCount / $totalEligible) * 100;
-
-        return $attendancePercentage >= $quorumPercentage;
-    }
-
-    /**
-     * Get quorum status for all voting colleges.
-     *
-     * @return array{met: bool, type: string, total_eligible?: int, present_count?: int, percentage?: float|int, required_percentage?: mixed, details?: list<array{college_id: string, college_name: string, total_eligible: int, present_count: int, percentage: float|int, required_percentage: mixed, met: bool}>}
-     */
-    public function getQuorumStatus(): array
-    {
-        [
-            'calculatePerCollege' => $calculatePerCollege,
-            'quorumPercentage' => $quorumPercentage,
-            'includeProxies' => $includeProxies,
-        ] = $this->resolveQuorumSettings();
-
-        if (! $calculatePerCollege) {
-            // All colleges combined
-            $totalEligible = $this->getTotalEligibleSeats();
-            $presentCount = $this->getPresentSeatsCount(null, $includeProxies);
-            $percentage = $totalEligible > 0 ? ($presentCount / $totalEligible) * 100 : 0;
-
-            return [
-                'met' => $this->hasQuorum(),
-                'type' => 'combined',
-                'total_eligible' => $totalEligible,
-                'present_count' => $presentCount,
-                'percentage' => round($percentage, 2),
-                'required_percentage' => $quorumPercentage,
-            ];
-        }
-
-        // Per college calculation
-        $votingColleges = College::where('can_vote', true)->get();
-        $details = [];
-        $allMet = true;
-
-        foreach ($votingColleges as $college) {
-            $totalEligible = $this->getTotalEligibleSeats($college->id);
-            $presentCount = $this->getPresentSeatsCount($college->id, $includeProxies);
-            $percentage = $totalEligible > 0 ? ($presentCount / $totalEligible) * 100 : 0;
-            $met = $this->hasQuorum($college->id);
-
-            $details[] = [
-                'college_id' => $college->id,
-                'college_name' => $college->name,
-                'total_eligible' => $totalEligible,
-                'present_count' => $presentCount,
-                'percentage' => round($percentage, 2),
-                'required_percentage' => $quorumPercentage,
-                'met' => $met,
-            ];
-
-            if (! $met && $totalEligible > 0) {
-                $allMet = false;
-            }
-        }
-
-        return [
-            'met' => $allMet,
-            'type' => 'per_college',
-            'details' => $details,
-        ];
+        return SessionStatus::Upcoming;
     }
 
     /**
@@ -237,16 +138,7 @@ final class DemocraticTimeSession extends Model
             return false;
         }
 
-        $closeTime = $this->ended_at ?? now();
-
-        // Update sign-out time for all delegates still signed in
-        $this->signIns()->whereNull('signed_out_at')->update([
-            'signed_out_at' => $closeTime,
-        ]);
-
-        $this->update([
-            'sign_in_closes_at' => $closeTime,
-        ]);
+        $this->closeSignInAt($this->ended_at ?? now());
 
         return true;
     }
@@ -295,14 +187,7 @@ final class DemocraticTimeSession extends Model
             return false;
         }
 
-        // Update sign-out time for all delegates still signed in
-        $this->signIns()->whereNull('signed_out_at')->update([
-            'signed_out_at' => $this->ended_at,
-        ]);
-
-        $this->update([
-            'sign_in_closes_at' => $this->ended_at,
-        ]);
+        $this->closeSignInAt($this->ended_at);
 
         return true;
     }
@@ -322,16 +207,16 @@ final class DemocraticTimeSession extends Model
     }
 
     /**
-     * Session-level quorum settings, falling back to the democratic time type.
-     *
-     * @return array{calculatePerCollege: mixed, quorumPercentage: mixed, includeProxies: mixed}
+     * Sign out every delegate still signed in and close sign-in at the given time.
      */
-    private function resolveQuorumSettings(): array
+    private function closeSignInAt(Carbon $closeTime): void
     {
-        return [
-            'calculatePerCollege' => $this->calculate_quorum_per_college ?? $this->democraticTimeType?->calculate_quorum_per_college ?? false,
-            'quorumPercentage' => $this->quorum_percentage ?? $this->democraticTimeType?->quorum_percentage ?? 50,
-            'includeProxies' => $this->include_proxies_in_quorum ?? $this->democraticTimeType?->include_proxies_in_quorum ?? true,
-        ];
+        $this->signIns()->whereNull('signed_out_at')->update([
+            'signed_out_at' => $closeTime,
+        ]);
+
+        $this->update([
+            'sign_in_closes_at' => $closeTime,
+        ]);
     }
 }

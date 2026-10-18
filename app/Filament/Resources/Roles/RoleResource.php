@@ -9,7 +9,7 @@ use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Filament\Resources\Roles\Pages\ViewRole;
 use App\Models\Scopes\ExcludeSuperAdminRoleScope;
-use App\Models\User;
+use App\Services\RoleAssignmentService;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource as ShieldRoleResource;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -24,7 +24,7 @@ final class RoleResource extends ShieldRoleResource
     {
         return parent::getEloquentQuery()
             ->when(
-                ! self::actorIsSuperAdmin(),
+                ! resolve(RoleAssignmentService::class)->isSuperAdmin(auth()->user()),
                 fn (Builder $query): Builder => $query->withGlobalScope(ExcludeSuperAdminRoleScope::class, new ExcludeSuperAdminRoleScope),
             );
     }
@@ -37,12 +37,5 @@ final class RoleResource extends ShieldRoleResource
             'view' => ViewRole::route('/{record}'),
             'edit' => EditRole::route('/{record}/edit'),
         ];
-    }
-
-    private static function actorIsSuperAdmin(): bool
-    {
-        $user = auth()->user();
-
-        return $user instanceof User && $user->isSuperAdmin();
     }
 }

@@ -29,7 +29,7 @@ final class UserPolicy
 
     public function update(AuthUser $authUser, User $user): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($this->isSuperAdmin($user)) {
             return false;
         }
 
@@ -38,7 +38,7 @@ final class UserPolicy
 
     public function delete(AuthUser $authUser, User $user): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($this->isSuperAdmin($user)) {
             return false;
         }
 
@@ -52,7 +52,7 @@ final class UserPolicy
 
     public function restore(AuthUser $authUser, User $user): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($this->isSuperAdmin($user)) {
             return false;
         }
 
@@ -61,7 +61,7 @@ final class UserPolicy
 
     public function forceDelete(AuthUser $authUser, User $user): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($this->isSuperAdmin($user)) {
             return false;
         }
 
@@ -80,7 +80,7 @@ final class UserPolicy
 
     public function replicate(AuthUser $authUser, User $user): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($this->isSuperAdmin($user)) {
             return false;
         }
 
@@ -90,5 +90,10 @@ final class UserPolicy
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:User');
+    }
+
+    private function isSuperAdmin(User $user): bool
+    {
+        return $user->isSuperAdmin();
     }
 }

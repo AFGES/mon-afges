@@ -13,9 +13,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class ProxiesTable
 {
-    public static function configure(Table $table): Table
+    /**
+     * @param  bool  $showSession  Set to false when the table is already scoped to a single session.
+     * @param  bool  $showApprovalStatus  Show the approval status column (for tables listing every approval state).
+     * @param  bool  $withRecordActions  Set to false to omit the edit record action and bulk delete.
+     */
+    public static function configure(Table $table, bool $showSession = true, bool $showApprovalStatus = false, bool $withRecordActions = true): Table
     {
-        return $table
+        $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
                 'delegatorSeat.collegeOrganization.college',
                 'delegatorSeat.delegates.user',
@@ -38,7 +43,13 @@ final class ProxiesTable
                     ->label(__('proxy.fields.democratic_time_session'))
                     ->searchable()
                     ->sortable()
-                    ->badge(),
+                    ->badge()
+                    ->visible($showSession),
+                TextColumn::make('approval_status')
+                    ->label(__('approval.fields.status'))
+                    ->badge()
+                    ->sortable()
+                    ->visible($showApprovalStatus),
                 TextColumn::make('started_at')
                     ->label(__('proxy.fields.started_at'))
                     ->dateTime('d/m/Y H:i')
@@ -60,15 +71,21 @@ final class ProxiesTable
             ])
             ->filters([
                 //
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
-                ]),
             ]);
+
+        if ($withRecordActions) {
+            $table
+                ->recordActions([
+                    EditAction::make(),
+                ])
+                ->toolbarActions([
+                    BulkActionGroup::make([
+                        DeleteBulkAction::make()
+                            ->authorizeIndividualRecords('delete'),
+                    ]),
+                ]);
+        }
+
+        return $table;
     }
 }

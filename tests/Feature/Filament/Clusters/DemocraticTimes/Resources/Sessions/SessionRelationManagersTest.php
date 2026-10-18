@@ -95,6 +95,19 @@ describe('ProxiesRelationManager', function () {
             'proxy_holder_seat_id' => $proxyHolderSeat->id,
         ]);
     });
+
+    it('does not expose edit or bulk delete actions', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
+        $session = DemocraticTimeSession::factory()->create();
+        $proxy = Proxy::factory()->for($session)->create();
+
+        livewire(ManageSessionProxies::class, [
+            'record' => $session->getKey(),
+        ])
+            ->assertTableActionDoesNotExist('edit', record: $proxy)
+            ->assertTableBulkActionDoesNotExist('delete');
+    });
 });
 
 describe('SessionSignInsRelationManager', function () {
@@ -164,7 +177,7 @@ describe('SessionSignInsRelationManager', function () {
         livewire(ManageSessionSignIns::class, [
             'record' => $session->getKey(),
         ])
-            ->filterTable('signed_in')
+            ->filterTable('is_signed_in', 'yes')
             ->assertCanSeeTableRecords([$signedIn])
             ->assertCanNotSeeTableRecords([$signedOut]);
     });
@@ -185,8 +198,21 @@ describe('SessionSignInsRelationManager', function () {
         livewire(ManageSessionSignIns::class, [
             'record' => $session->getKey(),
         ])
-            ->filterTable('signed_out')
+            ->filterTable('is_signed_in', 'no')
             ->assertCanSeeTableRecords([$signedOut])
             ->assertCanNotSeeTableRecords([$signedIn]);
+    });
+
+    it('does not expose edit or bulk delete actions', function () {
+        actingAsSuperAdminForSessionRelationManagers();
+
+        $session = DemocraticTimeSession::factory()->create();
+        $signIn = SessionSignIn::factory()->for($session)->create();
+
+        livewire(ManageSessionSignIns::class, [
+            'record' => $session->getKey(),
+        ])
+            ->assertTableActionDoesNotExist('edit', record: $signIn)
+            ->assertTableBulkActionDoesNotExist('delete');
     });
 });

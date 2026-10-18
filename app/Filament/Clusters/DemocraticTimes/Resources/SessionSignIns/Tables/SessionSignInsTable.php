@@ -15,14 +15,19 @@ use Filament\Tables\Table;
 
 final class SessionSignInsTable
 {
-    public static function configure(Table $table): Table
+    /**
+     * @param  bool  $showSession  Set to false when the table is already scoped to a single session.
+     * @param  bool  $withRecordActions  Set to false to omit the edit record action and bulk delete.
+     */
+    public static function configure(Table $table, bool $showSession = true, bool $withRecordActions = true): Table
     {
-        return $table
+        $table
             ->columns([
                 TextColumn::make('democraticTimeSession.location')
                     ->label(__('democratic_time_session.label'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->visible($showSession),
 
                 TextColumn::make('seat.label')
                     ->label(__('emargement.fields.seat'))
@@ -73,7 +78,8 @@ final class SessionSignInsTable
                     ->label(__('democratic_time_session.label'))
                     ->relationship('democraticTimeSession', 'location')
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->visible($showSession),
 
                 SelectFilter::make('is_signed_in')
                     ->label(__('emargement.fields.is_signed_in'))
@@ -92,15 +98,21 @@ final class SessionSignInsTable
                         return $query;
                     }),
             ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
-                ]),
-            ])
             ->defaultSort('signed_in_at', 'desc');
+
+        if ($withRecordActions) {
+            $table
+                ->recordActions([
+                    EditAction::make(),
+                ])
+                ->toolbarActions([
+                    BulkActionGroup::make([
+                        DeleteBulkAction::make()
+                            ->authorizeIndividualRecords('delete'),
+                    ]),
+                ]);
+        }
+
+        return $table;
     }
 }

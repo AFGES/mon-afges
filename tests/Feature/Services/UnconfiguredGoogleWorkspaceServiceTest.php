@@ -36,3 +36,7 @@ it('resolves the real service when the Google Workspace configuration is complet
 
     expect(app(GoogleWorkspaceServiceInterface::class))->toBeInstanceOf(GoogleWorkspaceService::class);
 });
+
+it('reports itself as not configured', function () {
+    expect((new UnconfiguredGoogleWorkspaceService)->isConfigured())->toBeFalse();
+});

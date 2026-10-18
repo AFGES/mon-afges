@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Log;
 
 final class UnconfiguredGoogleWorkspaceService implements GoogleWorkspaceServiceInterface
 {
+    public function isConfigured(): bool
+    {
+        return false;
+    }
+
     public function addToGroup(string $email): bool
     {
         return $this->skip();

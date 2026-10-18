@@ -20,6 +20,7 @@ function mockGoogleWorkspaceService(): GoogleWorkspaceServiceInterface&MockInter
 {
     /** @var GoogleWorkspaceServiceInterface&MockInterface $googleWorkspaceService */
     $googleWorkspaceService = test()->mock(GoogleWorkspaceServiceInterface::class);
+    $googleWorkspaceService->shouldReceive('isConfigured')->andReturnTrue();
 
     return $googleWorkspaceService;
 }

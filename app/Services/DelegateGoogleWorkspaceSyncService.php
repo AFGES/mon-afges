@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\GoogleWorkspaceSyncEvent;
 use App\Models\Delegate;
 use App\Models\User;
 use Closure;
@@ -15,6 +16,11 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
     public function __construct(
         private GoogleWorkspaceServiceInterface $googleWorkspaceService
     ) {}
+
+    public function isConfigured(): bool
+    {
+        return $this->googleWorkspaceService->isConfigured();
+    }
 
     /**
      * A delegate belongs to the Google Workspace group only once approved, with a verified email,
@@ -53,7 +59,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function addDelegate(Delegate $delegate): bool
     {
-        if (! $this->isGoogleWorkspaceConfigured()) {
+        if (! $this->isConfigured()) {
             return false;
         }
 
@@ -88,7 +94,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function removeDelegate(Delegate $delegate): bool
     {
-        if (! $this->isGoogleWorkspaceConfigured()) {
+        if (! $this->isConfigured()) {
             return false;
         }
 
@@ -128,35 +134,10 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
     }
 
     /**
-     * Check if an email is in the Google Workspace group.
-     */
-    public function isInGroup(string $email): bool
-    {
-        return $this->googleWorkspaceService->isInGroup($email);
-    }
-
-    /**
-     * Add an email to the Google Workspace group.
-     */
-    public function addToGroup(string $email): bool
-    {
-        return $this->googleWorkspaceService->addToGroup($email);
-    }
-
-    /**
-     * Remove an email from the Google Workspace group.
-     */
-    public function removeFromGroup(string $email): bool
-    {
-        return $this->googleWorkspaceService->removeFromGroup($email);
-    }
-
-    /**
      * Sync all delegates to the Google Workspace group.
      * Returns an array with sync statistics.
      *
-     * @param  (Closure(string, string|int): void)|null  $onProgress  Receives an event name
-     *                                                                (found_active, checking_removals or a stats key) and its detail (an email, or the count for found_active).
+     * @param  (Closure(GoogleWorkspaceSyncEvent, string|int): void)|null  $onProgress  Receives an event and its detail (an email, or the count for FoundActive).
      * @return array{
      *     already_in_group: int,
      *     added: int,
@@ -167,7 +148,7 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
      */
     public function syncAll(bool $dryRun = false, ?Closure $onProgress = null): array
     {
-        if (! $this->isGoogleWorkspaceConfigured()) {
+        if (! $this->isConfigured()) {
             Log::warning('Google Workspace configuration incomplete, skipping delegate sync');
 
             return array_fill_keys(
@@ -178,8 +159,8 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
 
         $activeDelegateEmails = $this->getActiveDelegateEmails();
 
-        $report = $onProgress ?? static fn (string $event, string|int $detail): null => null;
-        $report('found_active', $activeDelegateEmails->count());
+        $report = $onProgress ?? static fn (GoogleWorkspaceSyncEvent $event, string|int $detail): null => null;
+        $report(GoogleWorkspaceSyncEvent::FoundActive, $activeDelegateEmails->count());
 
         $stats = [
             'already_in_group' => 0,
@@ -192,30 +173,30 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
         foreach ($activeDelegateEmails as $email) {
             if ($this->googleWorkspaceService->isInGroup($email)) {
                 $stats['already_in_group']++;
-                $report('already_in_group', $email);
+                $report(GoogleWorkspaceSyncEvent::AlreadyInGroup, $email);
 
                 continue;
             }
 
             if ($dryRun) {
                 $stats['added']++;
-                $report('added', $email);
+                $report(GoogleWorkspaceSyncEvent::Added, $email);
 
                 continue;
             }
 
             if ($this->googleWorkspaceService->addToGroup($email)) {
                 $stats['added']++;
-                $report('added', $email);
+                $report(GoogleWorkspaceSyncEvent::Added, $email);
 
                 continue;
             }
 
             $stats['failed_to_add']++;
-            $report('failed_to_add', $email);
+            $report(GoogleWorkspaceSyncEvent::FailedToAdd, $email);
         }
 
-        $report('checking_removals', 0);
+        $report(GoogleWorkspaceSyncEvent::CheckingRemovals, 0);
 
         foreach ($this->getRemovalCandidateEmails() as $email) {
             if ($activeDelegateEmails->contains($email)) {
@@ -228,20 +209,20 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
 
             if ($dryRun) {
                 $stats['removed']++;
-                $report('removed', $email);
+                $report(GoogleWorkspaceSyncEvent::Removed, $email);
 
                 continue;
             }
 
             if ($this->googleWorkspaceService->removeFromGroup($email)) {
                 $stats['removed']++;
-                $report('removed', $email);
+                $report(GoogleWorkspaceSyncEvent::Removed, $email);
 
                 continue;
             }
 
             $stats['failed_to_remove']++;
-            $report('failed_to_remove', $email);
+            $report(GoogleWorkspaceSyncEvent::FailedToRemove, $email);
         }
 
         return $stats;
@@ -262,10 +243,5 @@ final class DelegateGoogleWorkspaceSyncService implements DelegateGoogleWorkspac
             ->merge(User::whereNotNull('email')->pluck('email'))
             ->unique()
             ->values();
-    }
-
-    private function isGoogleWorkspaceConfigured(): bool
-    {
-        return ! $this->googleWorkspaceService instanceof UnconfiguredGoogleWorkspaceService;
     }
 }

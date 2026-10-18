@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Enums\GoogleWorkspaceSyncEvent;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
-use App\Services\GoogleWorkspaceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -27,7 +27,7 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
 
     public function handle(DelegateGoogleWorkspaceSyncServiceInterface $syncService): int
     {
-        if (! GoogleWorkspaceService::isConfigured()) {
+        if (! $syncService->isConfigured()) {
             $this->error('Google Workspace configuration is incomplete. Please set all required environment variables.');
             $this->info('Required: GOOGLE_WORKSPACE_SERVICE_ACCOUNT_JSON, GOOGLE_WORKSPACE_ADMIN_EMAIL, GOOGLE_WORKSPACE_DELEGATE_GROUP');
 
@@ -39,7 +39,7 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
             $this->info('Running in dry-run mode - no changes will be made');
         }
 
-        $stats = $syncService->syncAll($isDryRun, function (string $event, string|int $detail) use ($isDryRun): void {
+        $stats = $syncService->syncAll($isDryRun, function (GoogleWorkspaceSyncEvent $event, string|int $detail) use ($isDryRun): void {
             $this->reportProgress($event, $detail, $isDryRun);
         });
 
@@ -65,17 +65,16 @@ final class SyncDelegatesToGoogleWorkspaceCommand extends Command
         return self::SUCCESS;
     }
 
-    private function reportProgress(string $event, string|int $detail, bool $isDryRun): void
+    private function reportProgress(GoogleWorkspaceSyncEvent $event, string|int $detail, bool $isDryRun): void
     {
         match ($event) {
-            'found_active' => $this->reportActiveDelegates((int) $detail),
-            'checking_removals' => $this->reportRemovalCheck(),
-            'already_in_group' => $this->line("  ✓ {$detail} - already in group"),
-            'added' => $this->line($isDryRun ? "  [DRY RUN] Would add {$detail}" : "  + {$detail} - added to group"),
-            'failed_to_add' => $this->line("  ✗ {$detail} - failed to add"),
-            'removed' => $this->line($isDryRun ? "  [DRY RUN] Would remove {$detail}" : "  - {$detail} - removed from group"),
-            'failed_to_remove' => $this->line("  ✗ {$detail} - failed to remove"),
-            default => null,
+            GoogleWorkspaceSyncEvent::FoundActive => $this->reportActiveDelegates((int) $detail),
+            GoogleWorkspaceSyncEvent::CheckingRemovals => $this->reportRemovalCheck(),
+            GoogleWorkspaceSyncEvent::AlreadyInGroup => $this->line("  ✓ {$detail} - already in group"),
+            GoogleWorkspaceSyncEvent::Added => $this->line($isDryRun ? "  [DRY RUN] Would add {$detail}" : "  + {$detail} - added to group"),
+            GoogleWorkspaceSyncEvent::FailedToAdd => $this->line("  ✗ {$detail} - failed to add"),
+            GoogleWorkspaceSyncEvent::Removed => $this->line($isDryRun ? "  [DRY RUN] Would remove {$detail}" : "  - {$detail} - removed from group"),
+            GoogleWorkspaceSyncEvent::FailedToRemove => $this->line("  ✗ {$detail} - failed to remove"),
         };
     }
 

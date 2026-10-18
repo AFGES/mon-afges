@@ -203,20 +203,6 @@ describe('getActiveDelegateEmails', function () {
     });
 });
 
-describe('group membership delegation', function () {
-    it('forwards isInGroup, addToGroup and removeFromGroup to Google', function () {
-        $google = mockGoogleWorkspaceService();
-        $google->shouldReceive('isInGroup')->once()->with('a@afges.org')->andReturnTrue();
-        $google->shouldReceive('addToGroup')->once()->with('b@afges.org')->andReturnFalse();
-        $google->shouldReceive('removeFromGroup')->once()->with('c@afges.org')->andReturnTrue();
-        $service = syncServiceWith($google);
-
-        expect($service->isInGroup('a@afges.org'))->toBeTrue()
-            ->and($service->addToGroup('b@afges.org'))->toBeFalse()
-            ->and($service->removeFromGroup('c@afges.org'))->toBeTrue();
-    });
-});
-
 describe('syncAll', function () {
     it('adds missing delegates, keeps present ones and removes former delegates', function () {
         Delegate::factory()->approved()->verified()->create(['email' => 'present@afges.org', 'ended_at' => null]);

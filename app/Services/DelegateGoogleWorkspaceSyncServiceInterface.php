@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\GoogleWorkspaceSyncEvent;
 use App\Models\Delegate;
 use Closure;
 
 interface DelegateGoogleWorkspaceSyncServiceInterface
 {
+    /**
+     * Whether the underlying Google Workspace integration is configured.
+     */
+    public function isConfigured(): bool;
+
     /**
      * Whether the delegate is entitled to be in the group: approved, verified email, valid mandate dates.
      */
@@ -27,8 +33,7 @@ interface DelegateGoogleWorkspaceSyncServiceInterface
     /**
      * Sync every delegate to the Google Workspace group, removing users who are no longer delegates.
      *
-     * @param  (Closure(string, string|int): void)|null  $onProgress  Receives an event name
-     *                                                                (found_active, checking_removals or a stats key) and its detail (an email, or the count for found_active).
+     * @param  (Closure(GoogleWorkspaceSyncEvent, string|int): void)|null  $onProgress  Receives an event and its detail (an email, or the count for FoundActive).
      * @return array{
      *     already_in_group: int,
      *     added: int,

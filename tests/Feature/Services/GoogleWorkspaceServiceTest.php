@@ -203,7 +203,7 @@ describe('isInGroup', function () {
     });
 });
 
-describe('isConfigured', function () {
+describe('configIsPresent', function () {
     it('requires the service account, admin email and delegate group', function (?string $missingKey, bool $expected) {
         config([
             'services.google.workspace.service_account_json' => '{"type":"service_account"}',
@@ -214,7 +214,7 @@ describe('isConfigured', function () {
             config(["services.google.workspace.{$missingKey}" => null]);
         }
 
-        expect(GoogleWorkspaceService::isConfigured())->toBe($expected);
+        expect(GoogleWorkspaceService::configIsPresent())->toBe($expected);
     })->with([
         'complete' => [null, true],
         'no service account' => ['service_account_json', false],

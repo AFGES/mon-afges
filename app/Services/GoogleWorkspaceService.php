@@ -23,7 +23,7 @@ final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
     /**
      * Whether every Google Workspace setting required to talk to the Directory API is present.
      */
-    public static function isConfigured(): bool
+    public static function configIsPresent(): bool
     {
         return (bool) (config('services.google.workspace.service_account_json')
             && config('services.google.workspace.admin_email')
@@ -37,6 +37,11 @@ final class GoogleWorkspaceService implements GoogleWorkspaceServiceInterface
             (string) config('services.google.workspace.admin_email'),
             (string) config('services.google.workspace.delegate_group'),
         );
+    }
+
+    public function isConfigured(): bool
+    {
+        return true;
     }
 
     /**

@@ -52,7 +52,9 @@ function syncSummary(int $alreadyInGroup = 0, int $added = 0, int $removed = 0, 
 
 it('fails without calling Google when the configuration is incomplete', function (string $missingKey) {
     config(["services.google.workspace.{$missingKey}" => null]);
-    $this->mock(GoogleWorkspaceServiceInterface::class)->shouldNotReceive('isInGroup', 'addToGroup', 'removeFromGroup');
+    $google = $this->mock(GoogleWorkspaceServiceInterface::class);
+    $google->shouldReceive('isConfigured')->andReturnFalse();
+    $google->shouldNotReceive('isInGroup', 'addToGroup', 'removeFromGroup');
 
     $this->artisan('delegates:sync-google-workspace')
         ->expectsOutput('Google Workspace configuration is incomplete. Please set all required environment variables.')

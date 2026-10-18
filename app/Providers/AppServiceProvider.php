@@ -40,7 +40,7 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(GoogleWorkspaceServiceInterface::class, fn (): GoogleWorkspaceServiceInterface => GoogleWorkspaceService::isConfigured()
+        $this->app->singleton(GoogleWorkspaceServiceInterface::class, fn (): GoogleWorkspaceServiceInterface => GoogleWorkspaceService::configIsPresent()
             ? GoogleWorkspaceService::fromConfig()
             : new UnconfiguredGoogleWorkspaceService);
         $this->app->singleton(DelegateGoogleWorkspaceSyncServiceInterface::class, DelegateGoogleWorkspaceSyncService::class);

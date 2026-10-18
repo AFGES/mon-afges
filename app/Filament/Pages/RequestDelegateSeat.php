@@ -51,6 +51,13 @@ final class RequestDelegateSeat extends Page
 
     protected string $view = 'filament.pages.request-delegate-seat';
 
+    /**
+     * Per-request memoization; private properties are not persisted by Livewire between requests.
+     *
+     * @var array<int|string, string>|null
+     */
+    private ?array $eligibleOrganizationsCache = null;
+
     public static function canAccess(): bool
     {
         return auth()->user()?->canRequestDelegateSeat() ?? false;
@@ -114,6 +121,10 @@ final class RequestDelegateSeat extends Page
                                 ->options(function (Get $get): array|Collection {
                                     $organizationId = $get('organization_id');
                                     if (! $organizationId) {
+                                        return [];
+                                    }
+
+                                    if (! array_key_exists($organizationId, $this->eligibleOrganizations())) {
                                         return [];
                                     }
 
@@ -225,7 +236,7 @@ final class RequestDelegateSeat extends Page
      */
     private function eligibleOrganizations(): array
     {
-        return auth()->user()->delegateEligibleOrganizations()->pluck('short_name', 'id')->all();
+        return $this->eligibleOrganizationsCache ??= auth()->user()->delegateEligibleOrganizations()->pluck('short_name', 'id')->all();
     }
 
     /**

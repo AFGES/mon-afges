@@ -179,3 +179,16 @@ it('creates a pending delegate, saves user fields and leaves volunteers untouche
         ->elected_mandates->toBe('CFVU')
         ->and(Volunteer::withoutGlobalScopes()->get(['id', 'position_title'])->toArray())->toBe($volunteersBefore);
 });
+
+it('offers no seats for an organization the user is not eligible for', function () {
+    [$user, $collegeOrganization] = eligibleDelegateCandidate();
+    $foreign = CollegeOrganization::factory()->withSeats(1)->create();
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm(['organization_id' => $foreign->organization_id])
+        ->assertFormFieldExists('seat_id', fn ($field): bool => $field->getOptions() === [])
+        ->fillForm(['organization_id' => $collegeOrganization->organization_id])
+        ->assertFormFieldExists('seat_id', fn ($field): bool => count($field->getOptions()) === 1);
+});

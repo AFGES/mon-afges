@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Volunteers\Widgets;
 
 use App\Enums\ApprovalStatus;
+use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use App\Models\Volunteer;
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Support\Icons\Heroicon;
@@ -20,7 +22,7 @@ final class PendingVolunteerStats extends StatsOverviewWidget
      */
     protected function getStats(): array
     {
-        $pendingCount = Volunteer::withoutGlobalScopes()
+        $pendingCount = Volunteer::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
             ->pending()
             ->count();
 

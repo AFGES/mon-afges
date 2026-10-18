@@ -65,3 +65,16 @@ it('is hidden from users without the View:PendingVolunteerStats permission', fun
 
     expect(PendingVolunteerStats::canView())->toBeFalse();
 });
+
+it('does not count soft-deleted pending volunteers', function () {
+    actingAsUserAllowedToViewPendingVolunteerStats();
+    Volunteer::factory()->pending()->create();
+    Volunteer::factory()->pending()->create()->delete();
+
+    $component = livewire(PendingVolunteerStats::class);
+
+    /** @var PendingVolunteerStats $widget */
+    $widget = $component->instance();
+
+    expect(pendingVolunteerStatValue($widget))->toBe(1);
+});

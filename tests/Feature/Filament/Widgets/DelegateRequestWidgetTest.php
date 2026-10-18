@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Filament\Pages\RequestDelegateSeat;
 use App\Filament\Widgets\DelegateRequestWidget;
 use App\Models\CollegeOrganization;
+use App\Models\Delegate;
 use App\Models\User;
 use App\Models\Volunteer;
 use Filament\Pages\Dashboard;
@@ -49,4 +50,17 @@ it('is rendered on the dashboard for an eligible user', function () {
     actingAs(eligibleWidgetUser());
 
     livewire(Dashboard::class)->assertSeeLivewire(DelegateRequestWidget::class);
+});
+
+it('does not count soft-deleted pending delegates', function () {
+    $user = eligibleWidgetUser();
+    Delegate::factory()->pending()->create(['user_id' => $user->id])->delete();
+    actingAs($user);
+
+    $component = livewire(DelegateRequestWidget::class);
+
+    /** @var DelegateRequestWidget $widget */
+    $widget = $component->instance();
+
+    expect((fn (): array => $this->getViewData())->call($widget)['pendingCount'])->toBe(0);
 });

@@ -6,6 +6,8 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Pages\RequestDelegateSeat;
 use App\Models\Delegate;
+use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use Filament\Widgets\Widget;
 
 final class DelegateRequestWidget extends Widget
@@ -27,7 +29,7 @@ final class DelegateRequestWidget extends Widget
     protected function getViewData(): array
     {
         return [
-            'pendingCount' => Delegate::withoutGlobalScopes()
+            'pendingCount' => Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
                 ->pending()
                 ->where('user_id', auth()->id())
                 ->count(),

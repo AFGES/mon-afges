@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Profile;
 
 use App\Models\Organization;
+use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use App\Models\Volunteer;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
@@ -41,7 +43,7 @@ final class ManageVolunteers extends MyProfileComponent
      */
     public function getVolunteersProperty(): Collection
     {
-        return Volunteer::withoutGlobalScopes()
+        return Volunteer::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
             ->where('user_id', auth()->id())
             ->with('organization')
             ->orderBy('started_at', 'desc')
@@ -126,7 +128,7 @@ final class ManageVolunteers extends MyProfileComponent
 
     public function terminateVolunteer(string $volunteerId): void
     {
-        $volunteer = Volunteer::withoutGlobalScopes()
+        $volunteer = Volunteer::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
             ->where('id', $volunteerId)
             ->firstOrFail();
 

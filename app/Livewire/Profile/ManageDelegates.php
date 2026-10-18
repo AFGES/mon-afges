@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Profile;
 
 use App\Models\Delegate;
+use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
@@ -23,7 +25,7 @@ final class ManageDelegates extends MyProfileComponent
      */
     public function getDelegatesProperty(): Collection
     {
-        return Delegate::withoutGlobalScopes()
+        return Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
             ->where('user_id', auth()->id())
             ->with(['organization', 'seat.collegeOrganization.college'])
             ->orderBy('started_at', 'desc')
@@ -32,7 +34,7 @@ final class ManageDelegates extends MyProfileComponent
 
     public function terminateDelegate(string $delegateId): void
     {
-        $delegate = Delegate::withoutGlobalScopes()
+        $delegate = Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
             ->where('id', $delegateId)
             ->firstOrFail();
 

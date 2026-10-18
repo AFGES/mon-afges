@@ -6,6 +6,8 @@ use App\Filament\Clusters\Settings\Resources\Colleges\Pages\CreateCollege;
 use App\Filament\Clusters\Settings\Resources\Colleges\Pages\EditCollege;
 use App\Filament\Clusters\Settings\Resources\Colleges\Pages\ListColleges;
 use App\Models\College;
+use App\Models\CollegeOrganization;
+use App\Models\Delegate;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -224,4 +226,26 @@ describe('EditCollege', function () {
         '`can_vote` is required' => [['can_vote' => null], ['can_vote' => 'required']],
         '`require_same_college_for_proxy` is required' => [['require_same_college_for_proxy' => null], ['require_same_college_for_proxy' => 'required']],
     ]);
+});
+
+describe('ListColleges delegates count', function () {
+    it('counts only approved delegates per college', function () {
+        actingAsSuperAdminForCollegeResource();
+
+        $collegeOrganization = CollegeOrganization::factory()->withSeats(1)->create();
+        $seat = $collegeOrganization->seatRecords->first();
+        Delegate::factory()->approved()->count(2)->create([
+            'seat_id' => $seat->id,
+            'organization_id' => $collegeOrganization->organization_id,
+        ]);
+        Delegate::factory()->pending()->create([
+            'seat_id' => $seat->id,
+            'organization_id' => $collegeOrganization->organization_id,
+        ]);
+        $emptyCollege = College::factory()->create();
+
+        livewire(ListColleges::class)
+            ->assertTableColumnStateSet('delegates_count', 2, $collegeOrganization->college)
+            ->assertTableColumnStateSet('delegates_count', 0, $emptyCollege);
+    });
 });

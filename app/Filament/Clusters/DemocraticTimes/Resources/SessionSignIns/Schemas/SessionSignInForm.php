@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Clusters\DemocraticTimes\Resources\SessionSignIns\Schemas;
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Sessions\Pages\ManageSessionSignIns;
+use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Section;
@@ -52,7 +54,7 @@ final class SessionSignInForm
                                 'email',
                                 fn ($query, callable $get) => $query
                                     ->when($get('seat_id'), fn ($q, $seatId) => $q->where('seat_id', $seatId))
-                                    ->withoutGlobalScopes()
+                                    ->withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
                             )
                             ->searchable()
                             ->preload()

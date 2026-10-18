@@ -7,6 +7,7 @@ use App\Models\CollegeOrganization;
 use App\Models\Delegate;
 use App\Models\Organization;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 test('is empty when no delegate sits on it', function () {
     $seat = CollegeOrganization::factory()->withSeats(1)->create()->seatRecords->first();
@@ -86,4 +87,23 @@ test('labels itself as vide when no delegate sits on it', function () {
     $seat = CollegeOrganization::factory()->for($college)->withSeats(1)->create()->seatRecords->first();
 
     expect($seat->label())->toBe('Fédéral: Vide');
+});
+
+test('label is identical whether or not delegates are eager loaded', function () {
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(1)->create();
+    $seat = $collegeOrganization->seatRecords->first();
+    Delegate::factory()->approved()->count(2)->create([
+        'seat_id' => $seat->id,
+        'organization_id' => $collegeOrganization->organization_id,
+    ]);
+
+    $lazyLabel = $seat->fresh()->label();
+    $eagerSeat = $seat->fresh()->load('delegates.user', 'collegeOrganization.college');
+
+    DB::enableQueryLog();
+    $eagerLabel = $eagerSeat->label();
+
+    expect($eagerLabel)->toBe($lazyLabel)
+        ->and($eagerSeat->isEmpty())->toBeFalse()
+        ->and(DB::getQueryLog())->toBeEmpty();
 });

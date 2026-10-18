@@ -151,3 +151,13 @@ test('renders the terminate action with a quoted delegate id', function () {
     livewire(ManageDelegates::class)
         ->assertSeeHtml("terminateDelegate('{$delegate->id}')");
 });
+
+test('does not list soft-deleted delegates', function () {
+    $user = User::factory()->create();
+    $delegate = Delegate::factory()->pending()->create(['user_id' => $user->id]);
+    $delegate->delete();
+
+    actingAs($user);
+
+    expect(livewire(ManageDelegates::class)->instance()->delegates)->toBeEmpty();
+});

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Organizations\Tables;
 
 use App\Models\Delegate;
+use App\Models\Organization;
 use App\Models\Seat;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -15,12 +16,30 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class OrganizationsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->select('organizations.*')
+                ->selectSub(
+                    Seat::query()
+                        ->selectRaw('count(*)')
+                        ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
+                        ->whereColumn('college_organization.organization_id', 'organizations.id'),
+                    'total_seats',
+                )
+                ->selectSub(
+                    Delegate::query()
+                        ->selectRaw('count(*)')
+                        ->join('seats', 'delegates.seat_id', '=', 'seats.id')
+                        ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
+                        ->whereColumn('college_organization.organization_id', 'organizations.id'),
+                    'total_delegates',
+                ))
             ->columns([
                 TextColumn::make('short_name')
                     ->label(__('organization.fields.short_name'))
@@ -37,23 +56,12 @@ final class OrganizationsTable
                     ->color('info'),
                 TextColumn::make('total_seats')
                     ->label(__('organization.fields.total_seats'))
-                    ->state(function ($record): int {
-                        return Seat::query()
-                            ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
-                            ->where('college_organization.organization_id', $record->id)
-                            ->count();
-                    })
+                    ->state(fn (Organization $record): int => (int) $record->getAttribute('total_seats'))
                     ->badge()
                     ->color('success'),
                 TextColumn::make('total_delegates')
                     ->label(__('organization.fields.total_delegates'))
-                    ->state(function ($record): int {
-                        return Delegate::query()
-                            ->join('seats', 'delegates.seat_id', '=', 'seats.id')
-                            ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
-                            ->where('college_organization.organization_id', $record->id)
-                            ->count();
-                    })
+                    ->state(fn (Organization $record): int => (int) $record->getAttribute('total_delegates'))
                     ->badge()
                     ->color('warning'),
                 TextColumn::make('created_at')

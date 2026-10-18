@@ -156,3 +156,12 @@ test('displays the end date of terminated mandates', function () {
     livewire(ManageVolunteers::class)
         ->assertSee(__('profile.manage_volunteers.ended_on', ['date' => '05/03/2026']));
 });
+
+test('does not list soft-deleted volunteers', function () {
+    $user = User::factory()->create();
+    Volunteer::factory()->pending()->create(['user_id' => $user->id])->delete();
+
+    actingAs($user);
+
+    expect(livewire(ManageVolunteers::class)->instance()->volunteers)->toBeEmpty();
+});

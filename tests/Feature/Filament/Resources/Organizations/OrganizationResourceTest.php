@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Filament\Resources\Organizations\Pages\CreateOrganization;
 use App\Filament\Resources\Organizations\Pages\EditOrganization;
 use App\Filament\Resources\Organizations\Pages\ListOrganizations;
+use App\Models\CollegeOrganization;
+use App\Models\Delegate;
 use App\Models\Organization;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
@@ -238,5 +240,29 @@ describe('EditOrganization', function () {
             ->assertRedirect();
 
         expect($organization->fresh()->trashed())->toBeTrue();
+    });
+});
+
+describe('ListOrganizations seat and delegate totals', function () {
+    it('shows seat and approved delegate totals per organization', function () {
+        actingAsSuperAdminForOrganizationResource();
+
+        $collegeOrganization = CollegeOrganization::factory()->withSeats(3)->create();
+        $seat = $collegeOrganization->seatRecords->first();
+        Delegate::factory()->approved()->count(2)->create([
+            'seat_id' => $seat->id,
+            'organization_id' => $collegeOrganization->organization_id,
+        ]);
+        Delegate::factory()->pending()->create([
+            'seat_id' => $seat->id,
+            'organization_id' => $collegeOrganization->organization_id,
+        ]);
+        $emptyOrganization = Organization::factory()->create();
+
+        livewire(ListOrganizations::class)
+            ->assertTableColumnStateSet('total_seats', 3, $collegeOrganization->organization)
+            ->assertTableColumnStateSet('total_delegates', 2, $collegeOrganization->organization)
+            ->assertTableColumnStateSet('total_seats', 0, $emptyOrganization)
+            ->assertTableColumnStateSet('total_delegates', 0, $emptyOrganization);
     });
 });

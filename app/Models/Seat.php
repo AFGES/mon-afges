@@ -115,6 +115,10 @@ final class Seat extends Model
      */
     public function isEmpty(): bool
     {
+        if ($this->relationLoaded('delegates')) {
+            return $this->delegates->isEmpty();
+        }
+
         return $this->delegates()->count() === 0;
     }
 
@@ -125,7 +129,9 @@ final class Seat extends Model
     public function label(): string
     {
         $college = $this->collegeOrganization->college;
-        $delegates = $this->delegates()->with('user')->get();
+        $delegates = $this->relationLoaded('delegates')
+            ? $this->delegates->loadMissing('user')
+            : $this->delegates()->with('user')->get();
 
         $delegateNames = $delegates->map(fn (Delegate $delegate): string => $delegate->user->name)->join(', ');
 

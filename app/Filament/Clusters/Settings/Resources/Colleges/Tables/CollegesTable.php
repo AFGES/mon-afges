@@ -12,12 +12,23 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 final class CollegesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->select('colleges.*')
+                ->selectSub(
+                    Delegate::query()
+                        ->selectRaw('count(*)')
+                        ->join('seats', 'delegates.seat_id', '=', 'seats.id')
+                        ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
+                        ->whereColumn('college_organization.college_id', 'colleges.id'),
+                    'delegates_count',
+                ))
             ->columns([
                 TextColumn::make('name')
                     ->label(__('college.fields.name'))
@@ -45,13 +56,7 @@ final class CollegesTable
                     ->sortable(),
                 TextColumn::make('delegates_count')
                     ->label(__('college.fields.delegates_count'))
-                    ->state(function (College $record): int {
-                        return Delegate::query()
-                            ->join('seats', 'delegates.seat_id', '=', 'seats.id')
-                            ->join('college_organization', 'seats.college_organization_id', '=', 'college_organization.id')
-                            ->where('college_organization.college_id', $record->id)
-                            ->count();
-                    }),
+                    ->state(fn (College $record): int => (int) $record->getAttribute('delegates_count')),
                 TextColumn::make('created_at')
                     ->label(__('college.fields.created_at'))
                     ->dateTime()

@@ -6,10 +6,16 @@ use App\Filament\Pages\Auth\Login;
 use App\Models\User;
 use App\Notifications\MagicLinkNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Sleep;
 
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\assertGuest;
 use function Pest\Livewire\livewire;
+
+beforeEach(function () {
+    $this->withoutDefer();
+    Sleep::fake();
+});
 
 it('renders the login page with the password toggle label', function () {
     $this->get('/login')

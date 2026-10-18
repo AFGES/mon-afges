@@ -10,6 +10,9 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Support\Timebox;
+
+use function Illuminate\Support\defer;
 
 final class SendMagicLink
 {
@@ -21,10 +24,16 @@ final class SendMagicLink
 
     private const int TOKEN_TTL_MINUTES = 15;
 
+    private const int MINIMUM_RESPONSE_MICROSECONDS = 250_000;
+
+    public function __construct(private readonly Timebox $timebox) {}
+
     /**
      * Send a magic link to the given email when an account exists.
      *
-     * Behaves identically for unknown emails so accounts cannot be enumerated.
+     * Behaves identically for unknown emails so accounts cannot be enumerated: only the lookup runs
+     * inside a Timebox, while token generation (slow hashing) and the notification are deferred until after
+     * the response is sent, so the response time does not reveal whether the account exists.
      *
      * @throws TooManyRequestsException When the per-email or per-IP limit is exceeded.
      */
@@ -34,20 +43,24 @@ final class SendMagicLink
 
         $this->hitRateLimiters(Str::lower($email), $ipAddress);
 
-        $user = User::where('email', $email)->first();
+        $this->timebox->call(function () use ($email): void {
+            $user = User::where('email', $email)->first();
 
-        if (! $user) {
-            return;
-        }
+            if (! $user) {
+                return;
+            }
 
-        $token = Str::random(64);
+            defer(function () use ($user): void {
+                $token = Str::random(64);
 
-        $user->update([
-            'magic_link_token' => Hash::make($token),
-            'magic_link_token_expires_at' => now()->addMinutes(self::TOKEN_TTL_MINUTES),
-        ]);
+                $user->update([
+                    'magic_link_token' => Hash::make($token),
+                    'magic_link_token_expires_at' => now()->addMinutes(self::TOKEN_TTL_MINUTES),
+                ]);
 
-        $user->notify(new MagicLinkNotification($token));
+                $user->notify(new MagicLinkNotification($token));
+            });
+        }, self::MINIMUM_RESPONSE_MICROSECONDS);
     }
 
     /**

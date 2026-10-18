@@ -6,8 +6,14 @@ use App\Models\User;
 use App\Notifications\MagicLinkNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Sleep;
 
 const MAGIC_LINK_STATUS = 'Si un compte existe avec cette adresse e-mail, un lien de connexion vous a été envoyé.';
+
+beforeEach(function () {
+    $this->withoutDefer();
+    Sleep::fake();
+});
 
 it('stores a hashed token valid for 15 minutes and sends the magic link', function () {
     $this->freezeTime();

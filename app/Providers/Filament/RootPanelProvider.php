@@ -43,6 +43,9 @@ final class RootPanelProvider extends PanelProvider
             ->id('root')
             ->path('')
             ->login(Login::class)
+            ->favicon(asset('favicon.svg'))
+            ->brandLogo(asset('images/afges-logo.svg'))
+            ->brandLogoHeight('4rem')
             ->colors([
                 'primary' => Color::Amber,
             ])

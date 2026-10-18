@@ -34,3 +34,7 @@ _ide_helper*.php
 /.claude
 /.cursor
 /.junie
+
+**/caddy
+frankenphp
+frankenphp-worker.php

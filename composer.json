@@ -16,6 +16,7 @@
         "google/apiclient": "^2.20.1",
         "jeffgreco13/filament-breezy": "^3.2.8",
         "laravel/framework": "^13.36",
+        "laravel/octane": "^2.22",
         "laravel/tinker": "^3.0",
         "owenvoke/blade-fontawesome": "^3.3",
         "socialiteproviders/google": "^4.1"

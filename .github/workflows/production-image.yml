@@ -1,0 +1,47 @@
+name: production image
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Testing
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build production image
+        env:
+          COMPOSER_AUTH: '{"http-basic":{"packages.filamentphp.com":{"username":"${{ secrets.FILAMENT_BLUEPRINT_EMAIL }}","password":"${{ secrets.FILAMENT_BLUEPRINT_LICENSE_KEY }}"}}}'
+          DOCKER_BUILDKIT: 1
+        run: |
+          docker build \
+            --file docker/production/Dockerfile \
+            --secret id=composer_auth,env=COMPOSER_AUTH \
+            --tag mon-afges:ci \
+            .

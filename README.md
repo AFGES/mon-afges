@@ -69,6 +69,54 @@ php artisan migrate
 bun run build
 ```
 
+## Laravel Octane (FrankenPHP)
+
+The application is served by [Laravel Octane](https://laravel.com/docs/octane) on FrankenPHP. Octane boots Laravel and Filament once and keeps the application in memory in long-lived workers.
+
+Cache and sessions are stored in Valkey (`CACHE_STORE=redis`, `SESSION_DRIVER=redis`). Switching the session driver from `database` logs out existing users once.
+
+### Development
+
+`composer dev` starts `php artisan octane:start --watch` instead of `artisan serve`. FrankenPHP watches the paths listed in `config/octane.php` (`watch` key) and reloads the workers when a file changes. The FrankenPHP binary is downloaded to the project root on first start (it is git-ignored).
+
+In the dev container, `OCTANE_HOST=0.0.0.0` is set in `.devcontainer/compose.ports.yml` so that port 8000 is reachable from the host.
+
+Useful commands:
+
+```bash
+php artisan octane:status
+php artisan octane:reload
+```
+
+### Production
+
+Build the image from the repository root. The Filament repository credentials are passed as a build secret and are never copied into the image:
+
+```bash
+docker build -f docker/production/Dockerfile \
+    --secret id=composer_auth,src=auth.json \
+    -t mon-afges .
+```
+
+The container listens on port 8000 and runs as a non-root user. At start, it runs `php artisan optimize` and `php artisan filament:optimize`, then `php artisan octane:frankenphp`. `OCTANE_WORKERS` (default `auto`) and `OCTANE_MAX_REQUESTS` (default `500`) tune the workers. Use `/up` for liveness and readiness probes.
+
+Migrations do not run in the container entrypoint. Run them once per release, before the new pods take traffic, with a Kubernetes Job or an init container:
+
+```bash
+php artisan migrate --force
+```
+
+Workers keep the code in memory. A deployment must start new containers (or run `php artisan octane:reload` on a long-lived server) for new code to be served.
+
+### Octane safety rules
+
+The application instance is shared by every request a worker serves. When writing code:
+
+- Never store request, authenticated user or session state in singletons or `static` properties.
+- Use `scoped()` bindings for services that depend on the current request; they are flushed after each request.
+- Do not inject the container, the request or the config repository into singleton constructors. Resolve them when needed with `app()`, `request()` or `config()`.
+- Do not append to static arrays: they grow for the life of the worker and leak memory.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

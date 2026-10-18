@@ -5,6 +5,7 @@ gh = "latest"
 jactionlint = "latest"
 jq = "latest"
 rtk = "latest"
+shellcheck = "latest"
 
 [env]
 _.path = ["vendor/bin", "."]

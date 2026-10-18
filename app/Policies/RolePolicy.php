@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Permission\Models\Role;
@@ -29,10 +30,23 @@ final class RolePolicy
 
     public function update(AuthUser $authUser, Role $role): bool
     {
+        if ($role->name === User::SUPER_ADMIN_ROLE) {
+            return false;
+        }
+
         return $authUser->can('Update:Role');
     }
 
     public function delete(AuthUser $authUser, Role $role): bool
+    {
+        if ($role->name === User::SUPER_ADMIN_ROLE) {
+            return false;
+        }
+
+        return $authUser->can('Delete:Role');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
     {
         return $authUser->can('Delete:Role');
     }
@@ -44,6 +58,10 @@ final class RolePolicy
 
     public function forceDelete(AuthUser $authUser, Role $role): bool
     {
+        if ($role->name === User::SUPER_ADMIN_ROLE) {
+            return false;
+        }
+
         return $authUser->can('ForceDelete:Role');
     }
 
@@ -59,6 +77,10 @@ final class RolePolicy
 
     public function replicate(AuthUser $authUser, Role $role): bool
     {
+        if ($role->name === User::SUPER_ADMIN_ROLE) {
+            return false;
+        }
+
         return $authUser->can('Replicate:Role');
     }
 

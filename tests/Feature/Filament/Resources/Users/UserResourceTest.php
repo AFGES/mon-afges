@@ -7,7 +7,9 @@ use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 use function Pest\Laravel\actingAs;
@@ -232,5 +234,156 @@ describe('EditUser', function () {
             ->assertRedirect();
 
         assertDatabaseMissing($user);
+    });
+});
+
+describe('UserForm roles field', function () {
+    function actingAsUserManager(): User
+    {
+        foreach (['ViewAny:User', 'View:User', 'Create:User', 'Update:User'] as $permission) {
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        $manager = User::factory()->create()->givePermissionTo(['ViewAny:User', 'View:User', 'Create:User', 'Update:User']);
+        actingAs($manager);
+
+        return $manager;
+    }
+
+    test('does not offer the super admin role to non super admins', function () {
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $editorRole = Role::create(['name' => 'editor', 'guard_name' => 'web']);
+        actingAsUserManager();
+
+        livewire(CreateUser::class)
+            ->assertFormFieldExists('roles', function (Select $field) use ($superAdminRole, $editorRole): bool {
+                $options = $field->getOptions();
+
+                return ! array_key_exists($superAdminRole->id, $options) && array_key_exists($editorRole->id, $options);
+            });
+    });
+
+    test('rejects assigning the super admin role as a non super admin', function () {
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        actingAsUserManager();
+        $target = User::factory()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => [$superAdminRole->id]])
+            ->call('save')
+            ->assertHasFormErrors(['roles.0']);
+
+        expect($target->fresh()->isSuperAdmin())->toBeFalse();
+    });
+
+    test('lets a super admin assign the super admin role', function () {
+        $superAdminRole = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        actingAsSuperAdminForUserResource();
+        $target = User::factory()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => [$superAdminRole->id]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($target->fresh()->isSuperAdmin())->toBeTrue();
+    });
+
+    function roleWithPermissions(string $name, array $permissions): Role
+    {
+        $role = Role::create(['name' => $name, 'guard_name' => 'web']);
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
+
+        return $role->syncPermissions($permissions);
+    }
+
+    test('only offers roles whose permissions the actor holds', function () {
+        $withinSubset = roleWithPermissions('within_subset', ['View:User']);
+        $beyondSubset = roleWithPermissions('beyond_subset', ['View:User', 'Delete:Organization']);
+        actingAsUserManager();
+
+        livewire(CreateUser::class)
+            ->assertFormFieldExists('roles', function (Select $field) use ($withinSubset, $beyondSubset): bool {
+                $options = $field->getOptions();
+
+                return array_key_exists($withinSubset->id, $options) && ! array_key_exists($beyondSubset->id, $options);
+            });
+    });
+
+    test('rejects assigning a role holding a permission the actor lacks', function () {
+        $beyondSubset = roleWithPermissions('beyond_subset', ['View:User', 'Delete:Organization']);
+        actingAsUserManager();
+        $target = User::factory()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => [$beyondSubset->id]])
+            ->call('save')
+            ->assertHasFormErrors(['roles.0']);
+
+        expect($target->fresh()->hasRole('beyond_subset'))->toBeFalse();
+    });
+
+    test('keeps a hidden role of the target when the roles field is emptied', function () {
+        $beyondSubset = roleWithPermissions('beyond_subset', ['View:User', 'Delete:Organization']);
+        actingAsUserManager();
+        $target = User::factory()->create()->assignRole($beyondSubset);
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->assertSchemaStateSet(['roles' => []])
+            ->fillForm(['roles' => []])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($target->fresh()->hasRole('beyond_subset'))->toBeTrue();
+    });
+
+    test('keeps the hidden roles of the target while syncing the visible ones', function () {
+        $beyondSubset = roleWithPermissions('beyond_subset', ['View:User', 'Delete:Organization']);
+        $withinSubset = roleWithPermissions('within_subset', ['View:User']);
+        actingAsUserManager();
+        $target = User::factory()->create()->assignRole($beyondSubset);
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => [$withinSubset->id]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($target->fresh()->getRoleNames()->all())->toEqualCanonicalizing(['beyond_subset', 'within_subset']);
+    });
+
+    test('lets an actor assign and remove a role within their permissions', function () {
+        $withinSubset = roleWithPermissions('within_subset', ['View:User']);
+        actingAsUserManager();
+        $target = User::factory()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => [$withinSubset->id]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($target->fresh()->hasRole('within_subset'))->toBeTrue();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => []])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($target->fresh()->hasRole('within_subset'))->toBeFalse();
+    });
+
+    test('lets a super admin assign any role', function () {
+        $beyondSubset = roleWithPermissions('beyond_subset', ['Delete:Organization']);
+        actingAsSuperAdminForUserResource();
+        $target = User::factory()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->fillForm(['roles' => [$beyondSubset->id]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($target->fresh()->hasRole('beyond_subset'))->toBeTrue();
     });
 });

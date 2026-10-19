@@ -129,6 +129,7 @@ return [
         'single_parameter_methods' => [
             'viewAny',
             'create',
+            'export',
             'deleteAny',
             'forceDeleteAny',
             'restoreAny',
@@ -172,6 +173,20 @@ return [
                 'create',
                 'update',
                 'delete',
+            ],
+            App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource::class => [
+                'viewAny',
+                'view',
+                'create',
+                'update',
+                'delete',
+                'restore',
+                'forceDelete',
+                'forceDeleteAny',
+                'restoreAny',
+                'replicate',
+                'reorder',
+                'export',
             ],
             App\Filament\FinMail\EmailTemplateResource::class => [
                 'viewAny',

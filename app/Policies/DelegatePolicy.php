@@ -82,6 +82,11 @@ final class DelegatePolicy implements RestrictsSuperAdmin
         return $authUser->can('Reorder:Delegate');
     }
 
+    public function export(AuthUser $authUser): bool
+    {
+        return $authUser->can('Export:Delegate');
+    }
+
     public function terminate(AuthUser $authUser, Delegate $delegate): bool
     {
         $canManageMandate = $delegate->user_id === $authUser->id || ($authUser instanceof User && $authUser->isSuperAdmin());

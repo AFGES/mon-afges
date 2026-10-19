@@ -84,3 +84,12 @@ test('forbids a super admin from terminating an already ended delegate mandate',
 
     expect($superAdmin->can('terminate', $delegate))->toBeFalse();
 });
+
+test('allows exporting delegates only for users holding the export permission', function () {
+    Permission::findOrCreate('Export:Delegate', 'web');
+    $exporter = User::factory()->create()->givePermissionTo('Export:Delegate');
+    $creator = User::factory()->create();
+
+    expect($exporter->can('export', Delegate::class))->toBeTrue()
+        ->and($creator->can('export', Delegate::class))->toBeFalse();
+});

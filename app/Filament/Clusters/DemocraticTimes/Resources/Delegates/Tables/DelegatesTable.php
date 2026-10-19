@@ -94,7 +94,7 @@ final class DelegatesTable
                         ->exporter(DelegateExporter::class)
                         ->formats([ExportFormat::Csv])
                         ->label(__('delegate_export.action'))
-                        ->authorize(fn (): bool => Gate::allows('create', Delegate::class)),
+                        ->authorize(fn (): bool => Gate::allows('export', Delegate::class)),
                 ]),
             ])
             ->defaultGroup('organization.legal_name');

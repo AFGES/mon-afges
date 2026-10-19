@@ -35,7 +35,7 @@ final class ListDelegates extends ListRecords
                 ->exporter(DelegateExporter::class)
                 ->formats([ExportFormat::Csv])
                 ->label(__('delegate_export.action'))
-                ->authorize(fn (): bool => Gate::allows('create', Delegate::class)),
+                ->authorize(fn (): bool => Gate::allows('export', Delegate::class)),
             CreateAction::make(),
         ];
     }

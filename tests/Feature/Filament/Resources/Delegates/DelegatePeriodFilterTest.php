@@ -16,7 +16,7 @@ use function Pest\Livewire\livewire;
 beforeEach(function () {
     $user = User::factory()->create();
     $user->givePermissionTo(Permission::findOrCreate('ViewAny:Delegate', 'web'));
-    $user->givePermissionTo(Permission::findOrCreate('Create:Delegate', 'web'));
+    $user->givePermissionTo(Permission::findOrCreate('Export:Delegate', 'web'));
     actingAs($user);
 
     $this->current = Delegate::factory()->approved()->create(['started_at' => now()->subMonth(), 'ended_at' => null]);

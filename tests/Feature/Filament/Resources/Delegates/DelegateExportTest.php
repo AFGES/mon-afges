@@ -89,8 +89,8 @@ it('exports the approval status label and date when selected', function () {
     expect($row)->toBe([__('approval.status.approved'), $delegate->approved_at->format('Y-m-d H:i:s')]);
 });
 
-it('shows the export actions to a user allowed to create delegates', function () {
-    actingAsDelegateExporter('ViewAny:Delegate', 'Create:Delegate');
+it('shows the export actions to a user allowed to export delegates', function () {
+    actingAsDelegateExporter('ViewAny:Delegate', 'Export:Delegate');
     $delegate = Delegate::factory()->approved()->create(['ended_at' => null]);
 
     livewire(ListDelegates::class)
@@ -99,12 +99,15 @@ it('shows the export actions to a user allowed to create delegates', function ()
         ->assertActionVisible(TestAction::make(ExportBulkAction::class)->table()->bulk());
 });
 
-it('hides the export actions from a user who cannot create delegates', function () {
-    actingAsDelegateExporter('ViewAny:Delegate');
+it('hides the export actions from a user who can only create delegates', function (array $permissions) {
+    actingAsDelegateExporter('ViewAny:Delegate', ...$permissions);
     $delegate = Delegate::factory()->approved()->create(['ended_at' => null]);
 
     livewire(ListDelegates::class)
         ->assertActionHidden('export')
         ->selectTableRecords([$delegate])
         ->assertActionHidden(TestAction::make(ExportBulkAction::class)->table()->bulk());
-});
+})->with([
+    'create only' => [['Create:Delegate']],
+    'no other permission' => [[]],
+]);

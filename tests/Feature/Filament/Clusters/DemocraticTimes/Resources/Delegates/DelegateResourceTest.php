@@ -530,7 +530,9 @@ describe('EditDelegate', function () {
                     'first_name' => 'Camille',
                     'study_program' => 'Master 2 Droit',
                     'phone' => '+33601020304',
-                    'postal_address' => '1 rue de la Paix, Paris',
+                    'address_street' => '1 rue de la Paix',
+                    'address_postcode' => '75002',
+                    'address_city' => 'Paris',
                     'elected_mandates' => 'CFVU',
                 ],
             ])
@@ -573,7 +575,9 @@ describe('EditDelegate', function () {
                     'phone' => '',
                     'birth_date' => null,
                     'study_program' => '',
-                    'postal_address' => '',
+                    'address_street' => '',
+                    'address_postcode' => '',
+                    'address_city' => '',
                 ],
             ])
             ->call('save')

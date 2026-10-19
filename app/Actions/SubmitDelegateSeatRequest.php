@@ -17,7 +17,12 @@ final class SubmitDelegateSeatRequest
         'study_program',
         'birth_date',
         'phone',
-        'postal_address',
+        'address_street',
+        'address_postcode',
+        'address_city',
+        'address_country',
+        'address_latitude',
+        'address_longitude',
         'elected_mandates',
     ];
 

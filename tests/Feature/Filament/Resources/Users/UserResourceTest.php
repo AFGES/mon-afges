@@ -177,7 +177,9 @@ describe('EditUser', function () {
                 'study_program' => $user->study_program,
                 'birth_date' => '1999-03-08',
                 'phone' => $user->phone,
-                'postal_address' => $user->postal_address,
+                'address_street' => $user->address_street,
+                'address_postcode' => $user->address_postcode,
+                'address_city' => $user->address_city,
                 'elected_mandates' => $user->elected_mandates,
             ]);
     });
@@ -198,7 +200,9 @@ describe('EditUser', function () {
                 'study_program' => 'Master 2 Droit',
                 'birth_date' => '2000-05-17',
                 'phone' => '+33601020304',
-                'postal_address' => '1 rue de la Paix, Paris',
+                'address_street' => '1 rue de la Paix',
+                'address_postcode' => '75002',
+                'address_city' => 'Paris',
                 'elected_mandates' => 'CFVU',
             ])
             ->call('save')
@@ -211,7 +215,9 @@ describe('EditUser', function () {
             'email' => $newUserData->email,
             'study_program' => 'Master 2 Droit',
             'phone' => '+33601020304',
-            'postal_address' => '1 rue de la Paix, Paris',
+            'address_street' => '1 rue de la Paix',
+            'address_postcode' => '75002',
+            'address_city' => 'Paris',
             'elected_mandates' => 'CFVU',
         ]);
 
@@ -428,7 +434,7 @@ describe('UserForm personal details', function () {
 
         livewire(EditUser::class, ['record' => $target->id])
             ->assertFormFieldHidden('phone')
-            ->assertFormFieldHidden('postal_address')
+            ->assertFormFieldHidden('address_street')
             ->assertFormFieldHidden('elected_mandates');
     });
 

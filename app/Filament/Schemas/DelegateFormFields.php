@@ -8,6 +8,7 @@ use App\Models\Seat;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -21,7 +22,7 @@ final class DelegateFormFields
      * Personal information stored on the user.
      *
      * @param  bool  $requirePersonalDetails  Makes study program, birth date, phone and postal address mandatory.
-     * @return list<TextInput|DatePicker|PhoneInput|Textarea>
+     * @return list<TextInput|DatePicker|PhoneInput|Fieldset>
      */
     public static function userComponents(bool $requirePersonalDetails = false): array
     {
@@ -44,7 +45,7 @@ final class DelegateFormFields
      * Personal details stored on the user, also editable from the profile page and the admin user form.
      *
      * @param  bool  $requirePersonalDetails  Makes study program, birth date, phone and postal address mandatory.
-     * @return list<TextInput|DatePicker|PhoneInput|Textarea>
+     * @return list<TextInput|DatePicker|PhoneInput|Fieldset>
      */
     public static function personalDetailComponents(bool $requirePersonalDetails = false): array
     {
@@ -71,10 +72,7 @@ final class DelegateFormFields
                 ->strictMode()
                 ->validateFor()
                 ->required($requirePersonalDetails),
-            Textarea::make('postal_address')
-                ->label(__('user.fields.postal_address'))
-                ->rows(2)
-                ->required($requirePersonalDetails),
+            PostalAddressFields::component($requirePersonalDetails),
         ];
     }
 

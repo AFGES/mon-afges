@@ -50,7 +50,12 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
         'magic_link_token_expires_at',
         'birth_date',
         'phone',
-        'postal_address',
+        'address_street',
+        'address_postcode',
+        'address_city',
+        'address_country',
+        'address_latitude',
+        'address_longitude',
         'study_program',
         'elected_mandates',
     ];
@@ -216,6 +221,8 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
             'password' => 'hashed',
             'magic_link_token_expires_at' => 'datetime',
             'birth_date' => 'date',
+            'address_latitude' => 'decimal:7',
+            'address_longitude' => 'decimal:7',
         ];
     }
 }

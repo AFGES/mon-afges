@@ -45,7 +45,9 @@ function validSeatRequestData(User $user, CollegeOrganization $collegeOrganizati
         'study_program' => 'Master 2 Droit',
         'birth_date' => '2000-01-31',
         'phone' => '0601020304',
-        'postal_address' => '1 rue de la Paix',
+        'address_street' => '1 rue de la Paix',
+        'address_postcode' => '75002',
+        'address_city' => 'Paris',
         'elected_mandates' => 'CFVU',
     ];
 }
@@ -149,7 +151,7 @@ it('requires', function (string $field) {
         ->assertHasFormErrors([$field => 'required']);
 
     expect(Delegate::withoutGlobalScopes()->count())->toBe(0);
-})->with(['study_program', 'birth_date', 'phone', 'postal_address', 'first_name', 'last_name', 'seat_id']);
+})->with(['study_program', 'birth_date', 'phone', 'address_street', 'address_postcode', 'address_city', 'first_name', 'last_name', 'seat_id']);
 
 it('rejects an invalid phone number', function () {
     [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
@@ -202,7 +204,9 @@ it('creates a pending delegate, saves user fields and leaves volunteers untouche
         ->and($user->refresh())
         ->phone->toBe('+33601020304')
         ->study_program->toBe('Master 2 Droit')
-        ->postal_address->toBe('1 rue de la Paix')
+        ->address_street->toBe('1 rue de la Paix')
+        ->address_postcode->toBe('75002')
+        ->address_city->toBe('Paris')
         ->elected_mandates->toBe('CFVU')
         ->and(Volunteer::withoutGlobalScopes()->get(['id', 'position_title'])->toArray())->toBe($volunteersBefore);
 });

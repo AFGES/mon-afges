@@ -26,7 +26,9 @@ use App\Services\DelegateGoogleWorkspaceSyncService;
 use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceService;
 use App\Services\GoogleWorkspaceServiceInterface;
+use App\Services\NominatimGeoSearchService;
 use App\Services\UnconfiguredGoogleWorkspaceService;
+use EduardoRibeiroDev\FilamentLeaflet\Services\GeoSearchService;
 use Filament\Facades\Filament;
 use FinityLabs\FinMail\Models\EmailTemplate;
 use Illuminate\Database\Eloquent\Model;
@@ -52,6 +54,7 @@ final class AppServiceProvider extends ServiceProvider
             ? GoogleWorkspaceService::fromConfig()
             : new UnconfiguredGoogleWorkspaceService);
         $this->app->singleton(DelegateGoogleWorkspaceSyncServiceInterface::class, DelegateGoogleWorkspaceSyncService::class);
+        $this->app->bind(GeoSearchService::class, NominatimGeoSearchService::class);
 
         if ($this->app->environment('local') && class_exists(LaravelTelescopeServiceProvider::class)) {
             $this->app->register(LaravelTelescopeServiceProvider::class);

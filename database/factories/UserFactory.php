@@ -53,7 +53,12 @@ final class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'birth_date' => fake()->dateTimeBetween('-30 years', '-18 years'),
             'phone' => '+336'.fake()->numerify('########'),
-            'postal_address' => fake()->address(),
+            'address_street' => fake()->numberBetween(1, 120).' rue '.fake()->lastName(),
+            'address_postcode' => fake()->numerify('#####'),
+            'address_city' => fake()->randomElement(['Paris', 'Lyon', 'Lille', 'Nantes', 'Toulouse', 'Strasbourg']),
+            'address_country' => 'FR',
+            'address_latitude' => fake()->latitude(42, 51),
+            'address_longitude' => fake()->longitude(-4, 8),
             'study_program' => fake()->words(3, true),
             'elected_mandates' => fake()->sentence(),
         ]);

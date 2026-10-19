@@ -8,8 +8,8 @@ use App\Actions\SubmitDelegateSeatRequest;
 use App\Filament\Schemas\DelegateFormFields;
 use App\Models\User;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Field;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Support\Icons\Heroicon;
 use Jeffgreco13\FilamentBreezy\Livewire\PersonalInfo as BreezyPersonalInfo;
 use Livewire\Attributes\Locked;
@@ -38,7 +38,7 @@ final class PersonalInfo extends BreezyPersonalInfo
     }
 
     /**
-     * @return list<Field>
+     * @return list<Component>
      */
     protected function getProfileFormComponents(): array
     {

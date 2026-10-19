@@ -28,9 +28,15 @@
         "ghcr.io/devcontainers-extra/features/mise:1": {}
 	},
 	"remoteUser": "sail",
-	"postCreateCommand": "grep -qxF 'eval \"$(mise activate bash)\"' ~/.bashrc || echo 'eval \"$(mise activate bash)\"' >> ~/.bashrc; mise trust --yes --all; composer setup && mise install",
+	"postCreateCommand": {
+		"mise": "mise trust --yes --all && mise install",
+		"composer": "composer setup"
+	},
 	// "runServices": [],
 	"shutdownAction": "stopCompose",
+	"remoteEnv": {
+    "PATH": "${containerEnv:PATH}:${containerEnv:HOME}/.local/share/mise/shims"
+  },
 	"mounts": [
         "source=${localEnv:HOME}/.claude,target=/home/sail/.claude,type=bind",
         "source=${localEnv:HOME}/.claude.json,target=/home/sail/.claude.json,type=bind"

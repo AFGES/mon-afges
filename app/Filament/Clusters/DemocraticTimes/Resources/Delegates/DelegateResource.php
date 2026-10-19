@@ -12,6 +12,7 @@ use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Schemas\DelegateFo
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Tables\DelegatesTable;
 use App\Models\Delegate;
 use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use BackedEnum;
 use Filament\Resources\Pages\PageRegistration;
 use Filament\Resources\RelationManagers\RelationGroup;
@@ -86,6 +87,7 @@ final class DelegateResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 ApprovedScope::class,
+                CurrentlyScope::class,
             ]);
     }
 
@@ -95,6 +97,7 @@ final class DelegateResource extends Resource
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
                 ApprovedScope::class,
+                CurrentlyScope::class,
             ]);
     }
 }

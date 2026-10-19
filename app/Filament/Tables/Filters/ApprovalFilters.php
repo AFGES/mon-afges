@@ -43,20 +43,31 @@ final class ApprovalFilters
                 'future' => __("{$translationPrefix}.future"),
             ])
             ->default(['current'])
-            ->query(fn (Builder $query, array $data): Builder => self::applyPeriod($query, $data['value'] ?? null));
+            ->query(fn (Builder $query, array $data): Builder => self::applyPeriods($query, $data['values'] ?? []));
     }
 
     /**
+     * Keep the records matching any of the selected periods, or every record when none is selected.
+     *
      * @param  Builder<Delegate|Volunteer>  $query
+     * @param  array<int, string>  $periods
      * @return Builder<Delegate|Volunteer>
      */
-    private static function applyPeriod(Builder $query, mixed $period): Builder
+    private static function applyPeriods(Builder $query, array $periods): Builder
     {
-        return match ($period) {
-            'current' => $query->currentlyActive(),
-            'old' => $query->ended(),
-            'future' => $query->notStarted(),
-            default => $query,
-        };
+        if ($periods === []) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $query) use ($periods): void {
+            foreach ($periods as $period) {
+                $query->orWhere(fn (Builder $query): Builder => match ($period) {
+                    'current' => $query->currentlyActive(),
+                    'old' => $query->ended(),
+                    'future' => $query->notStarted(),
+                    default => $query,
+                });
+            }
+        });
     }
 }

@@ -20,7 +20,9 @@ final class DelegateRequestWidget extends Widget
 
     public static function canView(): bool
     {
-        return auth()->user()?->canRequestDelegateSeat() ?? false;
+        $user = auth()->user();
+
+        return $user !== null && ($user->delegateEligibleOrganizations()->exists() || $user->hasPendingDelegateSeatRequest());
     }
 
     /**

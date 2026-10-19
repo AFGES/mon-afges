@@ -8,6 +8,7 @@ use App\Models\Delegate;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final class SubmitDelegateSeatRequest
 {
@@ -30,10 +31,20 @@ final class SubmitDelegateSeatRequest
      * Save the user's personal details and register their pending delegate seat request.
      *
      * @param  array<string, mixed>  $data  Validated form data.
+     *
+     * @throws ValidationException When the user already has a pending request.
      */
     public function handle(User $user, array $data): Delegate
     {
         return DB::transaction(function () use ($user, $data): Delegate {
+            User::query()->whereKey($user->getKey())->lockForUpdate()->sole();
+
+            if ($user->hasPendingDelegateSeatRequest()) {
+                throw ValidationException::withMessages([
+                    'seat_id' => __('delegate_form.request_locked'),
+                ]);
+            }
+
             $user->update(Arr::only($data, self::USER_FIELDS));
 
             return Delegate::create([

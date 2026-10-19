@@ -46,10 +46,18 @@ final class BulkApproveDelegatesAction extends BaseBulkApproveAction
         $count = 0;
         $skippedCount = 0;
         $approvedInBatchIds = [];
+        $approvedUserIds = [];
+        $sameUserSkippedCount = 0;
 
         /** @var Delegate $record */
         foreach ($records as $record) {
             if (! $record->isPending()) {
+                continue;
+            }
+
+            if (in_array($record->user_id, $approvedUserIds, true)) {
+                $sameUserSkippedCount++;
+
                 continue;
             }
 
@@ -70,6 +78,7 @@ final class BulkApproveDelegatesAction extends BaseBulkApproveAction
             }
 
             $approvedInBatchIds[] = $record->getKey();
+            $approvedUserIds[] = $record->user_id;
             $count++;
         }
 
@@ -84,6 +93,15 @@ final class BulkApproveDelegatesAction extends BaseBulkApproveAction
                 ->warning()
                 ->title(__('delegate.approval.bulk_skipped_title'))
                 ->body(trans_choice('delegate.approval.bulk_skipped_body', $skippedCount, ['count' => $skippedCount]))
+                ->persistent()
+                ->send();
+        }
+
+        if ($sameUserSkippedCount > 0) {
+            Notification::make()
+                ->warning()
+                ->title(__('delegate.approval.bulk_skipped_title'))
+                ->body(trans_choice('delegate.approval.bulk_skipped_same_user_body', $sameUserSkippedCount, ['count' => $sameUserSkippedCount]))
                 ->persistent()
                 ->send();
         }

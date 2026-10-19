@@ -38,6 +38,14 @@ it('is hidden from a user who cannot request a delegate seat', function () {
     expect(DelegateRequestWidget::canView())->toBeFalse();
 });
 
+it('stays visible while a request is pending', function () {
+    $user = eligibleWidgetUser();
+    Delegate::factory()->pending()->create(['user_id' => $user->id]);
+    actingAs($user);
+
+    expect(DelegateRequestWidget::canView())->toBeTrue();
+});
+
 it('links to the request page', function () {
     actingAs(eligibleWidgetUser());
 

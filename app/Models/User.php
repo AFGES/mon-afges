@@ -13,11 +13,13 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laravel\Passkeys\Contracts\PasskeyUser;
@@ -110,7 +112,30 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
 
     public function canRequestDelegateSeat(): bool
     {
-        return once(fn (): bool => $this->delegateEligibleOrganizations()->exists());
+        return once(fn (): bool => $this->delegateEligibleOrganizations()->exists() && ! $this->hasPendingDelegateSeatRequest());
+    }
+
+    /**
+     * Approved seats of the user, current or starting later, that have no end date or end after the given date.
+     *
+     * @return EloquentCollection<int, Delegate>
+     */
+    public function upcomingDelegateSeats(Carbon $from, ?string $exceptDelegateId = null): EloquentCollection
+    {
+        return $this->upcomingDelegateSeatsQuery($from, $exceptDelegateId)->get();
+    }
+
+    public function hasCurrentOrUpcomingDelegateSeat(): bool
+    {
+        return $this->upcomingDelegateSeatsQuery(today())->exists();
+    }
+
+    public function hasPendingDelegateSeatRequest(): bool
+    {
+        return $this->delegates()
+            ->withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
+            ->where('approval_status', ApprovalStatus::Pending)
+            ->exists();
     }
 
     /**
@@ -224,5 +249,17 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
             'address_latitude' => 'decimal:7',
             'address_longitude' => 'decimal:7',
         ];
+    }
+
+    /**
+     * @return Builder<Delegate>
+     */
+    private function upcomingDelegateSeatsQuery(Carbon $from, ?string $exceptDelegateId = null): Builder
+    {
+        return Delegate::query()
+            ->withoutGlobalScope(CurrentlyScope::class)
+            ->whereBelongsTo($this)
+            ->where(fn (Builder $query): Builder => $query->whereNull('ended_at')->orWhere('ended_at', '>', $from))
+            ->when($exceptDelegateId !== null, fn (Builder $query): Builder => $query->whereKeyNot($exceptDelegateId));
     }
 }

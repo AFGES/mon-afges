@@ -12,6 +12,7 @@ use App\Models\Seat;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\ApprovalApprovedNotification;
+use Filament\Schemas\Components\Text;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -340,6 +341,47 @@ describe('BulkApproveDelegatesAction within one batch', function () {
             ->and($first->ended_at)->toBeNull()
             ->and($second->refresh()->isPending())->toBeTrue()
             ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateString())->toBe(now()->subDays(2)->toDateString());
+    });
+});
+
+describe('ApproveDelegateAction one seat per user', function () {
+    it('lists the other seats of the user that the approval will end', function () {
+        actingAsSuperAdminForApprovalActions();
+        $user = User::factory()->create();
+        $other = Delegate::factory()->approved()->create(['user_id' => $user->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+        $record = Delegate::factory()->pending()->create(['user_id' => $user->id, 'started_at' => now()->subDay()->startOfDay()]);
+
+        livewire(ListDelegates::class)
+            ->mountTableAction('approve', $record)
+            ->assertSchemaComponentVisible('ended_seats', 'mountedActionSchema0')
+            ->assertSchemaComponentExists('ended_seats', 'mountedActionSchema0', fn (Text $text): bool => str_contains((string) $text->getContent(), e($other->organization->short_name)));
+    });
+
+    it('shows no list when the user holds no other seat', function () {
+        actingAsSuperAdminForApprovalActions();
+        $record = Delegate::factory()->pending()->create();
+
+        livewire(ListDelegates::class)
+            ->mountTableAction('approve', $record)
+            ->assertSchemaComponentHidden('ended_seats', 'mountedActionSchema0');
+    });
+});
+
+describe('BulkApproveDelegatesAction for one user', function () {
+    it('approves only the first request of a user within a batch', function () {
+        actingAsSuperAdminForApprovalActions();
+        Notification::fake();
+        mockGoogleWorkspaceService()->shouldIgnoreMissing();
+        $user = User::factory()->create();
+        $first = Delegate::factory()->pending()->create(['user_id' => $user->id, 'started_at' => now()->subDays(2)->startOfDay(), 'ended_at' => null]);
+        $second = Delegate::factory()->pending()->create(['user_id' => $user->id, 'started_at' => now()->subDay()->startOfDay(), 'ended_at' => null]);
+
+        livewire(ListDelegates::class)
+            ->callTableBulkAction('bulkApprove', [$first, $second], ['terminate_current_delegates' => false])
+            ->assertNotified(__('delegate.approval.bulk_skipped_title'));
+
+        expect($first->refresh()->isApproved())->toBeTrue()
+            ->and($second->refresh()->isPending())->toBeTrue();
     });
 });
 

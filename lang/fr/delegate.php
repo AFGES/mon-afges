@@ -55,6 +55,7 @@ return [
     ],
 
     'approval' => [
+        'ended_seats' => 'Cette approbation mettra fin à la délégation de cette personne sur les sièges suivants :',
         'terminate_label' => 'Délégué-e-s actuel-le-s du siège à faire terminer',
         'occupancy' => 'Siège occupé : :count / :capacity',
         'bulk_terminate_label' => 'Mettre fin à la délégation des délégué-e-s actuel-le-s de ces sièges',
@@ -64,6 +65,7 @@ return [
         'capacity_exceeded_on_edit' => 'Le siège est complet sur cette période : la capacité du collège est dépassée d\'un-e délégué-e.|Le siège est complet sur cette période : la capacité du collège est dépassée de :count délégué-e-s.',
         'bulk_skipped_title' => 'Demandes non approuvées',
         'bulk_skipped_body' => ':count demande non approuvée : le siège est complet. Activez la fin des délégations actuelles ou approuvez-la individuellement.|:count demandes non approuvées : leur siège est complet. Activez la fin des délégations actuelles ou approuvez-les individuellement.',
+        'bulk_skipped_same_user_body' => ':count demande non approuvée : une autre demande de la même personne a été approuvée dans cette sélection, et un-e délégué-e n\'occupe qu\'un siège à la fois.|:count demandes non approuvées : une autre demande de la même personne a été approuvée dans cette sélection, et un-e délégué-e n\'occupe qu\'un siège à la fois.',
     ],
 
     'notifications' => [

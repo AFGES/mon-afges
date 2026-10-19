@@ -27,6 +27,7 @@ use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @property-read Schema $form
@@ -54,7 +55,7 @@ final class RequestDelegateSeat extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return self::canAccess();
+        return false;
     }
 
     public static function getNavigationLabel(): string
@@ -178,12 +179,51 @@ final class RequestDelegateSeat extends Page
             ->statePath('data');
     }
 
-    public function submit(SubmitDelegateSeatRequest $submitDelegateSeatRequest): void
+    public function submit(): void
+    {
+        $this->form->validate();
+
+        if (auth()->user()->hasCurrentOrUpcomingDelegateSeat()) {
+            $this->mountAction('confirmSubmission');
+
+            return;
+        }
+
+        $this->sendRequest(app(SubmitDelegateSeatRequest::class));
+    }
+
+    public function confirmSubmissionAction(): Action
+    {
+        return Action::make('confirmSubmission')
+            ->requiresConfirmation()
+            ->color('warning')
+            ->modalIcon(Heroicon::OutlinedExclamationTriangle)
+            ->modalHeading(__('delegate_form.confirm_replacement.heading'))
+            ->modalDescription(__('delegate_form.confirm_replacement.description'))
+            ->modalSubmitActionLabel(__('delegate_form.confirm_replacement.confirm'))
+            ->action(function (SubmitDelegateSeatRequest $submitDelegateSeatRequest): void {
+                $this->sendRequest($submitDelegateSeatRequest);
+            });
+    }
+
+    private function sendRequest(SubmitDelegateSeatRequest $submitDelegateSeatRequest): void
     {
         /** @var User $user */
         $user = auth()->user();
 
-        $submitDelegateSeatRequest->handle($user, $this->form->getState());
+        $data = $this->form->getState();
+
+        try {
+            $submitDelegateSeatRequest->handle($user, $data);
+        } catch (ValidationException) {
+            Notification::make()
+                ->title(__('delegate_form.notifications.locked.title'))
+                ->body(__('delegate_form.request_locked'))
+                ->danger()
+                ->send();
+
+            return;
+        }
 
         Notification::make()
             ->title(__('delegate_form.notifications.submitted.title'))

@@ -52,15 +52,26 @@ function validSeatRequestData(User $user, CollegeOrganization $collegeOrganizati
     ];
 }
 
-it('lets an approved member of an organization with seats access the page', function () {
+it('lets an approved member of an organization with seats access the page without a navigation item', function () {
     [$user] = eligibleDelegateCandidate();
 
     actingAs($user);
 
     expect(RequestDelegateSeat::canAccess())->toBeTrue()
-        ->and(RequestDelegateSeat::shouldRegisterNavigation())->toBeTrue();
+        ->and(RequestDelegateSeat::shouldRegisterNavigation())->toBeFalse();
 
     $this->get(RequestDelegateSeat::getUrl())->assertOk();
+});
+
+it('forbids access while a request is pending', function () {
+    [$user] = eligibleDelegateCandidate();
+    Delegate::factory()->pending()->create(['user_id' => $user->id]);
+
+    actingAs($user);
+
+    expect(RequestDelegateSeat::canAccess())->toBeFalse();
+
+    $this->get(RequestDelegateSeat::getUrl())->assertForbidden();
 });
 
 it('forbids access', function (Closure $setUp) {
@@ -223,3 +234,66 @@ it('offers no seats for an organization the user is not eligible for', function 
         ->fillForm(['organization_id' => $collegeOrganization->organization_id])
         ->assertFormFieldExists('seat_id', fn ($field): bool => count($field->getOptions()) === 1);
 });
+
+it('asks for confirmation before sending a request when the user already holds a seat', function () {
+    mockGoogleWorkspaceService()->shouldIgnoreMissing();
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+    Delegate::factory()->approved()->create(['user_id' => $user->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm(validSeatRequestData($user, $collegeOrganization, $seat))
+        ->call('submit')
+        ->assertActionMounted('confirmSubmission');
+
+    expect(Delegate::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(1);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm(validSeatRequestData($user, $collegeOrganization, $seat))
+        ->callAction('confirmSubmission')
+        ->assertNotified(__('delegate_form.notifications.submitted.title'));
+
+    expect(Delegate::withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(2);
+});
+
+it('asks for confirmation when the user already holds an upcoming approved seat', function () {
+    mockGoogleWorkspaceService()->shouldIgnoreMissing();
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+    Delegate::factory()->approved()->create(['user_id' => $user->id, 'started_at' => now()->addMonth(), 'ended_at' => null]);
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm(validSeatRequestData($user, $collegeOrganization, $seat))
+        ->call('submit')
+        ->assertActionMounted('confirmSubmission');
+});
+
+it('notifies the user instead of submitting when a request became pending meanwhile', function (bool $throughConfirmation) {
+    mockGoogleWorkspaceService()->shouldIgnoreMissing();
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+    if ($throughConfirmation) {
+        Delegate::factory()->approved()->create(['user_id' => $user->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+    }
+
+    actingAs($user);
+
+    $component = livewire(RequestDelegateSeat::class)
+        ->fillForm(validSeatRequestData($user, $collegeOrganization, $seat));
+
+    Delegate::factory()->pending()->create(['user_id' => $user->id]);
+
+    $throughConfirmation
+        ? $component->callAction('confirmSubmission')
+        : $component->call('submit');
+
+    $component
+        ->assertNotified(__('delegate_form.notifications.locked.title'))
+        ->assertNoRedirect();
+
+    expect(Delegate::withoutGlobalScopes()->where('user_id', $user->id)->pending()->count())->toBe(1);
+})->with([
+    'direct submit' => false,
+    'confirm modal' => true,
+]);

@@ -7,6 +7,7 @@ use App\Models\CollegeOrganization;
 use App\Models\Delegate;
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\ValidationException;
 
 it('updates the user details and creates the delegate request', function () {
     $user = User::factory()->create();
@@ -45,4 +46,19 @@ it('rolls back the user update when the delegate cannot be created', function ()
 
     expect($user->fresh()->last_name)->toBe('Original')
         ->and(Delegate::query()->count())->toBe(0);
+});
+
+it('rejects a new request while another one is pending', function () {
+    $user = User::factory()->create();
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(2)->create();
+    Delegate::factory()->pending()->create(['user_id' => $user->id]);
+
+    expect(fn () => app(SubmitDelegateSeatRequest::class)->handle($user, [
+        'organization_id' => $collegeOrganization->organization_id,
+        'seat_id' => $collegeOrganization->seatRecords()->firstOrFail()->id,
+        'email' => 'x@afges.org',
+        'started_at' => '2026-01-05',
+    ]))->toThrow(ValidationException::class);
+
+    expect(Delegate::query()->withoutGlobalScopes()->where('user_id', $user->id)->count())->toBe(1);
 });

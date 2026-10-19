@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\ApprovalStatus;
 use App\Models\Delegate;
 use App\Models\Seat;
+use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -36,12 +37,14 @@ final class DelegateApprovalService
                 $terminatedDelegateIds,
             );
 
+            $this->terminateOtherSeatsOfUser($delegate->user_id, $delegate->getKey(), $delegate->started_at ?? now());
+
             $delegate->approve($approvedBy);
         });
     }
 
     /**
-     * Create a delegate that is already approved by the given user, ending the given approved delegates of its seat first.
+     * Create a delegate that is already approved by the given user, ending the given approved delegates of its seat and the other current seats of the delegate's user first.
      *
      * @param  array<string, mixed>  $attributes
      * @param  list<string>  $terminatedDelegateIds
@@ -51,12 +54,20 @@ final class DelegateApprovalService
     public function createApproved(array $attributes, int|string|null $approvedBy, array $terminatedDelegateIds = []): Delegate
     {
         return DB::transaction(function () use ($attributes, $approvedBy, $terminatedDelegateIds): Delegate {
+            $startedAt = isset($attributes['started_at']) ? Carbon::parse($attributes['started_at']) : now();
+
             $this->terminateForCapacity(
                 (string) $attributes['seat_id'],
-                isset($attributes['started_at']) ? Carbon::parse($attributes['started_at']) : now(),
+                $startedAt,
                 isset($attributes['ended_at']) ? Carbon::parse($attributes['ended_at']) : null,
                 null,
                 $terminatedDelegateIds,
+            );
+
+            $this->terminateOtherSeatsOfUser(
+                $attributes['user_id'] ?? null,
+                null,
+                $startedAt,
             );
 
             $delegate = new Delegate($attributes);
@@ -87,6 +98,26 @@ final class DelegateApprovalService
             $approvedBy,
             $this->seatCapacity->currentDelegatesOfSeat($delegate)->whereNotIn('id', $protectedDelegateIds)->modelKeys(),
         );
+    }
+
+    /**
+     * A user holds a single seat at a time: the other approved seats of the user, current or upcoming, end on the start date of the approved delegate.
+     *
+     * The user row is locked meanwhile so concurrent approvals for the same user queue up. Seats already ending on or before
+     * the start date are left untouched, and a seat starting later ends on its own start date.
+     */
+    private function terminateOtherSeatsOfUser(int|string|null $userId, ?string $exceptDelegateId, Carbon $startedAt): void
+    {
+        if ($userId === null) {
+            return;
+        }
+
+        $user = User::query()->whereKey($userId)->lockForUpdate()->first();
+
+        $user?->upcomingDelegateSeats($startedAt, $exceptDelegateId)
+            ->each(fn (Delegate $current): bool => $current->end(
+                $current->started_at->gt($startedAt) ? $current->started_at->copy() : $startedAt->copy()
+            ));
     }
 
     /**

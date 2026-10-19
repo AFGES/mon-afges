@@ -18,7 +18,18 @@ return [
         'pending' => '{1} Vous avez :count demande en attente de validation.|[2,*] Vous avez :count demandes en attente de validation.',
     ],
 
+    'request_locked' => 'Vous avez déjà une demande en attente de validation. Vous pourrez en faire une autre une fois celle-ci traitée.',
+
+    'confirm_replacement' => [
+        'heading' => 'Remplacement de votre siège actuel',
+        'description' => 'Vous occupez déjà un siège de délégué-e. Un-e délégué-e ne peut occuper qu\'un seul siège à la fois : votre siège actuel prendra fin dès que cette nouvelle demande sera approuvée.',
+        'confirm' => 'Envoyer la demande',
+    ],
+
     'notifications' => [
+        'locked' => [
+            'title' => 'Demande impossible',
+        ],
         'submitted' => [
             'title' => 'Fiche envoyée',
             'body' => 'Votre demande a été transmise et sera examinée prochainement.',

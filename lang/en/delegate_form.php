@@ -18,7 +18,18 @@ return [
         'pending' => '{1} You have :count request awaiting approval.|[2,*] You have :count requests awaiting approval.',
     ],
 
+    'request_locked' => 'You already have a request awaiting validation. You can submit another one once it has been processed.',
+
+    'confirm_replacement' => [
+        'heading' => 'Replace your current seat',
+        'description' => 'You already hold a delegate seat. A delegate can only hold one seat at a time: your current seat will end as soon as this new request is approved.',
+        'confirm' => 'Submit request',
+    ],
+
     'notifications' => [
+        'locked' => [
+            'title' => 'Request not sent',
+        ],
         'submitted' => [
             'title' => 'Form submitted',
             'body' => 'Your request has been submitted and will be reviewed shortly.',

@@ -49,6 +49,7 @@ return [
     ],
 
     'approval' => [
+        'ended_seats' => 'Approving this request will end the delegate\'s other seats:',
         'terminate_label' => 'Current delegates of the seat to end',
         'occupancy' => 'Seat occupancy: :count / :capacity',
         'bulk_terminate_label' => 'End the delegation of the current delegates of these seats',
@@ -58,6 +59,7 @@ return [
         'capacity_exceeded_on_edit' => 'The seat is full for these dates: this delegate\'s period exceeds the college capacity by :count delegate.|The seat is full for these dates: this delegate\'s period exceeds the college capacity by :count delegates.',
         'bulk_skipped_title' => 'Requests not approved',
         'bulk_skipped_body' => ':count request was not approved because its seat is full. Enable ending current delegations or approve it individually.|:count requests were not approved because their seat is full. Enable ending current delegations or approve them individually.',
+        'bulk_skipped_same_user_body' => ':count request was not approved: another request from the same delegate was approved in this batch, and a delegate holds one seat at a time.|:count requests were not approved: another request from the same delegate was approved in this batch, and a delegate holds one seat at a time.',
     ],
 
     'notifications' => [

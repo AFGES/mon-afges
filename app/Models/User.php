@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\ApprovalStatus;
+use App\Models\Scopes\ApprovedScope;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -99,6 +101,18 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     public function canRequestDelegateSeat(): bool
     {
         return once(fn (): bool => $this->delegateEligibleOrganizations()->exists());
+    }
+
+    /**
+     * Whether the user holds a current seat or has a pending seat request, both of which
+     * rely on the personal details mandatory at request time.
+     */
+    public function hasCurrentOrPendingDelegateSeat(): bool
+    {
+        return $this->delegates()
+            ->withoutGlobalScope(ApprovedScope::class)
+            ->whereIn('approval_status', [ApprovalStatus::Pending, ApprovalStatus::Approved])
+            ->exists();
     }
 
     /**

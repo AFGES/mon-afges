@@ -36,6 +36,14 @@ final class UserPolicy
         return $authUser->can('Update:User');
     }
 
+    /**
+     * Personal details (birth date, phone, postal address...) are restricted to delegate managers.
+     */
+    public function managePersonalDetails(AuthUser $authUser): bool
+    {
+        return $authUser->can('Update:Delegate');
+    }
+
     public function delete(AuthUser $authUser, User $user): bool
     {
         if ($this->isSuperAdmin($user)) {

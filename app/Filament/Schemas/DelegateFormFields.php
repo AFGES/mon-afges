@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
- * Fields of the "Fiche Délégué-e" shared by the seat request form and the admin delegate form.
+ * User fields shared by the seat request form, the admin delegate and user forms and the profile page.
  */
 final class DelegateFormFields
 {
@@ -36,21 +36,34 @@ final class DelegateFormFields
                 ->prefixIcon(Heroicon::OutlinedUser)
                 ->required()
                 ->maxLength(255),
+            ...self::personalDetailComponents($requirePersonalDetails),
+        ];
+    }
+
+    /**
+     * Personal details stored on the user, also editable from the profile page and the admin user form.
+     *
+     * @param  bool  $requirePersonalDetails  Makes study program, birth date, phone and postal address mandatory.
+     * @return list<TextInput|DatePicker|PhoneInput|Textarea>
+     */
+    public static function personalDetailComponents(bool $requirePersonalDetails = false): array
+    {
+        return [
             TextInput::make('study_program')
-                ->label(__('delegate_form.fields.study_program'))
+                ->label(__('user.fields.study_program'))
                 ->prefixIcon(Heroicon::OutlinedAcademicCap)
-                ->helperText(__('delegate_form.fields.study_program_helper'))
+                ->helperText(__('user.fields.study_program_helper'))
                 ->maxLength(255)
                 ->required($requirePersonalDetails),
             DatePicker::make('birth_date')
-                ->label(__('delegate_form.fields.birth_date'))
+                ->label(__('user.fields.birth_date'))
                 ->prefixIcon(Heroicon::OutlinedCake)
                 ->maxDate(now())
                 ->native(false)
                 ->displayFormat('d/m/Y')
                 ->required($requirePersonalDetails),
             PhoneInput::make('phone')
-                ->label(__('delegate_form.fields.phone'))
+                ->label(__('user.fields.phone'))
                 ->defaultCountry('FR')
                 ->initialCountry('FR')
                 ->countryOrder(['FR'])
@@ -59,7 +72,7 @@ final class DelegateFormFields
                 ->validateFor()
                 ->required($requirePersonalDetails),
             Textarea::make('postal_address')
-                ->label(__('delegate_form.fields.postal_address'))
+                ->label(__('user.fields.postal_address'))
                 ->rows(2)
                 ->required($requirePersonalDetails),
         ];
@@ -90,8 +103,8 @@ final class DelegateFormFields
     public static function electedMandatesComponent(): Textarea
     {
         return Textarea::make('elected_mandates')
-            ->label(__('delegate_form.fields.elected_mandates'))
-            ->helperText(__('delegate_form.fields.elected_mandates_helper'))
+            ->label(__('user.fields.elected_mandates'))
+            ->helperText(__('user.fields.elected_mandates_helper'))
             ->rows(2);
     }
 }

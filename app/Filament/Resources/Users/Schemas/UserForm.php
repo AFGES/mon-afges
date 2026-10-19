@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Filament\Schemas\DelegateFormFields;
 use App\Models\User;
 use App\Services\RoleAssignmentService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
@@ -34,7 +36,15 @@ final class UserForm
                     ->label(__('user.fields.email'))
                     ->prefixIcon(Heroicon::OutlinedEnvelope)
                     ->email()
+                    ->unique(ignoreRecord: true)
                     ->required(),
+                Group::make([
+                    ...DelegateFormFields::personalDetailComponents(),
+                    DelegateFormFields::electedMandatesComponent(),
+                ])
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->visible(fn (): bool => auth()->user()?->can('managePersonalDetails', User::class) ?? false),
                 DateTimePicker::make('email_verified_at')
                     ->label(__('user.fields.email_verified_at'))
                     ->prefixIcon(Heroicon::OutlinedCheckBadge)

@@ -164,7 +164,7 @@ describe('EditUser', function () {
     it('renders the page', function () {
         actingAsSuperAdminForUserResource();
 
-        $user = User::factory()->create();
+        $user = User::factory()->withDelegateFormData()->create(['birth_date' => '1999-03-08']);
 
         livewire(EditUser::class, [
             'record' => $user->id,
@@ -174,6 +174,11 @@ describe('EditUser', function () {
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
+                'study_program' => $user->study_program,
+                'birth_date' => '1999-03-08',
+                'phone' => $user->phone,
+                'postal_address' => $user->postal_address,
+                'elected_mandates' => $user->elected_mandates,
             ]);
     });
 
@@ -190,6 +195,11 @@ describe('EditUser', function () {
                 'first_name' => $newUserData->first_name,
                 'last_name' => $newUserData->last_name,
                 'email' => $newUserData->email,
+                'study_program' => 'Master 2 Droit',
+                'birth_date' => '2000-05-17',
+                'phone' => '+33601020304',
+                'postal_address' => '1 rue de la Paix, Paris',
+                'elected_mandates' => 'CFVU',
             ])
             ->call('save')
             ->assertNotified();
@@ -199,7 +209,13 @@ describe('EditUser', function () {
             'first_name' => $newUserData->first_name,
             'last_name' => $newUserData->last_name,
             'email' => $newUserData->email,
+            'study_program' => 'Master 2 Droit',
+            'phone' => '+33601020304',
+            'postal_address' => '1 rue de la Paix, Paris',
+            'elected_mandates' => 'CFVU',
         ]);
+
+        expect($user->fresh())->birth_date->toDateString()->toBe('2000-05-17');
     });
 
     it('rejects invalid form data on edit', function (array $data, array $errors) {
@@ -219,7 +235,24 @@ describe('EditUser', function () {
         '`last_name` is required' => [['first_name' => 'Test', 'last_name' => null, 'email' => 'test@example.com'], ['last_name' => 'required']],
         '`email` is a valid email address' => [['first_name' => 'Test', 'last_name' => 'User', 'email' => 'invalid-email'], ['email' => 'email']],
         '`email` is required' => [['first_name' => 'Test', 'last_name' => 'User', 'email' => null], ['email' => 'required']],
+        '`phone` is a valid phone number' => [['phone' => '123'], ['phone']],
+        '`birth_date` is not in the future' => [['birth_date' => '2999-01-01'], ['birth_date']],
     ]);
+
+    it('rejects an email already used by another user', function () {
+        actingAsSuperAdminForUserResource();
+
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        livewire(EditUser::class, [
+            'record' => $user->id,
+        ])
+            ->fillForm(['email' => $otherUser->email])
+            ->call('save')
+            ->assertHasFormErrors(['email' => 'unique'])
+            ->assertNotNotified();
+    });
 
     it('deletes a user when the delete action is called', function () {
         actingAsSuperAdminForUserResource();
@@ -385,5 +418,27 @@ describe('UserForm roles field', function () {
             ->assertHasNoFormErrors();
 
         expect($target->fresh()->hasRole('beyond_subset'))->toBeTrue();
+    });
+});
+
+describe('UserForm personal details', function () {
+    test('hides the personal details from user managers who cannot manage delegates', function () {
+        actingAsUserManager();
+        $target = User::factory()->withDelegateFormData()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->assertFormFieldHidden('phone')
+            ->assertFormFieldHidden('postal_address')
+            ->assertFormFieldHidden('elected_mandates');
+    });
+
+    test('shows the personal details to user managers who can manage delegates', function () {
+        Permission::firstOrCreate(['name' => 'Update:Delegate', 'guard_name' => 'web']);
+        actingAsUserManager()->givePermissionTo('Update:Delegate');
+        $target = User::factory()->withDelegateFormData()->create();
+
+        livewire(EditUser::class, ['record' => $target->id])
+            ->assertFormFieldVisible('phone')
+            ->assertSchemaStateSet(['phone' => $target->phone]);
     });
 });

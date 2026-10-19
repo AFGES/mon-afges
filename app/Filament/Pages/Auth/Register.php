@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Pages\Auth;
 
 use App\Actions\RegisterPasswordlessUser;
+use App\Filament\Schemas\DelegateFormFields;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
 use Filament\Auth\Pages\Register as BaseRegister;
@@ -79,10 +80,12 @@ final class Register extends BaseRegister
      */
     protected function getEmailFormComponent(): Component
     {
-        return TextInput::make('email')
-            ->label(__('filament-panels::auth/pages/register.form.email.label'))
-            ->email()
-            ->required()
-            ->maxLength(255);
+        return DelegateFormFields::rejectDisposableEmail(
+            TextInput::make('email')
+                ->label(__('filament-panels::auth/pages/register.form.email.label'))
+                ->email()
+                ->required()
+                ->maxLength(255)
+        );
     }
 }

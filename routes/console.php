@@ -10,6 +10,12 @@ Schedule::command('delegates:sync-google-workspace')
     ->daily()
     ->timezone('Europe/Paris');
 
+// Schedule daily refresh of the disposable email domain list
+Schedule::command('erag:sync-disposable-email-list')
+    ->daily()
+    ->onOneServer()
+    ->timezone('Europe/Paris');
+
 // Schedule sign-in management every 5 minutes
 Schedule::job(new ManageSessionSignIns)
     ->everyFiveMinutes()

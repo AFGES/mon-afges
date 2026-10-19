@@ -139,3 +139,13 @@ it('limits registrations and shows the rate limited notification', function () {
 
     $this->assertDatabaseMissing('users', ['email' => 'third@example.org']);
 });
+
+it('rejects a disposable email address', function () {
+    livewire(Register::class)
+        ->fillForm(['first_name' => 'Jane', 'last_name' => 'Doe', 'email' => 'jane@mailinator.com'])
+        ->call('register')
+        ->assertHasFormErrors(['email' => 'disposable_email']);
+
+    $this->assertDatabaseCount('users', 0);
+    Notification::assertNothingSent();
+});

@@ -297,3 +297,28 @@ it('notifies the user instead of submitting when a request became pending meanwh
     'direct submit' => false,
     'confirm modal' => true,
 ]);
+
+it('rejects a disposable email address', function () {
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm([...validSeatRequestData($user, $collegeOrganization, $seat), 'email' => 'camille@mailinator.com'])
+        ->call('submit')
+        ->assertHasFormErrors(['email' => 'disposable_email']);
+
+    expect(Delegate::withoutGlobalScopes()->count())->toBe(0);
+});
+
+it('accepts the current disposable email address of a grandfathered user', function () {
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+    $user->forceFill(['email' => 'camille@mailinator.com'])->save();
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm([...validSeatRequestData($user, $collegeOrganization, $seat), 'email' => 'camille@mailinator.com'])
+        ->call('submit')
+        ->assertHasNoFormErrors();
+});

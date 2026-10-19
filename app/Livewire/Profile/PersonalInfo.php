@@ -53,7 +53,10 @@ final class PersonalInfo extends BreezyPersonalInfo
                 ->prefixIcon(Heroicon::OutlinedUser)
                 ->required()
                 ->maxLength(255),
-            $this->getEmailComponent()->prefixIcon(Heroicon::OutlinedEnvelope),
+            DelegateFormFields::rejectDisposableEmail(
+                $this->getEmailComponent()->prefixIcon(Heroicon::OutlinedEnvelope),
+                fn (): ?string => $this->user->email,
+            ),
             ...DelegateFormFields::personalDetailComponents($this->requirePersonalDetails),
             DelegateFormFields::electedMandatesComponent(),
             $this->getCurrentPasswordComponent()->prefixIcon(Heroicon::OutlinedLockClosed),

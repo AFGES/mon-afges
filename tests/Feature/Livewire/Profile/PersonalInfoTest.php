@@ -124,6 +124,40 @@ test('lets a user without a current or pending delegate seat clear the personal 
         ->phone->toBeNull();
 });
 
+test('rejects a disposable email address', function () {
+    $user = User::factory()->create();
+    actingAs($user);
+
+    livewire(PersonalInfo::class)
+        ->fillForm(['email' => 'grace@mailinator.com', 'current_password' => 'password'])
+        ->call('submit')
+        ->assertHasFormErrors(['email' => 'disposable_email']);
+
+    expect($user->fresh()->email)->toBe($user->email);
+});
+
+test('accepts a regular email address change', function () {
+    $user = User::factory()->create();
+    actingAs($user);
+
+    livewire(PersonalInfo::class)
+        ->fillForm(['email' => 'grace@afges.org', 'current_password' => 'password'])
+        ->call('submit')
+        ->assertHasNoFormErrors(['email']);
+
+    expect($user->fresh()->email)->toBe('grace@afges.org');
+});
+
+test('keeps accepting the current disposable email address of a grandfathered user', function () {
+    $user = User::factory()->create(['email' => 'grace@mailinator.com']);
+    actingAs($user);
+
+    livewire(PersonalInfo::class)
+        ->fillForm(['first_name' => 'Grace', 'email' => 'grace@mailinator.com'])
+        ->call('submit')
+        ->assertHasNoFormErrors();
+});
+
 test('fills the address fields from a selected search result', function () {
     actingAs(User::factory()->create());
 

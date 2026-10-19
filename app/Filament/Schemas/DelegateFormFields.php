@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Schemas;
 
 use App\Models\Seat;
+use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
@@ -95,6 +97,21 @@ final class DelegateFormFields
         return $seats->whereHas(
             'collegeOrganization',
             fn (Builder $query): Builder => $query->where('organization_id', $organizationId),
+        );
+    }
+
+    /**
+     * Rejects disposable email addresses, without any RFC mode: the field already validates the format with `email()`,
+     * and the package reports every mode failure as a disposable address.
+     *
+     * @param  Closure(): ?string|string|null  $exceptEmail  Address always accepted, such as the current email of a grandfathered user.
+     */
+    public static function rejectDisposableEmail(TextInput $input, Closure|string|null $exceptEmail = null): TextInput
+    {
+        return $input->rule(
+            'disposable_email',
+            fn (?string $state): bool => $exceptEmail === null
+                || Str::lower(mb_trim((string) $state)) !== Str::lower(mb_trim((string) value($exceptEmail))),
         );
     }
 

@@ -13,6 +13,7 @@
         "bezhansalleh/filament-shield": "^4.3.1",
         "dutchcodingcompany/filament-socialite": "^3.3",
         "eduardoribeirodev/filament-leaflet": "^5.2",
+        "erag/laravel-disposable-email": "^5.3",
         "filament/filament": "^5.10.2",
         "finity-labs/fin-mail": "^1.14",
         "google/apiclient": "^2.20.1",

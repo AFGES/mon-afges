@@ -133,17 +133,20 @@ final class RequestDelegateSeat extends Page
                                 ->validationMessages([
                                     'required' => __('profile.form.seat.required'),
                                 ]),
-                            TextInput::make('email')
-                                ->label(__('delegate_form.fields.email'))
-                                ->prefixIcon(Heroicon::OutlinedEnvelope)
-                                ->helperText(__('profile.form.email.helper'))
-                                ->email()
-                                ->required()
-                                ->maxLength(255)
-                                ->validationMessages([
-                                    'required' => __('profile.form.email.required'),
-                                    'email' => __('profile.form.email.invalid'),
-                                ]),
+                            DelegateFormFields::rejectDisposableEmail(
+                                TextInput::make('email')
+                                    ->label(__('delegate_form.fields.email'))
+                                    ->prefixIcon(Heroicon::OutlinedEnvelope)
+                                    ->helperText(__('profile.form.email.helper'))
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->validationMessages([
+                                        'required' => __('profile.form.email.required'),
+                                        'email' => __('profile.form.email.invalid'),
+                                    ]),
+                                fn (): ?string => auth()->user()?->email,
+                            ),
                             DatePicker::make('started_at')
                                 ->label(__('delegate_form.fields.started_at'))
                                 ->prefixIcon(Heroicon::OutlinedCalendarDays)

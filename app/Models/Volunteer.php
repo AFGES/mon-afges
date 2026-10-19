@@ -19,11 +19,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
 /**
  * @property \Illuminate\Support\Carbon $started_at
  * @property \Illuminate\Support\Carbon|null $ended_at
  */
+#[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
 final class Volunteer extends Model implements Approvable
 {
     use HasApprovalStatus;

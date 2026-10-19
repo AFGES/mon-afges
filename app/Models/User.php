@@ -149,6 +149,35 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     }
 
     /**
+     * Whether the user must go through the join organization page before using the panel:
+     * no approved, current volunteer yet, or one still waiting for its position title.
+     * Super admins and applications without any organization are never held back.
+     * A single query checks both volunteer conditions.
+     */
+    public function needsVolunteerOnboarding(): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return false;
+        }
+
+        if (Organization::query()->doesntExist()) {
+            return false;
+        }
+
+        $volunteerState = self::query()
+            ->whereKey($this->getKey())
+            ->select('id')
+            ->withExists([
+                'volunteers as has_volunteer',
+                'volunteers as awaits_position_title' => fn (Builder $query) => $query->scopes(['awaitingPositionTitle']),
+            ])
+            ->toBase()
+            ->first();
+
+        return ! $volunteerState?->has_volunteer || $volunteerState->awaits_position_title;
+    }
+
+    /**
      * The full name, kept in sync with the generated `name` column so it is
      * available before the model is refreshed from the database.
      *

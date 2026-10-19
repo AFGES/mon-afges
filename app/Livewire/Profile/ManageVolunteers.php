@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Profile;
 
 use App\Actions\SubmitVolunteerRequests;
+use App\Filament\Schemas\VolunteerRequestFields;
 use App\Models\Organization;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
@@ -12,13 +13,9 @@ use App\Models\User;
 use App\Models\Volunteer;
 use App\Rules\CanRequestOrganization;
 use Closure;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -117,41 +114,14 @@ final class ManageVolunteers extends MyProfileComponent
                 Repeater::make('organizations')
                     ->label(__('profile.manage_volunteers.form_label'))
                     ->schema([
-                        Select::make('organization_id')
-                            ->label(__('profile.form.organization.label'))
-                            ->prefixIcon(Heroicon::OutlinedBuildingOffice2)
-                            ->options($this->requestableOrganizationOptions(...))
-                            ->required()
+                        VolunteerRequestFields::organization($this->requestableOrganizationOptions(...))
                             ->rule(fn (): CanRequestOrganization => new CanRequestOrganization(
                                 $this->linkedOrganizationIds,
                                 $this->pendingOrganizationRequest,
                             ))
-                            ->searchable()
-                            ->preload()
-                            ->disableOptionsWhenSelectedInSiblingRepeaterItems()
-                            ->validationMessages([
-                                'required' => __('profile.form.organization.required'),
-                            ]),
-                        TextInput::make('position_title')
-                            ->label(__('profile.form.position_title.label'))
-                            ->prefixIcon(Heroicon::OutlinedBriefcase)
-                            ->placeholder(__('profile.form.position_title.placeholder'))
-                            ->required()
-                            ->maxLength(255)
-                            ->validationMessages([
-                                'required' => __('profile.form.position_title.required'),
-                            ]),
-                        DatePicker::make('started_at')
-                            ->label(__('profile.form.started_at.label'))
-                            ->prefixIcon(Heroicon::OutlinedCalendarDays)
-                            ->default(now())
-                            ->required()
-                            ->maxDate(now())
-                            ->native(false)
-                            ->displayFormat('d/m/Y')
-                            ->validationMessages([
-                                'required' => __('profile.form.started_at.required'),
-                            ]),
+                            ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                        VolunteerRequestFields::positionTitle(),
+                        VolunteerRequestFields::startedAt(),
                     ])
                     ->columns(3)
                     ->minItems(0)
@@ -170,18 +140,7 @@ final class ManageVolunteers extends MyProfileComponent
     {
         return $schema
             ->components(
-                $this->volunteersWithoutPositionTitle
-                    ->map(fn (Volunteer $volunteer): TextInput => TextInput::make($volunteer->id)
-                        ->label(__('profile.manage_volunteers.position_title_required.field_label', [
-                            'organization' => $volunteer->organization->short_name,
-                        ]))
-                        ->prefixIcon(Heroicon::OutlinedBriefcase)
-                        ->required()
-                        ->maxLength(255)
-                        ->validationMessages([
-                            'required' => __('profile.form.position_title.required'),
-                        ]))
-                    ->all()
+                VolunteerRequestFields::positionTitleInputs($this->volunteersWithoutPositionTitle)
             )
             ->statePath('positionTitles');
     }

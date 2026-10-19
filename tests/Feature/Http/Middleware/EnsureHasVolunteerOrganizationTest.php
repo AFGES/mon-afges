@@ -16,17 +16,17 @@ beforeEach(function () {
     Filament::setCurrentPanel('admin');
 });
 
-test('redirects to the profile page when the user has no volunteer organization', function () {
+test('redirects to the join organization page when the user has no volunteer organization', function () {
     $user = User::factory()->create(['email' => 'volunteer@afges.org']);
     Organization::factory()->create();
 
     actingAs($user);
 
     get(route('filament.root.pages.dashboard'))
-        ->assertRedirect(route('filament.root.pages.my-profile'));
+        ->assertRedirect(route('filament.root.join-organization'));
 });
 
-test('redirects to the profile page when the volunteer organization is pending', function () {
+test('redirects to the join organization page when the volunteer organization is pending', function () {
     $user = User::factory()->create(['email' => 'volunteer@afges.org']);
     $organization = Organization::factory()->create();
     Volunteer::factory()->pending()->create([
@@ -37,10 +37,10 @@ test('redirects to the profile page when the volunteer organization is pending',
     actingAs($user);
 
     get(route('filament.root.pages.dashboard'))
-        ->assertRedirect(route('filament.root.pages.my-profile'));
+        ->assertRedirect(route('filament.root.join-organization'));
 });
 
-test('redirects to the profile page when the volunteer organization is rejected', function () {
+test('redirects to the join organization page when the volunteer organization is rejected', function () {
     $user = User::factory()->create(['email' => 'volunteer@afges.org']);
     $organization = Organization::factory()->create();
     Volunteer::factory()->rejected()->create([
@@ -51,7 +51,7 @@ test('redirects to the profile page when the volunteer organization is rejected'
     actingAs($user);
 
     get(route('filament.root.pages.dashboard'))
-        ->assertRedirect(route('filament.root.pages.my-profile'));
+        ->assertRedirect(route('filament.root.join-organization'));
 });
 
 test('lets a user with an approved volunteer organization reach the dashboard', function () {
@@ -75,13 +75,32 @@ test('lets any user reach the dashboard when no organization exists', function (
     get(route('filament.root.pages.dashboard'))->assertSuccessful();
 });
 
-test('does not redirect a user without approved volunteer away from the profile page', function () {
+test('lets a user needing onboarding reach the join organization page', function () {
     $user = User::factory()->create(['email' => 'volunteer@afges.org']);
     Organization::factory()->create();
 
     actingAs($user);
 
-    get(route('filament.root.pages.my-profile'))->assertSuccessful();
+    get(route('filament.root.join-organization'))->assertSuccessful();
+});
+
+test('no longer lets a user needing onboarding reach the profile page', function () {
+    $user = User::factory()->create(['email' => 'volunteer@afges.org']);
+    Organization::factory()->create();
+
+    actingAs($user);
+
+    get(route('filament.root.pages.my-profile'))
+        ->assertRedirect(route('filament.root.join-organization'));
+});
+
+test('lets a user needing onboarding reach the email verification prompt', function () {
+    $user = User::factory()->unverified()->create(['email' => 'volunteer@afges.org']);
+    Organization::factory()->create();
+
+    actingAs($user);
+
+    get(route('filament.root.auth.email-verification.prompt'))->assertSuccessful();
 });
 
 test('lets a user without approved volunteer log out', function () {
@@ -106,14 +125,14 @@ test('lets a super admin reach the dashboard without a volunteer organization', 
     get(route('filament.root.pages.dashboard'))->assertSuccessful();
 });
 
-test('redirects to the profile page when an approved volunteer has no position title', function () {
+test('redirects to the join organization page when an approved volunteer has no position title', function () {
     $user = User::factory()->create(['email' => 'volunteer@afges.org']);
     Volunteer::factory()->approved()->for($user)->create(['position_title' => null]);
 
     actingAs($user);
 
     get(route('filament.root.pages.dashboard'))
-        ->assertRedirect(route('filament.root.pages.my-profile'));
+        ->assertRedirect(route('filament.root.join-organization'));
 });
 
 test('lets a super admin reach the dashboard without a position title', function () {

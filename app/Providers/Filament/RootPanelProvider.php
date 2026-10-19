@@ -8,6 +8,7 @@ use App\Actions\CreateUserFromSocialite;
 use App\Filament\FinMail\EmailTemplateResource;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
+use App\Filament\Pages\JoinOrganization;
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Filament\Widgets\DelegateRequestWidget;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
@@ -34,6 +35,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use MarcelWeidum\Passkeys\PasskeysPlugin;
@@ -96,6 +98,9 @@ final class RootPanelProvider extends PanelProvider
                     ->deleteActionOnEditPage(false),
                 PasskeysPlugin::make(),
             ])
+            ->authenticatedRoutes(function (): void {
+                Route::get('/join-organization', JoinOrganization::class)->name('join-organization');
+            })
             ->authMiddleware([
                 Authenticate::class,
                 EnsureHasVolunteerOrganization::class,

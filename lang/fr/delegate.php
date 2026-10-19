@@ -65,7 +65,7 @@ return [
         'capacity_exceeded_on_edit' => 'Le siège est complet sur cette période : la capacité du collège est dépassée d\'un-e délégué-e.|Le siège est complet sur cette période : la capacité du collège est dépassée de :count délégué-e-s.',
         'bulk_skipped_title' => 'Demandes non approuvées',
         'bulk_skipped_body' => ':count demande non approuvée : le siège est complet. Activez la fin des délégations actuelles ou approuvez-la individuellement.|:count demandes non approuvées : leur siège est complet. Activez la fin des délégations actuelles ou approuvez-les individuellement.',
-        'bulk_skipped_same_user_body' => ':count demande non approuvée : une autre demande de la même personne a été approuvée dans cette sélection, et un-e délégué-e n\'occupe qu\'un siège à la fois.|:count demandes non approuvées : une autre demande de la même personne a été approuvée dans cette sélection, et un-e délégué-e n\'occupe qu\'un siège à la fois.',
+        'bulk_skipped_same_user_body' => ':count demande non approuvée : une demande de la même personne avec une date de début plus tardive est prioritaire dans cette sélection, et un-e délégué-e n\'occupe qu\'un siège à la fois.|:count demandes non approuvées : une demande de la même personne avec une date de début plus tardive est prioritaire dans cette sélection, et un-e délégué-e n\'occupe qu\'un siège à la fois.',
     ],
 
     'notifications' => [

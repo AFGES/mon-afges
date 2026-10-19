@@ -230,3 +230,46 @@ it('ends the approved seats of the user starting after the start date of the app
 
     expect(Delegate::withoutGlobalScopes()->find($upcoming->id)->ended_at->toDateString())->toBe(now()->addMonth()->toDateString());
 });
+
+it('frees the seat held by the user before checking the capacity when the user requests the same seat again', function () {
+    $user = User::factory()->create();
+    $seat = seatWithCapacityForApprovalService(1);
+    $previous = Delegate::factory()->approved()->create(['user_id' => $user->id, 'seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+    $pending = Delegate::factory()->pending()->create(['user_id' => $user->id, 'seat_id' => $seat->id, 'started_at' => now()->subDay()->startOfDay()]);
+
+    approvalService()->approve($pending, null, []);
+
+    expect($pending->refresh()->isApproved())->toBeTrue()
+        ->and(Delegate::withoutGlobalScopes()->find($previous->id)->ended_at->toDateString())->toBe(now()->subDay()->toDateString());
+});
+
+it('frees the seat held by the user before checking the capacity when creating an approved delegate', function () {
+    $user = User::factory()->create();
+    $seat = seatWithCapacityForApprovalService(1);
+    $previous = Delegate::factory()->approved()->create(['user_id' => $user->id, 'seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+
+    $created = approvalService()->createApproved([
+        'user_id' => $user->id,
+        'organization_id' => $seat->collegeOrganization->organization_id,
+        'seat_id' => $seat->id,
+        'email' => 'camille@afges.org',
+        'started_at' => now()->subDay()->toDateString(),
+    ], null);
+
+    expect($created->isApproved())->toBeTrue()
+        ->and(Delegate::withoutGlobalScopes()->find($previous->id)->ended_at->toDateString())->toBe(now()->subDay()->toDateString());
+});
+
+it('rolls back the ended seats of the user when another delegate still fills the seat', function () {
+    $user = User::factory()->create();
+    $seat = seatWithCapacityForApprovalService(1);
+    $other = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+    $previous = Delegate::factory()->approved()->create(['user_id' => $user->id, 'seat_id' => seatWithCapacityForApprovalService(1)->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+    $pending = Delegate::factory()->pending()->create(['user_id' => $user->id, 'seat_id' => $seat->id, 'started_at' => now()->subDay()->startOfDay()]);
+
+    expect(fn () => approvalService()->approve($pending, null, []))->toThrow(ValidationException::class);
+
+    expect(Delegate::withoutGlobalScopes()->find($previous->id)->ended_at)->toBeNull()
+        ->and($pending->refresh()->isPending())->toBeTrue()
+        ->and(Delegate::withoutGlobalScopes()->find($other->id)->ended_at)->toBeNull();
+});

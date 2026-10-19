@@ -46,20 +46,12 @@ final class BulkApproveDelegatesAction extends BaseBulkApproveAction
         $count = 0;
         $skippedCount = 0;
         $approvedInBatchIds = [];
-        $approvedUserIds = [];
-        $sameUserSkippedCount = 0;
+        $pendingRecords = $records->filter(fn (Delegate $record): bool => $record->isPending());
+        $latestRecords = $this->latestRequestPerUser($pendingRecords);
+        $sameUserSkippedCount = $pendingRecords->count() - $latestRecords->count();
 
         /** @var Delegate $record */
-        foreach ($records as $record) {
-            if (! $record->isPending()) {
-                continue;
-            }
-
-            if (in_array($record->user_id, $approvedUserIds, true)) {
-                $sameUserSkippedCount++;
-
-                continue;
-            }
+        foreach ($latestRecords as $record) {
 
             if ($terminate) {
                 try {
@@ -78,7 +70,6 @@ final class BulkApproveDelegatesAction extends BaseBulkApproveAction
             }
 
             $approvedInBatchIds[] = $record->getKey();
-            $approvedUserIds[] = $record->user_id;
             $count++;
         }
 
@@ -105,5 +96,21 @@ final class BulkApproveDelegatesAction extends BaseBulkApproveAction
                 ->persistent()
                 ->send();
         }
+    }
+
+    /**
+     * A user holds one seat at a time, so only the request with the latest start date of each user is kept, in selection order.
+     *
+     * @param  Collection<int, Delegate>  $records
+     * @return Collection<int, Delegate>
+     */
+    private function latestRequestPerUser(Collection $records): Collection
+    {
+        $latestKeys = $records
+            ->groupBy('user_id')
+            ->map(fn (Collection $userRecords): int|string => $userRecords->sortByDesc('started_at')->first()->getKey())
+            ->values();
+
+        return $records->filter(fn (Delegate $record): bool => $latestKeys->contains($record->getKey()))->values();
     }
 }

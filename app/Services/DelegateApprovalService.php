@@ -29,15 +29,15 @@ final class DelegateApprovalService
     public function approve(Delegate $delegate, int|string|null $approvedBy, array $terminatedDelegateIds = []): void
     {
         DB::transaction(function () use ($delegate, $approvedBy, $terminatedDelegateIds): void {
+            $endedOwnSeatIds = $this->terminateOtherSeatsOfUser($delegate->user_id, $delegate->getKey(), $delegate->started_at ?? now());
+
             $this->terminateForCapacity(
                 (string) $delegate->seat_id,
                 $delegate->started_at ?? now(),
                 $delegate->ended_at,
                 $delegate->getKey(),
-                $terminatedDelegateIds,
+                [...$terminatedDelegateIds, ...$endedOwnSeatIds],
             );
-
-            $this->terminateOtherSeatsOfUser($delegate->user_id, $delegate->getKey(), $delegate->started_at ?? now());
 
             $delegate->approve($approvedBy);
         });
@@ -56,18 +56,18 @@ final class DelegateApprovalService
         return DB::transaction(function () use ($attributes, $approvedBy, $terminatedDelegateIds): Delegate {
             $startedAt = isset($attributes['started_at']) ? Carbon::parse($attributes['started_at']) : now();
 
+            $endedOwnSeatIds = $this->terminateOtherSeatsOfUser(
+                $attributes['user_id'] ?? null,
+                null,
+                $startedAt,
+            );
+
             $this->terminateForCapacity(
                 (string) $attributes['seat_id'],
                 $startedAt,
                 isset($attributes['ended_at']) ? Carbon::parse($attributes['ended_at']) : null,
                 null,
-                $terminatedDelegateIds,
-            );
-
-            $this->terminateOtherSeatsOfUser(
-                $attributes['user_id'] ?? null,
-                null,
-                $startedAt,
+                [...$terminatedDelegateIds, ...$endedOwnSeatIds],
             );
 
             $delegate = new Delegate($attributes);
@@ -105,19 +105,30 @@ final class DelegateApprovalService
      *
      * The user row is locked meanwhile so concurrent approvals for the same user queue up. Seats already ending on or before
      * the start date are left untouched, and a seat starting later ends on its own start date.
+     *
+     * Runs before the capacity check so the ended seats free their place on the seat being approved.
+     *
+     * @return list<string> Keys of the delegates ended.
      */
-    private function terminateOtherSeatsOfUser(int|string|null $userId, ?string $exceptDelegateId, Carbon $startedAt): void
+    private function terminateOtherSeatsOfUser(int|string|null $userId, ?string $exceptDelegateId, Carbon $startedAt): array
     {
         if ($userId === null) {
-            return;
+            return [];
         }
 
         $user = User::query()->whereKey($userId)->lockForUpdate()->first();
 
-        $user?->upcomingDelegateSeats($startedAt, $exceptDelegateId)
+        if ($user === null) {
+            return [];
+        }
+
+        return $user->upcomingDelegateSeats($startedAt, $exceptDelegateId)
             ->each(fn (Delegate $current): bool => $current->end(
                 $current->started_at->gt($startedAt) ? $current->started_at->copy() : $startedAt->copy()
-            ));
+            ))
+            ->map(fn (Delegate $current): string => (string) $current->getKey())
+            ->values()
+            ->all();
     }
 
     /**

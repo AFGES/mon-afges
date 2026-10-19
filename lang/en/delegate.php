@@ -59,7 +59,7 @@ return [
         'capacity_exceeded_on_edit' => 'The seat is full for these dates: this delegate\'s period exceeds the college capacity by :count delegate.|The seat is full for these dates: this delegate\'s period exceeds the college capacity by :count delegates.',
         'bulk_skipped_title' => 'Requests not approved',
         'bulk_skipped_body' => ':count request was not approved because its seat is full. Enable ending current delegations or approve it individually.|:count requests were not approved because their seat is full. Enable ending current delegations or approve them individually.',
-        'bulk_skipped_same_user_body' => ':count request was not approved: another request from the same delegate was approved in this batch, and a delegate holds one seat at a time.|:count requests were not approved: another request from the same delegate was approved in this batch, and a delegate holds one seat at a time.',
+        'bulk_skipped_same_user_body' => ':count request was not approved: a request of the same delegate with a later start date takes precedence in this batch, and a delegate holds one seat at a time.|:count requests were not approved: a request of the same delegate with a later start date takes precedence in this batch, and a delegate holds one seat at a time.',
     ],
 
     'notifications' => [

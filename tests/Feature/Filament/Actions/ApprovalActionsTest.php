@@ -368,7 +368,7 @@ describe('ApproveDelegateAction one seat per user', function () {
 });
 
 describe('BulkApproveDelegatesAction for one user', function () {
-    it('approves only the first request of a user within a batch', function () {
+    it('approves only the request with the latest start date of a user within a batch', function () {
         actingAsSuperAdminForApprovalActions();
         Notification::fake();
         mockGoogleWorkspaceService()->shouldIgnoreMissing();
@@ -380,8 +380,8 @@ describe('BulkApproveDelegatesAction for one user', function () {
             ->callTableBulkAction('bulkApprove', [$first, $second], ['terminate_current_delegates' => false])
             ->assertNotified(__('delegate.approval.bulk_skipped_title'));
 
-        expect($first->refresh()->isApproved())->toBeTrue()
-            ->and($second->refresh()->isPending())->toBeTrue();
+        expect($second->refresh()->isApproved())->toBeTrue()
+            ->and($first->refresh()->isPending())->toBeTrue();
     });
 });
 

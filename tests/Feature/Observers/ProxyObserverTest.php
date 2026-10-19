@@ -49,9 +49,9 @@ describe('created', function (): void {
     it('links the notification mail to the proxies list page', function (): void {
         $proxy = Proxy::factory()->create();
 
-        $mailMessage = (new ProxyApprovalNotification($proxy))->toMail(User::factory()->create());
+        $mail = (new ProxyApprovalNotification($proxy))->toMail(User::factory()->create());
 
-        expect($mailMessage->actionUrl)->toBe(ProxyResource::getUrl('index'));
+        expect(templateMailLinks($mail))->toContain(ProxyResource::getUrl('index'));
     });
 });
 

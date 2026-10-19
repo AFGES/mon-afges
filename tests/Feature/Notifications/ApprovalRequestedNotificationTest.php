@@ -2,58 +2,82 @@
 
 declare(strict_types=1);
 
+use App\Enums\MailTemplateKey;
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
 use App\Filament\Resources\Volunteers\VolunteerResource;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\ApprovalRequestedNotification;
+use FinityLabs\FinMail\Models\SentEmail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
     app()->setLocale('fr');
 });
 
+/**
+ * The signed links of the mail, keyed by the route they target.
+ *
+ * @return array{approve: string, reject: string}
+ */
+function approvalLinks(Delegate|Volunteer $approvable): array
+{
+    $routePrefix = Str::plural(Str::snake(class_basename($approvable)));
+    $links = templateMailLinks((new ApprovalRequestedNotification($approvable))->toMail(User::factory()->make()));
+    $linkTo = fn (string $action): string => collect($links)
+        ->first(fn (string $link): bool => Str::startsWith($link, route("{$routePrefix}.{$action}", $approvable)));
+
+    return ['approve' => $linkTo('approve'), 'reject' => $linkTo('reject')];
+}
+
+it('is sent by mail and queued', function (string $model) {
+    $notification = new ApprovalRequestedNotification($model::factory()->make());
+
+    expect($notification->via(new User))->toBe(['mail'])
+        ->and($notification)->toBeInstanceOf(ShouldQueue::class);
+})->with([Delegate::class, Volunteer::class]);
+
+it('offers signed approve and reject links that expire after the configured number of days', function (string $model) {
+    $this->freezeTime();
+
+    foreach (approvalLinks($model::factory()->create()) as $link) {
+        parse_str((string) parse_url($link, PHP_URL_QUERY), $query);
+
+        expect(URL::hasValidSignature(Request::create($link)))->toBeTrue()
+            ->and((int) $query['expires'])->toBe(now()->addDays(7)->getTimestamp());
+    }
+})->with([Delegate::class, Volunteer::class]);
+
+it('does not store the rendered body, which holds the signed links, in the sent-emails log', function () {
+    $approver = User::factory()->create();
+
+    $approver->notify(new ApprovalRequestedNotification(Delegate::factory()->create()));
+
+    expect(SentEmail::query()->sole())
+        ->rendered_body->toBeNull()
+        ->to->toBe([$approver->email]);
+});
+
 describe('for a delegate', function () {
-    it('is sent by mail and queued', function () {
-        $notification = new ApprovalRequestedNotification(Delegate::factory()->make());
-
-        expect($notification->via(new User))->toBe(['mail'])
-            ->and($notification)->toBeInstanceOf(ShouldQueue::class);
-    });
-
-    it('describes the applicant and the organization', function () {
+    it('renders the delegate template for the approver', function () {
         $delegate = Delegate::factory()->create();
-        $approver = User::factory()->make(['first_name' => 'Alice', 'last_name' => 'Approver']);
+        $approver = User::factory()->make(['first_name' => 'Alice', 'last_name' => 'Approver', 'email' => 'approver@afges.org']);
 
         $mail = (new ApprovalRequestedNotification($delegate))->toMail($approver);
 
-        expect($mail->subject)->toBe("Nouvelle demande d'approbation de délégué-e")
-            ->and($mail->greeting)->toBe('Bonjour Alice Approver,')
-            ->and(collect($mail->introLines)->implode("\n"))
-            ->toContain("Demandeur : {$delegate->user->name}")
-            ->toContain("Association : {$delegate->organization->short_name}");
-    });
-
-    it('links to the signed approve url', function () {
-        $delegate = Delegate::factory()->create();
-
-        $mail = (new ApprovalRequestedNotification($delegate))->toMail(User::factory()->make());
-
-        expect(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue()
-            ->and($mail->actionUrl)->toContain(route('delegates.approve', ['delegate' => $delegate->id], false));
-    });
-
-    it('offers a signed reject link and a link to the edit page', function () {
-        $delegate = Delegate::factory()->create();
-
-        $mail = (new ApprovalRequestedNotification($delegate))->toMail(User::factory()->make());
-
-        expect(collect($mail->outroLines)->implode("\n"))
-            ->toContain(route('delegates.reject', ['delegate' => $delegate->id], false))
-            ->toContain(DelegateResource::getUrl('edit', ['record' => $delegate]));
+        expect($mail->getTemplate()->key)->toBe(MailTemplateKey::DelegateApprovalRequested->value)
+            ->and($mail->hasTo('approver@afges.org'))->toBeTrue()
+            ->and($mail->envelope()->subject)->toBe("Nouvelle demande d'approbation de délégué-e")
+            ->and($mail->render())
+            ->toContain('Bonjour Alice Approver,')
+            ->toContain('Demandeur : '.e($delegate->user->name))
+            ->toContain('Association : '.e($delegate->organization->short_name))
+            ->toContain('Siège : '.e($delegate->seat->label()))
+            ->and(templateMailLinks($mail))->toContain(DelegateResource::getUrl('edit', ['record' => $delegate]));
     });
 
     it('escapes the applicant name in the rendered mail', function () {
@@ -62,120 +86,36 @@ describe('for a delegate', function () {
 
         $content = (new ApprovalRequestedNotification($delegate))->toMail(User::factory()->make())->render();
 
-        expect((string) $content)
+        expect($content)
             ->toContain('&lt;script&gt;')
             ->not->toContain("<script>alert('xss')</script>");
-    });
-
-    it('expires the approve and reject links after the configured number of days', function () {
-        $this->freezeTime();
-        $delegate = Delegate::factory()->create();
-
-        $mail = (new ApprovalRequestedNotification($delegate))->toMail(User::factory()->make());
-
-        parse_str((string) parse_url($mail->actionUrl, PHP_URL_QUERY), $query);
-        expect((int) $query['expires'])->toBe(now()->addDays(7)->getTimestamp())
-            ->and(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue();
-    });
-
-    it('does not turn a Markdown link in the applicant name into a link', function () {
-        $applicant = User::factory()->create(['first_name' => '[x](https://evil.example)', 'last_name' => 'Doe']);
-        $delegate = Delegate::factory()->for($applicant)->create();
-
-        $content = (string) (new ApprovalRequestedNotification($delegate))->toMail(User::factory()->make())->render();
-
-        expect($content)->not->toContain('<a href="https://evil.example"');
-    });
-
-    it('does not turn a Markdown link in the approver name into a link', function () {
-        $approver = User::factory()->make(['first_name' => '[click](https://evil.example)', 'last_name' => 'Doe']);
-        $delegate = Delegate::factory()->create();
-
-        $content = (string) (new ApprovalRequestedNotification($delegate))->toMail($approver)->render();
-
-        expect($content)->not->toContain('<a href="https://evil.example"');
     });
 });
 
 describe('for a volunteer', function () {
-    it('is sent by mail and queued', function () {
-        $notification = new ApprovalRequestedNotification(Volunteer::factory()->make());
-
-        expect($notification->via(new User))->toBe(['mail'])
-            ->and($notification)->toBeInstanceOf(ShouldQueue::class);
-    });
-
-    it('describes the applicant, the organization and the position', function () {
+    it('renders the volunteer template for the approver', function () {
         $volunteer = Volunteer::factory()->create();
         $approver = User::factory()->make(['first_name' => 'Alice', 'last_name' => 'Approver']);
 
         $mail = (new ApprovalRequestedNotification($volunteer))->toMail($approver);
 
-        expect($mail->subject)->toBe("Nouvelle demande d'approbation de mandat de bénévolat")
-            ->and($mail->greeting)->toBe('Bonjour Alice Approver,')
-            ->and(collect($mail->introLines)->implode("\n"))
-            ->toContain("Demandeur : {$volunteer->user->name}")
-            ->toContain("Association : {$volunteer->organization->short_name}")
-            ->toContain("Poste : {$volunteer->position_title}");
-    });
-
-    it('links to the signed approve url', function () {
-        $volunteer = Volunteer::factory()->create();
-
-        $mail = (new ApprovalRequestedNotification($volunteer))->toMail(User::factory()->make());
-
-        expect(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue()
-            ->and($mail->actionUrl)->toContain(route('volunteers.approve', ['volunteer' => $volunteer->id], false));
-    });
-
-    it('offers a signed reject link and a link to the edit page', function () {
-        $volunteer = Volunteer::factory()->create();
-
-        $mail = (new ApprovalRequestedNotification($volunteer))->toMail(User::factory()->make());
-
-        expect(collect($mail->outroLines)->implode("\n"))
-            ->toContain(route('volunteers.reject', ['volunteer' => $volunteer->id], false))
-            ->toContain(VolunteerResource::getUrl('edit', ['record' => $volunteer]));
+        expect($mail->getTemplate()->key)->toBe(MailTemplateKey::VolunteerApprovalRequested->value)
+            ->and($mail->envelope()->subject)->toBe("Nouvelle demande d'approbation de mandat de bénévolat")
+            ->and($mail->render())
+            ->toContain('Bonjour Alice Approver,')
+            ->toContain('Poste : '.e($volunteer->position_title))
+            ->and(templateMailLinks($mail))->toContain(VolunteerResource::getUrl('edit', ['record' => $volunteer]));
     });
 
     it('escapes the applicant name and position in the rendered mail', function () {
         $applicant = User::factory()->create(['first_name' => "<script>alert('xss')</script>", 'last_name' => 'Doe']);
         $volunteer = Volunteer::factory()->for($applicant)->create(['position_title' => '<img src=x onerror=alert(1)>']);
 
-        $content = (string) (new ApprovalRequestedNotification($volunteer))->toMail(User::factory()->make())->render();
+        $content = (new ApprovalRequestedNotification($volunteer))->toMail(User::factory()->make())->render();
 
         expect($content)
             ->toContain('&lt;script&gt;')
             ->not->toContain("<script>alert('xss')</script>")
             ->not->toContain('<img src=x');
-    });
-
-    it('expires the approve and reject links after the configured number of days', function () {
-        $this->freezeTime();
-        $volunteer = Volunteer::factory()->create();
-
-        $mail = (new ApprovalRequestedNotification($volunteer))->toMail(User::factory()->make());
-
-        parse_str((string) parse_url($mail->actionUrl, PHP_URL_QUERY), $query);
-        expect((int) $query['expires'])->toBe(now()->addDays(7)->getTimestamp())
-            ->and(URL::hasValidSignature(Request::create($mail->actionUrl)))->toBeTrue();
-    });
-
-    it('does not turn a Markdown link in the applicant name or position into a link', function () {
-        $applicant = User::factory()->create(['first_name' => '[x](https://evil.example)', 'last_name' => 'Doe']);
-        $volunteer = Volunteer::factory()->for($applicant)->create(['position_title' => '[y](https://evil.example)']);
-
-        $content = (string) (new ApprovalRequestedNotification($volunteer))->toMail(User::factory()->make())->render();
-
-        expect($content)->not->toContain('<a href="https://evil.example"');
-    });
-
-    it('does not turn a Markdown link in the approver name into a link', function () {
-        $approver = User::factory()->make(['first_name' => '[click](https://evil.example)', 'last_name' => 'Doe']);
-        $volunteer = Volunteer::factory()->create();
-
-        $content = (string) (new ApprovalRequestedNotification($volunteer))->toMail($approver)->render();
-
-        expect($content)->not->toContain('<a href="https://evil.example"');
     });
 });

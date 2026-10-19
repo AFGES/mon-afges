@@ -30,7 +30,7 @@ it('stores a hashed token valid for 15 minutes and sends the magic link', functi
         $user,
         MagicLinkNotification::class,
         function (MagicLinkNotification $notification) use ($user): bool {
-            parse_str((string) parse_url($notification->toMail($user)->actionUrl, PHP_URL_QUERY), $query);
+            parse_str((string) parse_url(templateMailLinks($notification->toMail($user))[0], PHP_URL_QUERY), $query);
 
             return Hash::check($query['token'], $user->magic_link_token);
         },

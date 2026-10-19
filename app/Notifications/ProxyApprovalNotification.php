@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Enums\MailTemplateKey;
 use App\Filament\Clusters\DemocraticTimes\Resources\Proxies\ProxyResource;
 use App\Models\Proxy;
-use App\Traits\EscapesMarkdown;
+use App\Traits\BuildsMailTemplate;
+use FinityLabs\FinMail\Mail\TemplateMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 final class ProxyApprovalNotification extends Notification implements ShouldQueue
 {
-    use EscapesMarkdown;
+    use BuildsMailTemplate;
     use Queueable;
 
     public function __construct(public Proxy $proxy) {}
@@ -29,17 +30,14 @@ final class ProxyApprovalNotification extends Notification implements ShouldQueu
         return ['mail', 'database'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): TemplateMail
     {
-        return (new MailMessage)
-            ->subject(__('proxy.notifications.approval_needed.subject'))
-            ->line(__('proxy.notifications.approval_needed.line1'))
-            ->line(__('proxy.notifications.approval_needed.line2', [
-                'delegator' => $this->escapeMarkdown($this->proxy->delegatorSeat->label()),
-                'proxy_holder' => $this->escapeMarkdown($this->proxy->proxyHolderSeat->label()),
-                'session' => $this->escapeMarkdown($this->proxy->democraticTimeSession->democraticTimeType->name),
-            ]))
-            ->action(__('proxy.notifications.approval_needed.action'), ProxyResource::getUrl('index'));
+        return $this->mailTemplate(MailTemplateKey::ProxyApprovalRequested, $notifiable, [
+            'delegator' => $this->proxy->delegatorSeat->label(),
+            'proxy_holder' => $this->proxy->proxyHolderSeat->label(),
+            'session' => $this->proxy->democraticTimeSession->democraticTimeType->name,
+            'review_url' => ProxyResource::getUrl('index'),
+        ]);
     }
 
     /**

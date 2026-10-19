@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers\Filament;
 
 use App\Actions\CreateUserFromSocialite;
+use App\Filament\FinMail\EmailTemplateResource;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Filament\Widgets\DelegateRequestWidget;
@@ -26,6 +27,7 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use FinityLabs\FinMail\FinMailPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -83,6 +85,11 @@ final class RootPanelProvider extends PanelProvider
                         ManageVolunteers::class,
                         ManageDelegates::class,
                     ]),
+                FinMailPlugin::make()
+                    ->emailTemplateResource(EmailTemplateResource::class)
+                    ->navigationGroup(fn (): string => __('navigation.clusters.settings'))
+                    ->enableThemes(false)
+                    ->deleteActionOnEditPage(false),
             ])
             ->authMiddleware([
                 Authenticate::class,

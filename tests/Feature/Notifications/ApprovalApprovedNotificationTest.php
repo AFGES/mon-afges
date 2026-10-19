@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Enums\MailTemplateKey;
 use App\Models\Delegate;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\ApprovalApprovedNotification;
+use FinityLabs\FinMail\Models\SentEmail;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Notification;
 
@@ -50,16 +52,18 @@ it('is sent by mail and queued', function () {
         ->and($notification)->toBeInstanceOf(ShouldQueue::class);
 });
 
-it('uses the subject of the approved mandate type', function (string $model, string $subject) {
-    $notification = new ApprovalApprovedNotification($model::factory()->make());
+it('renders the template of the approved mandate type for the mandate owner', function (string $model, MailTemplateKey $key, string $subject) {
+    $recipient = User::factory()->make(['first_name' => 'Test', 'last_name' => 'User', 'email' => 'owner@afges.org']);
 
-    $mail = $notification->toMail(User::factory()->make(['first_name' => 'Test', 'last_name' => 'User']));
+    $mail = (new ApprovalApprovedNotification($model::factory()->make()))->toMail($recipient);
 
-    expect($mail->subject)->toBe($subject)
-        ->and($mail->greeting)->toBe('Bonjour Test User,');
+    expect($mail->getTemplate()->key)->toBe($key->value)
+        ->and($mail->hasTo('owner@afges.org'))->toBeTrue()
+        ->and($mail->envelope()->subject)->toBe($subject)
+        ->and($mail->render())->toContain('Bonjour Test User,');
 })->with([
-    'delegate' => [Delegate::class, 'Votre demande de délégué-e a été approuvée'],
-    'volunteer' => [Volunteer::class, 'Votre candidature au mandat de bénévolat a été approuvée'],
+    'delegate' => [Delegate::class, MailTemplateKey::DelegateApprovalApproved, 'Votre demande de délégué-e a été approuvée'],
+    'volunteer' => [Volunteer::class, MailTemplateKey::VolunteerApprovalApproved, 'Votre candidature au mandat de bénévolat a été approuvée'],
 ]);
 
 it('identifies the approved record in its array form', function () {
@@ -78,15 +82,15 @@ it('escapes the recipient name in the rendered mail', function () {
 
     $content = (new ApprovalApprovedNotification(Delegate::factory()->make()))->toMail($recipient)->render();
 
-    expect((string) $content)
+    expect($content)
         ->toContain('&lt;script&gt;')
         ->not->toContain("<script>alert('xss')</script>");
 });
 
-it('does not turn a Markdown link in the recipient name into a link', function () {
-    $recipient = User::factory()->make(['first_name' => '[click](https://evil.example)', 'last_name' => 'Doe']);
+it('stores the rendered body in the sent-emails log', function () {
+    $recipient = User::factory()->create();
 
-    $content = (new ApprovalApprovedNotification(Delegate::factory()->make()))->toMail($recipient)->render();
+    $recipient->notify(new ApprovalApprovedNotification(Delegate::factory()->create()));
 
-    expect((string) $content)->not->toContain('<a href="https://evil.example"');
+    expect(SentEmail::query()->sole()->rendered_body)->toContain($recipient->name);
 });

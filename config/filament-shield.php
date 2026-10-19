@@ -173,6 +173,18 @@ return [
                 'update',
                 'delete',
             ],
+            App\Filament\FinMail\EmailTemplateResource::class => [
+                'viewAny',
+                'view',
+                'update',
+                'preview',
+                'sendTest',
+            ],
+            FinityLabs\FinMail\Resources\SentEmailResource\SentEmailResource::class => [
+                'viewAny',
+                'view',
+                'resend',
+            ],
         ],
         'exclude' => [
             //

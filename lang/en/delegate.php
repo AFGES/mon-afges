@@ -67,25 +67,5 @@ return [
         'rejected' => [
             'title' => 'Delegate rejected successfully',
         ],
-        'approval_requested' => [
-            'subject' => 'New delegate approval request',
-            'greeting' => 'Hello :name,',
-            'intro' => 'A new delegate request requires your approval.',
-            'applicant' => 'Applicant: :name',
-            'organization' => 'Organization: :organization',
-            'seat' => 'Seat: :seat',
-            'started_at' => 'Start date: :date',
-            'approve_action' => 'Approve',
-            'reject_action' => 'Reject',
-            'view_details' => 'View details: :url',
-            'outro' => 'Please process this request as soon as possible.',
-        ],
-        'approval_approved' => [
-            'subject' => 'Your delegate request has been approved',
-            'greeting' => 'Hello :name,',
-            'intro' => 'We are pleased to inform you that your delegate request has been approved.',
-            'body' => 'You can now access the features reserved for delegates.',
-            'outro' => 'Thank you for your commitment.',
-        ],
     ],
 ];

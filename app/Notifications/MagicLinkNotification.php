@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Enums\MailTemplateKey;
+use App\Traits\BuildsMailTemplate;
+use FinityLabs\FinMail\Mail\TemplateMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
 final class MagicLinkNotification extends Notification implements ShouldQueue
 {
+    use BuildsMailTemplate;
     use Queueable;
 
     public function __construct(
@@ -29,7 +32,11 @@ final class MagicLinkNotification extends Notification implements ShouldQueue
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    /**
+     * The login link is signed: the rendered body is kept out of the sent-emails log so that reading
+     * the log does not let anyone sign in as the recipient.
+     */
+    public function toMail(object $notifiable): TemplateMail
     {
         $url = URL::temporarySignedRoute(
             'magicLink.verify',
@@ -40,12 +47,9 @@ final class MagicLinkNotification extends Notification implements ShouldQueue
             ]
         );
 
-        return (new MailMessage)
-            ->subject('Votre lien de connexion')
-            ->greeting('Bonjour !')
-            ->line('Cliquez sur le bouton ci-dessous pour vous connecter à votre compte.')
-            ->action('Se connecter', $url)
-            ->line("Ce lien expirera dans {$this->expiresInMinutes} minutes.")
-            ->line("Si vous n'avez pas demandé ce lien, ignorez simplement cet e-mail.");
+        return $this->mailTemplate(MailTemplateKey::MagicLink, $notifiable, [
+            'login_url' => $url,
+            'expires_in_minutes' => $this->expiresInMinutes,
+        ])->withoutStoringRenderedBody();
     }
 }

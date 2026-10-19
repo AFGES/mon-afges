@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Traits\EscapesMarkdown;
+use App\Enums\MailTemplateKey;
+use App\Traits\BuildsMailTemplate;
+use FinityLabs\FinMail\Mail\TemplateMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
 final class ApprovalApprovedNotification extends Notification implements ShouldQueue
 {
-    use EscapesMarkdown;
+    use BuildsMailTemplate;
     use Queueable;
 
     /**
-     * The translation key prefix for the notification (e.g., 'delegate', 'volunteer').
+     * The approvable type (e.g., 'delegate', 'volunteer'), prefix of the mail template key.
      */
     private string $translationKey;
 
@@ -39,14 +40,13 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): TemplateMail
     {
-        return (new MailMessage)
-            ->subject(__("{$this->translationKey}.notifications.approval_approved.subject"))
-            ->greeting(__("{$this->translationKey}.notifications.approval_approved.greeting", ['name' => $this->escapeMarkdown($notifiable->name)]))
-            ->line(__("{$this->translationKey}.notifications.approval_approved.intro"))
-            ->line(__("{$this->translationKey}.notifications.approval_approved.body"))
-            ->line(__("{$this->translationKey}.notifications.approval_approved.outro"));
+        return $this->mailTemplate(
+            MailTemplateKey::from("{$this->translationKey}-approval-approved"),
+            $notifiable,
+            ['recipient_name' => $notifiable->name],
+        );
     }
 
     /**

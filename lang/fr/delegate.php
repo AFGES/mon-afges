@@ -73,25 +73,5 @@ return [
         'rejected' => [
             'title' => 'Délégué refusé avec succès',
         ],
-        'approval_requested' => [
-            'subject' => 'Nouvelle demande d\'approbation de délégué-e',
-            'greeting' => 'Bonjour :name,',
-            'intro' => 'Une nouvelle demande de délégué-e requiert votre approbation.',
-            'applicant' => 'Demandeur : :name',
-            'organization' => 'Association : :organization',
-            'seat' => 'Siège : :seat',
-            'started_at' => 'Date de début : :date',
-            'approve_action' => 'Approuver',
-            'reject_action' => 'Refuser',
-            'view_details' => 'Voir les détails : :url',
-            'outro' => 'Merci de traiter cette demande dans les meilleurs délais.',
-        ],
-        'approval_approved' => [
-            'subject' => 'Votre demande de délégué-e a été approuvée',
-            'greeting' => 'Bonjour :name,',
-            'intro' => 'Nous avons le plaisir de vous informer que votre demande de délégué-e a été approuvée.',
-            'body' => 'Vous pouvez désormais accéder aux fonctionnalités réservées aux délégué-e-s.',
-            'outro' => 'Merci de votre engagement.',
-        ],
     ],
 ];

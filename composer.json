@@ -13,6 +13,7 @@
         "bezhansalleh/filament-shield": "^4.3.1",
         "dutchcodingcompany/filament-socialite": "^3.3",
         "filament/filament": "^5.10.2",
+        "finity-labs/fin-mail": "^1.14",
         "google/apiclient": "^2.20.1",
         "jeffgreco13/filament-breezy": "^3.2.8",
         "laravel/framework": "^13.36",

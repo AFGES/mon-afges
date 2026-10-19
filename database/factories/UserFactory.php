@@ -52,7 +52,7 @@ final class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'birth_date' => fake()->dateTimeBetween('-30 years', '-18 years'),
-            'phone' => fake()->phoneNumber(),
+            'phone' => '+336'.fake()->numerify('########'),
             'postal_address' => fake()->address(),
             'study_program' => fake()->words(3, true),
             'elected_mandates' => fake()->sentence(),

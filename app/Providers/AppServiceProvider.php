@@ -33,6 +33,7 @@ use Illuminate\Support\Pluralizer;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Telescope\TelescopeServiceProvider as LaravelTelescopeServiceProvider;
 use Livewire\Livewire;
+use Propaganistas\LaravelPhone\Rules\Phone;
 use SocialiteProviders\Google\Provider as GoogleProvider;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
@@ -59,6 +60,9 @@ final class AppServiceProvider extends ServiceProvider
         if (app()->isLocale('fr')) {
             Pluralizer::useLanguage('french');
         }
+
+        // Parse phone numbers without an international prefix as French numbers
+        Phone::setDefaultCountry('FR');
 
         $this->blueprintApprovalStatusMacro();
         $this->blueprintPeriodMacro();

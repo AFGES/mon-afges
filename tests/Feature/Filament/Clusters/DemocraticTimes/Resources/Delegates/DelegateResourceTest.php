@@ -529,7 +529,7 @@ describe('EditDelegate', function () {
                     'last_name' => 'Durand',
                     'first_name' => 'Camille',
                     'study_program' => 'Master 2 Droit',
-                    'phone' => '0601020304',
+                    'phone' => '+33601020304',
                     'postal_address' => '1 rue de la Paix, Paris',
                     'elected_mandates' => 'CFVU',
                 ],
@@ -542,9 +542,22 @@ describe('EditDelegate', function () {
             'last_name' => 'Durand',
             'first_name' => 'Camille',
             'study_program' => 'Master 2 Droit',
-            'phone' => '0601020304',
+            'phone' => '+33601020304',
             'elected_mandates' => 'CFVU',
         ]);
+    });
+
+    it('rejects an invalid phone number on the edit form', function () {
+        actingAsSuperAdminForDelegateResource();
+
+        $delegate = Delegate::factory()->approved()->create();
+
+        livewire(EditDelegate::class, [
+            'record' => $delegate->id,
+        ])
+            ->fillForm(['user' => ['phone' => '123']])
+            ->call('save')
+            ->assertHasFormErrors(['user.phone']);
     });
 
     it('saves the edit form with empty optional user fields', function () {

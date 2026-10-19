@@ -19,7 +19,8 @@
         "laravel/octane": "^2.22",
         "laravel/tinker": "^3.0",
         "owenvoke/blade-fontawesome": "^3.3",
-        "socialiteproviders/google": "^4.1"
+        "socialiteproviders/google": "^4.1",
+        "ysfkaya/filament-phone-input": "^4.2"
     },
     "require-dev": {
         "carthage-software/mago": "^1.57",

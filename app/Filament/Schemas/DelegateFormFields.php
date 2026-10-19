@@ -10,6 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
  * Fields of the "Fiche Délégué-e" shared by the seat request form and the admin delegate form.
@@ -20,7 +21,7 @@ final class DelegateFormFields
      * Personal information stored on the user.
      *
      * @param  bool  $requirePersonalDetails  Makes study program, birth date, phone and postal address mandatory.
-     * @return list<TextInput|DatePicker|Textarea>
+     * @return list<TextInput|DatePicker|PhoneInput|Textarea>
      */
     public static function userComponents(bool $requirePersonalDetails = false): array
     {
@@ -48,11 +49,14 @@ final class DelegateFormFields
                 ->native(false)
                 ->displayFormat('d/m/Y')
                 ->required($requirePersonalDetails),
-            TextInput::make('phone')
+            PhoneInput::make('phone')
                 ->label(__('delegate_form.fields.phone'))
-                ->prefixIcon(Heroicon::OutlinedPhone)
-                ->tel()
-                ->maxLength(30)
+                ->defaultCountry('FR')
+                ->initialCountry('FR')
+                ->countryOrder(['FR'])
+                ->disableLookup()
+                ->strictMode()
+                ->validateFor()
                 ->required($requirePersonalDetails),
             Textarea::make('postal_address')
                 ->label(__('delegate_form.fields.postal_address'))

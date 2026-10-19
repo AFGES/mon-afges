@@ -117,7 +117,7 @@ it('pre-fills the personal details of the user', function () {
         ->assertFormSet([
             'first_name' => 'Camille',
             'last_name' => 'Durand',
-            'phone' => '0611223344',
+            'phone' => '+33611223344',
             'study_program' => 'L3 Histoire',
             'email' => $user->email,
         ]);
@@ -151,6 +151,33 @@ it('requires', function (string $field) {
     expect(Delegate::withoutGlobalScopes()->count())->toBe(0);
 })->with(['study_program', 'birth_date', 'phone', 'postal_address', 'first_name', 'last_name', 'seat_id']);
 
+it('rejects an invalid phone number', function () {
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm([...validSeatRequestData($user, $collegeOrganization, $seat), 'phone' => '123'])
+        ->call('submit')
+        ->assertHasFormErrors(['phone']);
+
+    expect(Delegate::withoutGlobalScopes()->count())->toBe(0);
+});
+
+it('accepts a foreign phone number in international format', function () {
+    mockGoogleWorkspaceService()->shouldReceive('addToGroup')->zeroOrMoreTimes()->andReturnTrue();
+    [$user, $collegeOrganization, $seat] = eligibleDelegateCandidate();
+
+    actingAs($user);
+
+    livewire(RequestDelegateSeat::class)
+        ->fillForm([...validSeatRequestData($user, $collegeOrganization, $seat), 'phone' => '+447911123456'])
+        ->call('submit')
+        ->assertHasNoFormErrors();
+
+    expect($user->refresh()->phone)->toBe('+447911123456');
+});
+
 it('creates a pending delegate, saves user fields and leaves volunteers untouched', function () {
     freezeTime();
     mockGoogleWorkspaceService()->shouldReceive('addToGroup')->zeroOrMoreTimes()->andReturnTrue();
@@ -173,7 +200,7 @@ it('creates a pending delegate, saves user fields and leaves volunteers untouche
         ->seat_id->toBe($seat->id)
         ->isPending()->toBeTrue()
         ->and($user->refresh())
-        ->phone->toBe('0601020304')
+        ->phone->toBe('+33601020304')
         ->study_program->toBe('Master 2 Droit')
         ->postal_address->toBe('1 rue de la Paix')
         ->elected_mandates->toBe('CFVU')

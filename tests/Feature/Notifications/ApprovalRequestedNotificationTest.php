@@ -76,7 +76,8 @@ describe('for a delegate', function () {
             ->toContain('Bonjour Alice Approver,')
             ->toContain('Demandeur : '.e($delegate->user->name))
             ->toContain('Association : '.e($delegate->organization->short_name))
-            ->toContain('Siège : '.e($delegate->seat->label()))
+            ->toContain('Siège : '.e("{$delegate->seat->collegeOrganization->college->name} #{$delegate->seat->seat_number}"))
+            ->not->toContain(e($delegate->seat->label()))
             ->and(templateMailLinks($mail))->toContain(DelegateResource::getUrl('edit', ['record' => $delegate]));
     });
 

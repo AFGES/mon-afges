@@ -17,6 +17,7 @@ use App\Models\Volunteer;
 use App\Observers\DelegateObserver;
 use App\Observers\DemocraticTimeSessionObserver;
 use App\Observers\DemocraticTimeTypeObserver;
+use App\Observers\EmailTemplateObserver;
 use App\Observers\ProxyObserver;
 use App\Observers\VolunteerObserver;
 use App\Policies\Contracts\RestrictsSuperAdmin;
@@ -25,6 +26,7 @@ use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceService;
 use App\Services\GoogleWorkspaceServiceInterface;
 use App\Services\UnconfiguredGoogleWorkspaceService;
+use FinityLabs\FinMail\Models\EmailTemplate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Event;
@@ -73,6 +75,7 @@ final class AppServiceProvider extends ServiceProvider
         Proxy::observe(ProxyObserver::class);
         DemocraticTimeSession::observe(DemocraticTimeSessionObserver::class);
         DemocraticTimeType::observe(DemocraticTimeTypeObserver::class);
+        EmailTemplate::observe(EmailTemplateObserver::class);
 
         // Register custom Filament Breezy profile components
         Livewire::component('manage_volunteers', ManageVolunteers::class);

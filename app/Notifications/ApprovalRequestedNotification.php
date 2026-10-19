@@ -29,13 +29,13 @@ final class ApprovalRequestedNotification extends Notification implements Should
     /**
      * The approvable type (e.g., 'delegate', 'volunteer').
      */
-    private string $translationKey;
+    private string $approvableType;
 
     public function __construct(
         public Delegate|Volunteer $approvable,
-        ?string $translationKey = null,
+        ?string $approvableType = null,
     ) {
-        $this->translationKey = $translationKey ?? Str::snake(class_basename($approvable));
+        $this->approvableType = $approvableType ?? Str::snake(class_basename($approvable));
     }
 
     /**
@@ -52,12 +52,12 @@ final class ApprovalRequestedNotification extends Notification implements Should
      */
     public function toMail(object $notifiable): TemplateMail
     {
-        $routePrefix = Str::plural($this->translationKey);
-        $routeParameters = [$this->translationKey => $this->approvable->getKey()];
+        $routePrefix = Str::plural($this->approvableType);
+        $routeParameters = [$this->approvableType => $this->approvable->getKey()];
         $expiry = now()->addDays(config('approval.link_expiry_days'));
 
         return $this->mailTemplate(
-            MailTemplateKey::from("{$this->translationKey}-approval-requested"),
+            MailTemplateKey::from("{$this->approvableType}-approval-requested"),
             $notifiable,
             [
                 'recipient_name' => $notifiable->name,
@@ -73,14 +73,17 @@ final class ApprovalRequestedNotification extends Notification implements Should
     }
 
     /**
-     * The one token that differs per approvable: the seat of a delegate, the position of a volunteer.
+     * The one token that differs per approvable: the seat of a delegate (its college and number, not the
+     * label, which names the delegates already holding it), the position of a volunteer.
      *
      * @return array{seat: string}|array{position: string}
      */
     private function detailToken(): array
     {
         if ($this->approvable instanceof Delegate) {
-            return ['seat' => $this->approvable->seat?->label() ?? 'N/A'];
+            $seat = $this->approvable->seat;
+
+            return ['seat' => $seat === null ? 'N/A' : "{$seat->collegeOrganization->college->name} #{$seat->seat_number}"];
         }
 
         return ['position' => (string) $this->approvable->position_title];

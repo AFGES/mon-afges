@@ -24,7 +24,7 @@ final class EmailTemplatePolicy implements RestrictsSuperAdmin
     {
         return [
             'create', 'delete', 'deleteAny', 'restore', 'restoreAny',
-            'forceDelete', 'forceDeleteAny', 'replicate', 'reorder', 'compose',
+            'forceDelete', 'forceDeleteAny', 'replicate', 'reorder',
         ];
     }
 
@@ -96,10 +96,5 @@ final class EmailTemplatePolicy implements RestrictsSuperAdmin
     public function sendTest(AuthUser $authUser, EmailTemplate $emailTemplate): bool
     {
         return $authUser->can('SendTest:EmailTemplate');
-    }
-
-    public function compose(AuthUser $authUser, EmailTemplate $emailTemplate): bool
-    {
-        return false;
     }
 }

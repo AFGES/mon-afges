@@ -10,6 +10,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Templates soft-deleted by down() come back under their ids, which their sent emails reference.
+        EmailTemplate::query()
+            ->onlyTrashed()
+            ->whereIn('key', array_column(MailTemplateKey::cases(), 'value'))
+            ->restore();
+
         foreach ($this->templates() as $template) {
             EmailTemplate::query()->updateOrCreate(
                 ['key' => $template['key']],
@@ -18,13 +24,16 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Soft-deletes the templates, through a query-level delete as the model's deleting hook refuses
+     * locked templates. A hard delete would null email_template_id on their sent emails, and up()
+     * would then recreate them under new ids, cutting the log off from them for good.
+     */
     public function down(): void
     {
-        // A query-level delete: the model's deleting hook refuses to delete locked templates.
         EmailTemplate::query()
-            ->withTrashed()
             ->whereIn('key', array_column(MailTemplateKey::cases(), 'value'))
-            ->forceDelete();
+            ->delete();
     }
 
     /**
@@ -36,7 +45,7 @@ return new class extends Migration
             $this->approvalRequested(MailTemplateKey::DelegateApprovalRequested, [
                 'fr' => ['name' => 'Délégué-e : demande d\'approbation', 'subject' => 'Nouvelle demande d\'approbation de délégué-e', 'intro' => 'Une nouvelle demande de délégué-e requiert votre approbation.', 'detail' => 'Siège : {{ seat }}'],
                 'en' => ['name' => 'Delegate: approval request', 'subject' => 'New delegate approval request', 'intro' => 'A new delegate request requires your approval.', 'detail' => 'Seat: {{ seat }}'],
-            ], ['token' => 'seat', 'description' => 'Siège demandé', 'example' => 'Siège 1']),
+            ], ['token' => 'seat', 'description' => 'Siège demandé : collège et numéro', 'example' => 'Collège des associations #1']),
             $this->approvalRequested(MailTemplateKey::VolunteerApprovalRequested, [
                 'fr' => ['name' => 'Bénévole : demande d\'approbation', 'subject' => 'Nouvelle demande d\'approbation de mandat de bénévolat', 'intro' => 'Une nouvelle demande de mandat de bénévolat requiert votre approbation.', 'detail' => 'Poste : {{ position }}'],
                 'en' => ['name' => 'Volunteer: approval request', 'subject' => 'New volunteer mandate approval request', 'intro' => 'A new volunteer mandate request requires your approval.', 'detail' => 'Position: {{ position }}'],

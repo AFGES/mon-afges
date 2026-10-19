@@ -21,13 +21,13 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
     /**
      * The approvable type (e.g., 'delegate', 'volunteer'), prefix of the mail template key.
      */
-    private string $translationKey;
+    private string $approvableType;
 
     public function __construct(
         public Model $approvable,
-        ?string $translationKey = null,
+        ?string $approvableType = null,
     ) {
-        $this->translationKey = $translationKey ?? $this->guessTranslationKey();
+        $this->approvableType = $approvableType ?? $this->guessApprovableType();
     }
 
     /**
@@ -43,7 +43,7 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
     public function toMail(object $notifiable): TemplateMail
     {
         return $this->mailTemplate(
-            MailTemplateKey::from("{$this->translationKey}-approval-approved"),
+            MailTemplateKey::from("{$this->approvableType}-approval-approved"),
             $notifiable,
             ['recipient_name' => $notifiable->name],
         );
@@ -63,9 +63,9 @@ final class ApprovalApprovedNotification extends Notification implements ShouldQ
     }
 
     /**
-     * Guess the translation key from the model class name.
+     * Guess the approvable type from the model class name.
      */
-    private function guessTranslationKey(): string
+    private function guessApprovableType(): string
     {
         return Str::snake(class_basename($this->approvable));
     }

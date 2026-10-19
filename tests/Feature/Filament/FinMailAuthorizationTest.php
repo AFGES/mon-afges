@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\MailTemplateKey;
 use App\Filament\FinMail\Pages\ComposeEmail;
+use App\Filament\FinMail\Pages\EditEmailTemplate;
+use App\Filament\FinMail\Pages\ListEmailTemplates;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -13,11 +15,11 @@ use FinityLabs\FinMail\Clusters\FinMailSettings\Pages\ManageAuthEmailSettings;
 use FinityLabs\FinMail\Clusters\FinMailSettings\Pages\ManageBrandingSettings;
 use FinityLabs\FinMail\Clusters\FinMailSettings\Pages\ManageGeneralSettings;
 use FinityLabs\FinMail\Clusters\FinMailSettings\Pages\ManageLoggingSettings;
+use FinityLabs\FinMail\Mail\TemplateMail;
 use FinityLabs\FinMail\Models\EmailTemplate;
 use FinityLabs\FinMail\Resources\EmailTemplateResource\EmailTemplateResource;
-use FinityLabs\FinMail\Resources\EmailTemplateResource\Pages\EditEmailTemplate;
-use FinityLabs\FinMail\Resources\EmailTemplateResource\Pages\ListEmailTemplates;
 use FinityLabs\FinMail\Resources\SentEmailResource\Pages\ListSentEmails;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -96,6 +98,36 @@ describe('a super admin', function () {
 
         expect(magicLinkTemplate()->getTranslation('subject', 'fr'))->toBe('Connectez-vous')
             ->and(magicLinkTemplate()->getTranslation('subject', 'en'))->toBe('Your sign-in link');
+    });
+
+    it('cannot switch off a locked template, which the application sends by key', function () {
+        livewire(EditEmailTemplate::class, ['record' => magicLinkTemplate()->getRouteKey()])
+            ->fillForm(['is_active' => false])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect(magicLinkTemplate()->is_active)->toBeTrue();
+    });
+
+    it('does not see the compose action, whose page is closed', function () {
+        $template = magicLinkTemplate();
+
+        livewire(ListEmailTemplates::class)->assertActionHidden(TestAction::make('compose')->table($template));
+        livewire(EditEmailTemplate::class, ['record' => $template->getRouteKey()])->assertActionDoesNotExist('compose');
+    });
+
+    it('sends a test email to their own address only', function () {
+        Mail::fake();
+        $superAdmin = auth()->user();
+
+        livewire(ListEmailTemplates::class)
+            ->callAction(TestAction::make('send_test')->table(magicLinkTemplate()), [
+                'test_email' => 'outsider@example.com',
+                'locale' => 'fr',
+            ])
+            ->assertHasNoFormErrors();
+
+        Mail::assertQueued(TemplateMail::class, fn (TemplateMail $mail): bool => $mail->hasTo($superAdmin->email) && ! $mail->hasTo('outsider@example.com'));
     });
 
     it('cannot create or delete templates', function () {

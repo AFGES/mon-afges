@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\MailTemplateKey;
+use FinityLabs\FinMail\Enums\EmailStatus;
 use FinityLabs\FinMail\Models\EmailTemplate;
+use FinityLabs\FinMail\Models\SentEmail;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -41,10 +43,28 @@ describe('seed_fin_mail_templates', function () {
         }
     });
 
-    it('removes the templates when rolled back', function () {
+    it('soft-deletes the templates when rolled back', function () {
         finMailTemplatesMigration()->down();
 
-        expect(EmailTemplate::query()->withTrashed()->exists())->toBeFalse();
+        expect(EmailTemplate::query()->exists())->toBeFalse()
+            ->and(EmailTemplate::query()->onlyTrashed()->count())->toBe(count(MailTemplateKey::cases()));
+    });
+
+    it('restores the same templates when migrated again, so the sent-emails log keeps pointing to them', function () {
+        $template = EmailTemplate::query()->where('key', MailTemplateKey::MagicLink->value)->sole();
+        $sentEmail = SentEmail::query()->create([
+            'email_template_id' => $template->id,
+            'sender' => 'noreply@afges.org',
+            'to' => ['jean@afges.org'],
+            'subject' => 'Votre lien de connexion',
+            'status' => EmailStatus::Sent,
+        ]);
+
+        finMailTemplatesMigration()->down();
+        finMailTemplatesMigration()->up();
+
+        expect(EmailTemplate::query()->where('key', MailTemplateKey::MagicLink->value)->sole()->id)->toBe($template->id)
+            ->and($sentEmail->fresh()->email_template_id)->toBe($template->id);
     });
 });
 

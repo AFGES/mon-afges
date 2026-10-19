@@ -22,6 +22,8 @@ return [
         'address_search' => 'Search an address',
         'address_search_helper' => 'Search for your address, then correct the fields below if needed.',
         'address_street' => 'Street',
+        'address_complement' => 'Address line 2',
+        'address_complement_placeholder' => 'Apartment, building, floor, P.O. box…',
         'address_postcode' => 'Postcode',
         'address_city' => 'City',
         'phone' => 'Phone',

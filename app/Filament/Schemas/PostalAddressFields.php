@@ -66,6 +66,11 @@ final class PostalAddressFields
                     ->live(onBlur: true)
                     ->afterStateUpdated(self::forgetCoordinates(...))
                     ->columnSpanFull(),
+                TextInput::make('address_complement')
+                    ->label(__('user.fields.address_complement'))
+                    ->placeholder(__('user.fields.address_complement_placeholder'))
+                    ->maxLength(self::STREET_MAX_LENGTH)
+                    ->columnSpanFull(),
                 TextInput::make('address_postcode')
                     ->label(__('user.fields.address_postcode'))
                     ->maxLength(self::POSTCODE_MAX_LENGTH)

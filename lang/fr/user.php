@@ -22,6 +22,8 @@ return [
         'address_search' => 'Rechercher une adresse',
         'address_search_helper' => 'Recherchez votre adresse, puis corrigez les champs ci-dessous si besoin.',
         'address_street' => 'Rue',
+        'address_complement' => 'Complément d’adresse',
+        'address_complement_placeholder' => 'Appartement, bâtiment, étage, boîte postale…',
         'address_postcode' => 'Code postal',
         'address_city' => 'Ville',
         'phone' => 'Téléphone',

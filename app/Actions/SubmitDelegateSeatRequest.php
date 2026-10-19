@@ -19,6 +19,7 @@ final class SubmitDelegateSeatRequest
         'birth_date',
         'phone',
         'address_street',
+        'address_complement',
         'address_postcode',
         'address_city',
         'address_country',

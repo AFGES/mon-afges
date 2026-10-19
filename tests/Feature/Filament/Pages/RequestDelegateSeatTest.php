@@ -46,6 +46,7 @@ function validSeatRequestData(User $user, CollegeOrganization $collegeOrganizati
         'birth_date' => '2000-01-31',
         'phone' => '0601020304',
         'address_street' => '1 rue de la Paix',
+        'address_complement' => 'Bâtiment B',
         'address_postcode' => '75002',
         'address_city' => 'Paris',
         'elected_mandates' => 'CFVU',
@@ -216,6 +217,7 @@ it('creates a pending delegate, saves user fields and leaves volunteers untouche
         ->phone->toBe('+33601020304')
         ->study_program->toBe('Master 2 Droit')
         ->address_street->toBe('1 rue de la Paix')
+        ->address_complement->toBe('Bâtiment B')
         ->address_postcode->toBe('75002')
         ->address_city->toBe('Paris')
         ->elected_mandates->toBe('CFVU')

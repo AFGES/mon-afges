@@ -61,6 +61,7 @@ test('saves the personal details', function () {
             'birth_date' => '2000-05-17',
             'phone' => '+33601020304',
             'address_street' => '1 rue de la Paix',
+            'address_complement' => 'Bâtiment B',
             'address_postcode' => '75002',
             'address_city' => 'Paris',
             'elected_mandates' => 'CFVU',
@@ -74,6 +75,7 @@ test('saves the personal details', function () {
         ->birth_date->toDateString()->toBe('2000-05-17')
         ->phone->toBe('+33601020304')
         ->address_street->toBe('1 rue de la Paix')
+        ->address_complement->toBe('Bâtiment B')
         ->address_postcode->toBe('75002')
         ->address_city->toBe('Paris')
         ->elected_mandates->toBe('CFVU');

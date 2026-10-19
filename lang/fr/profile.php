@@ -25,6 +25,7 @@ return [
         'position_title' => [
             'label' => 'Titre du poste',
             'placeholder' => 'Membre',
+            'required' => 'Le titre du poste est requis.',
         ],
         'submit' => [
             'label' => 'Confirmer',
@@ -58,6 +59,15 @@ return [
         'add_action' => 'Ajouter un mandat',
         'new_item' => 'Nouveau mandat',
         'ended_on' => 'Terminé le :date',
+        'request_locked' => [
+            'message' => 'Votre demande pour :organization est en attente de validation. Vous ne pouvez pas demander une autre association avant son traitement.',
+            'single_new_organization' => 'Vous ne pouvez demander qu\'une seule nouvelle association à la fois.',
+        ],
+        'position_title_required' => [
+            'banner' => 'Vous avez été rattaché-e à une association grâce à votre adresse courriel. Définissez votre titre de poste pour accéder à l\'application.',
+            'field_label' => 'Titre du poste (:organization)',
+            'success_title' => 'Titre du poste enregistré',
+        ],
         'terminate' => [
             'action' => 'Terminer ce mandat',
             'confirm' => 'Êtes-vous sûr-e de vouloir terminer ce mandat de bénévolat ?',

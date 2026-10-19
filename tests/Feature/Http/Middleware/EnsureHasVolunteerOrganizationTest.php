@@ -105,3 +105,24 @@ test('lets a super admin reach the dashboard without a volunteer organization', 
 
     get(route('filament.root.pages.dashboard'))->assertSuccessful();
 });
+
+test('redirects to the profile page when an approved volunteer has no position title', function () {
+    $user = User::factory()->create(['email' => 'volunteer@afges.org']);
+    Volunteer::factory()->approved()->for($user)->create(['position_title' => null]);
+
+    actingAs($user);
+
+    get(route('filament.root.pages.dashboard'))
+        ->assertRedirect(route('filament.root.pages.my-profile'));
+});
+
+test('lets a super admin reach the dashboard without a position title', function () {
+    Role::create(['name' => 'super_admin']);
+    $superAdmin = User::factory()->create(['email' => 'volunteer@afges.org']);
+    $superAdmin->assignRole('super_admin');
+    Volunteer::factory()->approved()->for($superAdmin)->create(['position_title' => null]);
+
+    actingAs($superAdmin);
+
+    get(route('filament.root.pages.dashboard'))->assertSuccessful();
+});

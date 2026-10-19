@@ -17,6 +17,7 @@ test('creates a pending volunteer application for each chosen organization', fun
     $user = User::factory()->create();
     $firstOrganization = Organization::factory()->create();
     $secondOrganization = Organization::factory()->create();
+    Volunteer::factory()->approved()->for($user)->for($secondOrganization)->create();
 
     actingAs($user);
 
@@ -25,10 +26,12 @@ test('creates a pending volunteer application for each chosen organization', fun
             'organizations' => [
                 [
                     'organization_id' => $firstOrganization->id,
+                    'position_title' => 'Trésorier',
                     'started_at' => now()->subDays(7)->toDateString(),
                 ],
                 [
                     'organization_id' => $secondOrganization->id,
+                    'position_title' => 'Trésorier',
                     'started_at' => now()->subDays(14)->toDateString(),
                 ],
             ],
@@ -38,7 +41,7 @@ test('creates a pending volunteer application for each chosen organization', fun
         ->assertNotified(__('volunteer.notifications.pending_approval.title'));
 
     $firstVolunteer = Volunteer::withoutGlobalScopes()->where('organization_id', $firstOrganization->id)->sole();
-    $secondVolunteer = Volunteer::withoutGlobalScopes()->where('organization_id', $secondOrganization->id)->sole();
+    $secondVolunteer = Volunteer::withoutGlobalScopes()->where('organization_id', $secondOrganization->id)->pending()->sole();
 
     expect($firstVolunteer)
         ->user_id->toBe($user->id)
@@ -164,4 +167,198 @@ test('does not list soft-deleted volunteers', function () {
     actingAs($user);
 
     expect(livewire(ManageVolunteers::class)->instance()->volunteers)->toBeEmpty();
+});
+
+test('rejects a request for a new organization while another one is pending', function () {
+    $user = User::factory()->create();
+    $pendingOrganization = Organization::factory()->create(['short_name' => 'AFGES']);
+    $otherOrganization = Organization::factory()->create();
+    Volunteer::factory()->pending()->for($user)->for($pendingOrganization)->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $otherOrganization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasFormErrors([
+            'organizations.0.organization_id' => [__('profile.manage_volunteers.request_locked.message', ['organization' => 'AFGES'])],
+        ]);
+
+    expect(Volunteer::withoutGlobalScopes()->where('organization_id', $otherOrganization->id)->exists())->toBeFalse();
+});
+
+test('allows a request for a new organization after a rejected one', function () {
+    $user = User::factory()->create();
+    $otherOrganization = Organization::factory()->create();
+    Volunteer::factory()->rejected()->for($user)->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $otherOrganization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasNoFormErrors();
+
+    expect(Volunteer::withoutGlobalScopes()->where('organization_id', $otherOrganization->id)->sole()->isPending())->toBeTrue();
+});
+
+test('allows a request for a linked organization while a new one is pending', function () {
+    $user = User::factory()->create();
+    $linkedOrganization = Organization::factory()->create();
+    Volunteer::factory()->approved()->for($user)->for($linkedOrganization)->create();
+    Volunteer::factory()->pending()->for($user)->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $linkedOrganization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasNoFormErrors();
+
+    expect(Volunteer::withoutGlobalScopes()->where('organization_id', $linkedOrganization->id)->pending()->exists())->toBeTrue();
+});
+
+test('rejects two new organizations in a single submission', function () {
+    $user = User::factory()->create();
+    $firstOrganization = Organization::factory()->create();
+    $secondOrganization = Organization::factory()->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $firstOrganization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+                ['organization_id' => $secondOrganization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasFormErrors([
+            'organizations' => [__('profile.manage_volunteers.request_locked.single_new_organization')],
+        ]);
+
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
+});
+
+test('displays the pending request banner', function () {
+    $user = User::factory()->create();
+    $organization = Organization::factory()->create(['short_name' => 'AFGES']);
+    Volunteer::factory()->pending()->for($user)->for($organization)->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->assertSee(__('profile.manage_volunteers.request_locked.message', ['organization' => 'AFGES']));
+});
+
+test('defines the missing position title of the user', function () {
+    $user = User::factory()->create();
+    $volunteer = Volunteer::factory()->approved()->for($user)->create(['position_title' => null]);
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->assertSee(__('profile.manage_volunteers.position_title_required.banner'))
+        ->fillForm([$volunteer->id => 'Trésorier'], 'positionTitleForm')
+        ->call('definePositionTitles')
+        ->assertHasNoFormErrors(form: 'positionTitleForm')
+        ->assertNotified(__('profile.manage_volunteers.position_title_required.success_title'))
+        ->assertDontSee(__('profile.manage_volunteers.position_title_required.banner'));
+
+    expect($volunteer->refresh()->position_title)->toBe('Trésorier');
+});
+
+test('requires a value for the missing position title', function () {
+    $user = User::factory()->create();
+    $volunteer = Volunteer::factory()->approved()->for($user)->create(['position_title' => null]);
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->fillForm([$volunteer->id => ''], 'positionTitleForm')
+        ->call('definePositionTitles')
+        ->assertHasFormErrors([$volunteer->id => [__('profile.form.position_title.required')]], 'positionTitleForm');
+
+    expect($volunteer->refresh()->position_title)->toBeNull();
+});
+
+test('does not define the position title of another user', function () {
+    $user = User::factory()->create();
+    $otherVolunteer = Volunteer::factory()->approved()->create(['position_title' => null]);
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->set("positionTitles.{$otherVolunteer->id}", 'Président')
+        ->call('definePositionTitles');
+
+    expect($otherVolunteer->refresh()->position_title)->toBeNull();
+});
+
+test('shows the pending request lock right after submitting a new organization', function () {
+    $user = User::factory()->create();
+    $organization = Organization::factory()->create(['short_name' => 'AFGES']);
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->assertDontSee(__('profile.manage_volunteers.request_locked.message', ['organization' => 'AFGES']))
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $organization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasNoFormErrors()
+        ->assertSee(__('profile.manage_volunteers.request_locked.message', ['organization' => 'AFGES']));
+});
+
+test('requires a position title when requesting an organization', function () {
+    $user = User::factory()->create();
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $organization->id, 'position_title' => null, 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasFormErrors(['organizations.0.position_title' => [__('profile.form.position_title.required')]]);
+
+    expect(Volunteer::withoutGlobalScopes()->count())->toBe(0);
+});
+
+test('ignores a pending request for a deleted organization', function () {
+    $user = User::factory()->create();
+    $deletedOrganization = Organization::factory()->create(['short_name' => 'AFGES']);
+    Volunteer::factory()->pending()->for($user)->for($deletedOrganization)->create();
+    $deletedOrganization->delete();
+    $otherOrganization = Organization::factory()->create();
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->assertDontSee(__('profile.manage_volunteers.request_locked.message', ['organization' => 'AFGES']))
+        ->fillForm([
+            'organizations' => [
+                ['organization_id' => $otherOrganization->id, 'position_title' => 'Trésorier', 'started_at' => now()->toDateString()],
+            ],
+        ])
+        ->call('submitVolunteers')
+        ->assertHasNoFormErrors();
 });

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\ApprovalStatus;
 use App\Models\Scopes\ApprovedScope;
+use App\Models\Scopes\CurrentlyScope;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -113,6 +115,34 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
             ->withoutGlobalScope(ApprovedScope::class)
             ->whereIn('approval_status', [ApprovalStatus::Pending, ApprovalStatus::Approved])
             ->exists();
+    }
+
+    /**
+     * Organizations the user is linked to through an approved, current volunteer.
+     *
+     * @return Collection<int, string>
+     */
+    public function linkedOrganizationIds(): Collection
+    {
+        return $this->volunteers()->pluck('organization_id')->unique()->values();
+    }
+
+    /**
+     * The pending request for an existing organization the user is not linked to yet.
+     * It locks requests for other new organizations until it is processed.
+     *
+     * @param  Collection<int, string>|null  $linkedOrganizationIds  reuses a computed linkedOrganizationIds()
+     */
+    public function pendingOrganizationRequest(?Collection $linkedOrganizationIds = null): ?Volunteer
+    {
+        return $this->volunteers()
+            ->withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
+            ->pending()
+            ->whereHas('organization')
+            ->whereNotIn('organization_id', $linkedOrganizationIds ?? $this->linkedOrganizationIds())
+            ->with('organization')
+            ->oldest()
+            ->first();
     }
 
     /**

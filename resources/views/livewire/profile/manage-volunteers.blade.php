@@ -3,6 +3,36 @@
     :heading="__('profile.manage_volunteers.section_heading')" 
     :description="__('profile.manage_volunteers.section_description')"
 >
+    @if($this->pendingOrganizationRequest)
+        <div class="mb-6 rounded-lg bg-warning-50 p-4 text-sm text-warning-700 ring-1 ring-warning-600/20 dark:bg-warning-400/10 dark:text-warning-400 dark:ring-warning-400/30">
+            <div class="flex items-start gap-2">
+                <x-filament::icon icon="heroicon-o-clock" class="h-5 w-5 shrink-0" />
+                <p>
+                    {{ __('profile.manage_volunteers.request_locked.message', ['organization' => $this->pendingOrganizationRequest->organization->short_name]) }}
+                </p>
+            </div>
+        </div>
+    @endif
+
+    @if($this->volunteersWithoutPositionTitle->isNotEmpty())
+        <div class="mb-6 rounded-lg bg-info-50 p-4 ring-1 ring-info-600/20 dark:bg-info-400/10 dark:ring-info-400/30">
+            <div class="mb-4 flex items-start gap-2 text-sm text-info-700 dark:text-info-400">
+                <x-filament::icon icon="heroicon-o-information-circle" class="h-5 w-5 shrink-0" />
+                <p>{{ __('profile.manage_volunteers.position_title_required.banner') }}</p>
+            </div>
+
+            <form wire:submit.prevent="definePositionTitles" class="space-y-4">
+                {{ $this->positionTitleForm }}
+
+                <div class="text-right">
+                    <x-filament::button type="submit">
+                        {{ __('profile.form.submit.label') }}
+                    </x-filament::button>
+                </div>
+            </form>
+        </div>
+    @endif
+
     {{-- Display current volunteer organizations status --}}
     @if($this->volunteers->isNotEmpty())
         <div class="mb-6">
@@ -50,7 +80,7 @@
                                     color="danger"
                                     size="sm"
                                     :tooltip="__('profile.manage_volunteers.terminate.action')"
-                                    wire:click="terminateVolunteer({{ $volunteer->id }})"
+                                    wire:click="terminateVolunteer('{{ $volunteer->id }}')"
                                     wire:confirm="{{ __('profile.manage_volunteers.terminate.confirm') }}"
                                 />
                             @endcan
@@ -62,13 +92,15 @@
     @endif
 
     {{-- Form to add new volunteer affiliations --}}
-    <form wire:submit.prevent="submitVolunteers" class="space-y-6">
-        {{ $this->form }}
+    @if($this->canAddVolunteers)
+        <form wire:submit.prevent="submitVolunteers" class="space-y-6">
+            {{ $this->form }}
 
-        <div class="text-right">
-            <x-filament::button type="submit">
-                {{ __('profile.form.submit.label') }}
-            </x-filament::button>
-        </div>
-    </form>
+            <div class="text-right">
+                <x-filament::button type="submit">
+                    {{ __('profile.form.submit.label') }}
+                </x-filament::button>
+            </div>
+        </form>
+    @endif
 </x-filament::section>

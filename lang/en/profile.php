@@ -25,6 +25,7 @@ return [
         'position_title' => [
             'label' => 'Position Title',
             'placeholder' => 'Member',
+            'required' => 'The position title is required.',
         ],
         'submit' => [
             'label' => 'Confirm',
@@ -57,6 +58,15 @@ return [
         'form_label' => 'Volunteer Mandates',
         'add_action' => 'Add Mandate',
         'new_item' => 'New Mandate',
+        'request_locked' => [
+            'message' => 'Your request for :organization is awaiting approval. You cannot request another organization until it is processed.',
+            'single_new_organization' => 'You can only request one new organization at a time.',
+        ],
+        'position_title_required' => [
+            'banner' => 'You were linked to an organization through your email address. Define your position title to access the application.',
+            'field_label' => 'Position title (:organization)',
+            'success_title' => 'Position title saved',
+        ],
     ],
 
     'manage_organizations' => [

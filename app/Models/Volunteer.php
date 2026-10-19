@@ -12,6 +12,7 @@ use App\Traits\HasApprovalStatus;
 use App\Traits\HasPeriod;
 use Database\Factories\VolunteerFactory;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,6 +41,17 @@ final class Volunteer extends Model implements Approvable
         'user_id',
         'organization_id',
     ];
+
+    /**
+     * Scope a query to volunteers of an existing organization still waiting for
+     * a position title, as left by the email-domain auto-link.
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeAwaitingPositionTitle(Builder $query): void
+    {
+        $query->whereNull('position_title')->whereHas('organization');
+    }
 
     /** @return BelongsTo<Organization, $this> */
     public function organization(): BelongsTo

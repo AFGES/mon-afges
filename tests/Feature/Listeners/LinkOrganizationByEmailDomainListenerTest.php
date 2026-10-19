@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Volunteer;
 use App\Notifications\ApprovalRequestedNotification;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 
@@ -93,4 +94,17 @@ it('does not duplicate the volunteer on a later login', function () {
     event(new Login('web', $user, false));
 
     $this->assertDatabaseCount('volunteers', 1);
+});
+
+it('links a user verified after logging in', function () {
+    $organization = Organization::factory()->create(['domain' => 'afges.org']);
+    $user = User::factory()->unverified()->create(['email' => 'jane@afges.org']);
+
+    event(new Login('web', $user, false));
+    $this->assertDatabaseCount('volunteers', 0);
+
+    $user->markEmailAsVerified();
+    event(new Verified($user));
+
+    expect(Volunteer::query()->where('user_id', $user->id)->sole()->organization_id)->toBe($organization->id);
 });

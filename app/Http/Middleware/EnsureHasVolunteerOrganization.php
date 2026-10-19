@@ -17,6 +17,9 @@ final class EnsureHasVolunteerOrganization
     /**
      * Handle an incoming request.
      *
+     * Users without an approved, current volunteer, or with one still waiting for its
+     * position title, are sent to their profile. A single query checks both.
+     *
      * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
@@ -43,8 +46,6 @@ final class EnsureHasVolunteerOrganization
             return $next($request);
         }
 
-        // One query checks for at least one approved, current volunteer (default scopes)
-        // and for one still waiting for its position title.
         $volunteerState = User::query()
             ->whereKey($user->getKey())
             ->select('id')

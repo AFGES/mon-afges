@@ -8,6 +8,7 @@ use App\Models\User;
 use DutchCodingCompany\FilamentSocialite\Events\Login;
 use DutchCodingCompany\FilamentSocialite\Events\Registered;
 use DutchCodingCompany\FilamentSocialite\Events\SocialiteUserConnected;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\Authenticatable;
 
 final class MarkEmailAsVerifiedOnSocialiteLoginListener
@@ -29,6 +30,8 @@ final class MarkEmailAsVerifiedOnSocialiteLoginListener
 
     /**
      * Mark the user's primary email as verified.
+     *
+     * The Verified event links the organization by email domain, which the earlier Login event skipped.
      */
     private function markEmailAsVerified(?Authenticatable $user): void
     {
@@ -44,6 +47,8 @@ final class MarkEmailAsVerifiedOnSocialiteLoginListener
             return;
         }
 
-        $user->markEmailAsVerified();
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
     }
 }

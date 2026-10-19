@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 final class MagicLinkLoginsController
 {
     /**
      * Verify the magic link token and log in the user.
+     *
+     * Opening the link proves ownership of the address, so the email is marked
+     * as verified before the login links the organization by email domain.
      */
     public function show(Request $request): RedirectResponse
     {
@@ -23,7 +28,7 @@ final class MagicLinkLoginsController
             'token' => ['required', 'string'],
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', Str::lower($request->string('email')->toString()))->first();
 
         if (! $this->hasValidMagicLink($user, $request->token)) {
             throw ValidationException::withMessages([
@@ -36,6 +41,10 @@ final class MagicLinkLoginsController
             'magic_link_token' => null,
             'magic_link_token_expires_at' => null,
         ]);
+
+        if (! $user->hasVerifiedEmail() && $user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
 
         Auth::login($user, remember: true);
 

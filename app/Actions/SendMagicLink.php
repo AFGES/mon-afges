@@ -39,9 +39,9 @@ final class SendMagicLink
      */
     public function handle(string $email, ?string $ipAddress): void
     {
-        $email = Str::trim($email);
+        $email = Str::lower(Str::trim($email));
 
-        $this->hitRateLimiters(Str::lower($email), $ipAddress);
+        $this->hitRateLimiters($email, $ipAddress);
 
         $this->timebox->call(function () use ($email): void {
             $user = User::where('email', $email)->first();

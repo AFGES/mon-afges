@@ -17,12 +17,20 @@ it('lets a user with an afges.org email access the panel', function () {
     expect($user->canAccessPanel(Filament::getPanel('root')))->toBeTrue();
 });
 
-it('forbids a user with another email domain from accessing the panel', function () {
+it('lets a verified user with another email domain reach the panel', function () {
     $user = User::factory()->create(['email' => 'member@example.org']);
 
     actingAs($user)
         ->get(Filament::getPanel('root')->getUrl())
-        ->assertForbidden();
+        ->assertOk();
 
-    expect($user->canAccessPanel(Filament::getPanel('root')))->toBeFalse();
+    expect($user->canAccessPanel(Filament::getPanel('root')))->toBeTrue();
+});
+
+it('redirects an unverified user to the email verification prompt', function () {
+    $user = User::factory()->unverified()->create();
+
+    actingAs($user)
+        ->get(Filament::getPanel('root')->getUrl())
+        ->assertRedirect(Filament::getPanel('root')->getEmailVerificationPromptUrl());
 });

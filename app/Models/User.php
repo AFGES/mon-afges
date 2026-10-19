@@ -63,11 +63,11 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     ];
 
     /**
-     * Only users with an @afges.org email address may access the panel.
+     * Anyone may sign in: access is gated by email verification, roles and the volunteer organization middleware.
      */
     final public function canAccessPanel(Panel $panel): bool
     {
-        return Str::endsWith($this->email, '@afges.org');
+        return true;
     }
 
     public function isSuperAdmin(): bool
@@ -160,6 +160,16 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
 
             return Str::squish(($attributes['first_name'] ?? '').' '.($attributes['last_name'] ?? ''));
         });
+    }
+
+    /**
+     * Emails are stored trimmed and lowercase so every lookup can match them exactly.
+     *
+     * @return Attribute<never, string>
+     */
+    protected function email(): Attribute
+    {
+        return Attribute::set(fn (string $value): string => Str::lower(Str::trim($value)));
     }
 
     /**

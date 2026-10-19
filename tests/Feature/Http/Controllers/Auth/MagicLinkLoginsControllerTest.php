@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Enums\ApprovalStatus;
+use App\Models\Organization;
 use App\Models\User;
+use App\Models\Volunteer;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 
 /**
  * @return array{0: User, 1: string}
  */
-function userWithPendingMagicLink(): array
+function userWithPendingMagicLink(?User $user = null): array
 {
-    $user = User::factory()->create(['email' => 'test@afges.org']);
+    $user ??= User::factory()->create(['email' => 'test@afges.org']);
     $token = 'known-magic-link-token';
     $user->update([
         'magic_link_token' => Hash::make($token),
@@ -38,6 +41,19 @@ it('logs the user in, redirects home and consumes the token', function () {
     $this->assertAuthenticatedAs($user);
     expect($user->refresh()->magic_link_token)->toBeNull()
         ->and($user->magic_link_token_expires_at)->toBeNull();
+});
+
+it('verifies the email and links the organization by domain on the first login', function () {
+    $organization = Organization::factory()->create(['domain' => 'afges.org']);
+    [$user, $token] = userWithPendingMagicLink(User::factory()->unverified()->create(['email' => 'new@afges.org']));
+
+    $this->get(signedMagicLinkUrl(['email' => $user->email, 'token' => $token]));
+
+    $this->assertAuthenticatedAs($user);
+    expect($user->refresh()->hasVerifiedEmail())->toBeTrue();
+    $volunteer = Volunteer::query()->where('user_id', $user->id)->sole();
+    expect($volunteer->organization_id)->toBe($organization->id)
+        ->and($volunteer->approval_status)->toBe(ApprovalStatus::Approved);
 });
 
 it('rejects a link that is used a second time', function () {

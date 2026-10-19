@@ -7,6 +7,7 @@ namespace App\Providers\Filament;
 use App\Actions\CreateUserFromSocialite;
 use App\Filament\FinMail\EmailTemplateResource;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\Register;
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Filament\Widgets\DelegateRequestWidget;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
@@ -26,7 +27,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use FinityLabs\FinMail\FinMailPlugin;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -45,6 +45,8 @@ final class RootPanelProvider extends PanelProvider
             ->id('root')
             ->path('')
             ->login(Login::class)
+            ->registration(Register::class)
+            ->emailVerification()
             ->favicon(asset('favicon.svg'))
             ->brandLogo(asset('images/afges-logo.svg'))
             ->brandLogoHeight('4rem')
@@ -62,7 +64,6 @@ final class RootPanelProvider extends PanelProvider
                 DelegateRequestWidget::class,
                 PendingVolunteerStats::class,
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

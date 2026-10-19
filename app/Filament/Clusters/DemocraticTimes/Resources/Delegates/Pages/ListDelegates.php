@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Filament\Clusters\DemocraticTimes\Resources\Delegates\Pages;
 
 use App\Filament\Clusters\DemocraticTimes\Resources\Delegates\DelegateResource;
+use App\Filament\Imports\DelegateImporter;
+use App\Models\Delegate;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Gate;
 
 final class ListDelegates extends ListRecords
 {
@@ -20,6 +24,10 @@ final class ListDelegates extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ImportAction::make()
+                ->importer(DelegateImporter::class)
+                ->label(__('delegate_import.action'))
+                ->authorize(fn (): bool => Gate::allows('create', Delegate::class)),
             CreateAction::make(),
         ];
     }

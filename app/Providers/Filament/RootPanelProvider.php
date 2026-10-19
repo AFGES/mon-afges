@@ -51,6 +51,7 @@ final class RootPanelProvider extends PanelProvider
             ->login(Login::class)
             ->registration(Register::class)
             ->emailVerification()
+            ->databaseNotifications()
             ->favicon(asset('favicon.svg'))
             ->brandLogo(asset('images/afges-logo.svg'))
             ->brandLogoHeight('4rem')

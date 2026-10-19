@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * @property \Illuminate\Support\Carbon $started_at
  * @property \Illuminate\Support\Carbon|null $ended_at
+ * @property ApprovalStatus $approval_status
+ * @property \Illuminate\Support\Carbon|null $approved_at
  */
 #[ScopedBy([CurrentlyScope::class, ApprovedScope::class])]
 final class Delegate extends Model implements Approvable, MustVerifyEmail

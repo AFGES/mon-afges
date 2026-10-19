@@ -8,17 +8,21 @@ use App\Filament\Actions\ApproveDelegateAction;
 use App\Filament\Actions\BulkApproveDelegatesAction;
 use App\Filament\Actions\BulkRejectAction;
 use App\Filament\Actions\RejectAction;
+use App\Filament\Exports\DelegateExporter;
 use App\Filament\Tables\Filters\ApprovalFilters;
 use App\Models\Delegate;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportBulkAction;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Gate;
 
 final class DelegatesTable
 {
@@ -86,6 +90,11 @@ final class DelegatesTable
                         ->authorizeIndividualRecords('delete'),
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
+                    ExportBulkAction::make()
+                        ->exporter(DelegateExporter::class)
+                        ->formats([ExportFormat::Csv])
+                        ->label(__('delegate_export.action'))
+                        ->authorize(fn (): bool => Gate::allows('create', Delegate::class)),
                 ]),
             ])
             ->defaultGroup('organization.legal_name');

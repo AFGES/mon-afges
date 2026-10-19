@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Enums\ApprovalStatus;
 use App\Livewire\Profile\ManageDelegates;
+use App\Livewire\Profile\ManagePasskeys;
 use App\Livewire\Profile\ManageVolunteers;
 use App\Livewire\Profile\PersonalInfo;
 use App\Models\Delegate;
@@ -26,13 +27,17 @@ use App\Services\DelegateGoogleWorkspaceSyncServiceInterface;
 use App\Services\GoogleWorkspaceService;
 use App\Services\GoogleWorkspaceServiceInterface;
 use App\Services\UnconfiguredGoogleWorkspaceService;
+use Filament\Facades\Filament;
 use FinityLabs\FinMail\Models\EmailTemplate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Pluralizer;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passkeys\Contracts\PasskeyUser;
+use Laravel\Passkeys\Passkeys;
 use Laravel\Telescope\TelescopeServiceProvider as LaravelTelescopeServiceProvider;
 use Livewire\Livewire;
 use Propaganistas\LaravelPhone\Rules\Phone;
@@ -81,6 +86,11 @@ final class AppServiceProvider extends ServiceProvider
         Livewire::component('manage_volunteers', ManageVolunteers::class);
         Livewire::component('manage_delegates', ManageDelegates::class);
         Livewire::component('personal_info', PersonalInfo::class);
+        Livewire::component('manage_passkeys', ManagePasskeys::class);
+
+        // Passkey logins bypass the Filament login page, so enforce panel access here
+        Passkeys::authorizeLoginUsing(fn (Request $request, PasskeyUser $user): bool => $user instanceof User
+            && $user->canAccessPanel(Filament::getPanel('root')));
 
         Event::listen(function (SocialiteWasCalled $event): void {
             $event->extendSocialite('google', GoogleProvider::class);

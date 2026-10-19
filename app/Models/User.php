@@ -20,9 +20,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Laravel\Passkeys\Contracts\PasskeyUser;
+use Laravel\Passkeys\PasskeyAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-final class User extends Authenticatable implements FilamentUser, MustVerifyEmail
+final class User extends Authenticatable implements FilamentUser, MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -30,6 +32,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     use HasRoles;
     use HasUuids;
     use Notifiable;
+    use PasskeyAuthenticatable;
 
     public const string SUPER_ADMIN_ROLE = 'super_admin';
 

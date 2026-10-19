@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4e96bb61f8fc0c573093a4b38aa0994d",
+    "content-hash": "d8ae37f33cbe13769693730e82cd88cf",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -3737,6 +3737,74 @@
             "time": "2026-10-14T15:54:28+00:00"
         },
         {
+            "name": "laravel/passkeys",
+            "version": "v0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/passkeys-server.git",
+                "reference": "a76656ada41b2b4a591f075eddae5ddc67e8ab9c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/passkeys-server/zipball/a76656ada41b2b4a591f075eddae5ddc67e8ab9c",
+                "reference": "a76656ada41b2b4a591f075eddae5ddc67e8ab9c",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^11.0|^12.0|^13.0",
+                "illuminate/database": "^11.0|^12.0|^13.0",
+                "illuminate/http": "^11.0|^12.0|^13.0",
+                "illuminate/routing": "^11.0|^12.0|^13.0",
+                "illuminate/support": "^11.0|^12.0|^13.0",
+                "php": "^8.2",
+                "web-auth/webauthn-lib": "5.3.x"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.28.0",
+                "orchestra/testbench": "^9.0|^10.0|^11.0",
+                "pestphp/pest": "^3.0|^4.0",
+                "phpstan/phpstan": "^2.0",
+                "rector/rector": "^2.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laravel\\Passkeys\\PasskeysServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laravel\\Passkeys\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "Passwordless authentication using WebAuthn/passkeys for Laravel",
+            "homepage": "https://github.com/laravel/passkeys-server",
+            "keywords": [
+                "Authentication",
+                "Passwordless",
+                "laravel",
+                "passkeys",
+                "webauthn"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/passkeys-server/issues",
+                "source": "https://github.com/laravel/passkeys-server"
+            },
+            "time": "2026-05-18T16:26:00+00:00"
+        },
+        {
             "name": "laravel/prompts",
             "version": "v0.3.26",
             "source": {
@@ -4882,6 +4950,78 @@
                 }
             ],
             "time": "2026-09-28T18:12:51+00:00"
+        },
+        {
+            "name": "marcelweidum/filament-passkeys",
+            "version": "v4.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MarcelWeidum/filament-passkeys.git",
+                "reference": "a55fa9204cb3514cf81874c05592e38313db8b2c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MarcelWeidum/filament-passkeys/zipball/a55fa9204cb3514cf81874c05592e38313db8b2c",
+                "reference": "a55fa9204cb3514cf81874c05592e38313db8b2c",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^5.0",
+                "laravel/passkeys": "^0.2.0",
+                "php": "^8.2",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "spatie/laravel-ray": "^1.26"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Passkeys": "MarcelWeidum\\Passkeys\\Facades\\Passkeys"
+                    },
+                    "providers": [
+                        "MarcelWeidum\\Passkeys\\PasskeysServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MarcelWeidum\\Passkeys\\": "src/",
+                    "MarcelWeidum\\Passkeys\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "MarcelWeidum",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Use passkeys in your filamentphp app",
+            "homepage": "https://github.com/marcelweidum/filament-passkeys",
+            "keywords": [
+                "MarcelWeidum",
+                "filament",
+                "filament-passkeys",
+                "filamentphp",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/marcelweidum/filament-passkeys/issues",
+                "source": "https://github.com/marcelweidum/filament-passkeys"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/MarcelWeidum",
+                    "type": "buy_me_a_coffee"
+                }
+            ],
+            "time": "2026-10-06T18:51:51+00:00"
         },
         {
             "name": "mobiledetect/mobiledetectlib",

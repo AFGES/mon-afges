@@ -69,6 +69,15 @@ return [
         ],
     ],
 
+    'manage_passkeys' => [
+        'reauthenticate' => [
+            'body' => 'For security reasons, log in again to manage your passkeys.',
+            'action' => 'Log out',
+            'confirm_action' => 'Confirm with a passkey',
+            'confirm_failed' => 'Passkey confirmation failed.',
+        ],
+    ],
+
     'manage_organizations' => [
         'label' => 'My Organizations',
         'section_description' => 'Manage your organization affiliations',

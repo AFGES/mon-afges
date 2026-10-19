@@ -78,6 +78,15 @@ return [
         ],
     ],
 
+    'manage_passkeys' => [
+        'reauthenticate' => [
+            'body' => 'Pour des raisons de sécurité, reconnectez-vous pour gérer vos clés d\'accès.',
+            'action' => 'Se déconnecter',
+            'confirm_action' => 'Confirmer avec une clé d\'accès',
+            'confirm_failed' => 'La confirmation par clé d\'accès a échoué.',
+        ],
+    ],
+
     'manage_organizations' => [
         'label' => 'Mes associations',
         'section_description' => 'Gérez vos affiliations aux associations',

@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
 use App\Services\GoogleWorkspaceServiceInterface;
 use FinityLabs\FinMail\Mail\TemplateMail;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Sleep;
+use Laravel\Passkeys\Passkey;
 use Mockery\MockInterface;
 
 pest()->extend(Tests\TestCase::class)
@@ -36,4 +38,16 @@ function templateMailLinks(TemplateMail $mail): array
     preg_match_all('/href="([^"]+)"/', $mail->render(), $matches);
 
     return array_map(html_entity_decode(...), $matches[1]);
+}
+
+/**
+ * Create a passkey belonging to the given user.
+ */
+function createPasskeyFor(User $user, string $name = 'Laptop'): Passkey
+{
+    return $user->passkeys()->create([
+        'name' => $name,
+        'credential_id' => fake()->uuid(),
+        'credential' => [],
+    ]);
 }

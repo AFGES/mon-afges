@@ -12,6 +12,7 @@ use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
 use App\Filament\Widgets\DelegateRequestWidget;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
 use App\Livewire\Profile\ManageDelegates;
+use App\Livewire\Profile\ManagePasskeys;
 use App\Livewire\Profile\ManageVolunteers;
 use App\Livewire\Profile\PersonalInfo;
 use App\Models\SocialiteUser;
@@ -35,6 +36,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use MarcelWeidum\Passkeys\PasskeysPlugin;
 
 final class RootPanelProvider extends PanelProvider
 {
@@ -85,12 +87,14 @@ final class RootPanelProvider extends PanelProvider
                         'personal_info' => PersonalInfo::class,
                         ManageVolunteers::class,
                         ManageDelegates::class,
+                        ManagePasskeys::class,
                     ]),
                 FinMailPlugin::make()
                     ->emailTemplateResource(EmailTemplateResource::class)
                     ->navigationGroup(fn (): string => __('navigation.clusters.settings'))
                     ->enableThemes(false)
                     ->deleteActionOnEditPage(false),
+                PasskeysPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,

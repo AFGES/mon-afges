@@ -19,6 +19,7 @@
         "laravel/framework": "^13.36",
         "laravel/octane": "^2.22",
         "laravel/tinker": "^3.0",
+        "marcelweidum/filament-passkeys": "^4.0.8",
         "owenvoke/blade-fontawesome": "^3.3",
         "socialiteproviders/google": "^4.1",
         "ysfkaya/filament-phone-input": "^4.2"

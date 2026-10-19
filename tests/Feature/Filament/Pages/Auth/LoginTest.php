@@ -23,6 +23,14 @@ it('renders the login page with the password toggle label', function () {
         ->assertSee(__('login.toggle.password'));
 });
 
+it('shows the passkey login button in the magic link and password modes', function () {
+    $this->get('/login')->assertSee(__('filament-passkeys::passkeys.authenticate_using_passkey'));
+
+    livewire(Login::class)
+        ->set('showMagicLinkForm', false)
+        ->assertSee(__('filament-passkeys::passkeys.authenticate_using_passkey'));
+});
+
 it('toggles between the magic link and password forms', function () {
     livewire(Login::class)
         ->assertSet('showMagicLinkForm', true)

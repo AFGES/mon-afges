@@ -10,7 +10,8 @@
     "packages": [
         "filament/filament",
         "filament/blueprint",
-        "spatie/boost-spatie-guidelines"
+        "spatie/boost-spatie-guidelines",
+        "erag/laravel-disposable-email"
     ],
     "sail": false,
     "skills": [
@@ -21,6 +22,7 @@
         "socialite-development",
         "telescope-debugging",
         "tailwindcss-development",
+        "disposable-email-detection",
         "filament-development",
         "filament-security-audit",
         "planning-filament",

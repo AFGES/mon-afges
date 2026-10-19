@@ -19,13 +19,13 @@
 				"onecentlin.laravel-blade",
 				"GitHub.copilot-chat",
 				"csstools.postcss",
-                "hverlin.mise-vscode"
+				"hverlin.mise-vscode"
 			],
 			"settings": {}
 		}
 	},
 	"features": {
-        "ghcr.io/devcontainers-extra/features/mise:1": {}
+    "ghcr.io/devcontainers-extra/features/mise:1": {}
 	},
 	"remoteUser": "sail",
 	"postCreateCommand": {
@@ -38,7 +38,7 @@
     "PATH": "${containerEnv:PATH}:${containerEnv:HOME}/.local/share/mise/shims"
   },
 	"mounts": [
-        "source=${localEnv:HOME}/.claude,target=/home/sail/.claude,type=bind",
-        "source=${localEnv:HOME}/.claude.json,target=/home/sail/.claude.json,type=bind"
+    "source=${localEnv:HOME}/.claude,target=/home/sail/.claude,type=bind",
+    "source=${localEnv:HOME}/.claude.json,target=/home/sail/.claude.json,type=bind"
 	]
 }

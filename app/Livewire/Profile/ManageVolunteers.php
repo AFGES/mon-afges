@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Profile;
 
+use App\Actions\SubmitVolunteerRequests;
 use App\Models\Organization;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Validation\ValidationException;
 use Jeffgreco13\FilamentBreezy\Livewire\MyProfileComponent;
 
 /**
@@ -206,7 +208,7 @@ final class ManageVolunteers extends MyProfileComponent
             ->send();
     }
 
-    public function submitVolunteers(): void
+    public function submitVolunteers(SubmitVolunteerRequests $submitVolunteerRequests): void
     {
         $data = $this->form->getState();
 
@@ -214,14 +216,13 @@ final class ManageVolunteers extends MyProfileComponent
             return;
         }
 
-        $user = $this->user();
+        try {
+            $submitVolunteerRequests->handle($this->user(), array_values($data['organizations']));
+        } catch (ValidationException $exception) {
+            $this->forgetComputedVolunteerState();
 
-        foreach ($data['organizations'] as $item) {
-            Volunteer::create([
-                'user_id' => $user->id,
-                'organization_id' => $item['organization_id'],
-                'position_title' => $item['position_title'],
-                'started_at' => $item['started_at'] ?? now(),
+            throw ValidationException::withMessages([
+                'data.organizations' => $exception->errors()['organizations'],
             ]);
         }
 

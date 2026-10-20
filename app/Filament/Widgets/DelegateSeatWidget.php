@@ -40,6 +40,19 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
         );
     }
 
+    public function changeSeatAction(): Action
+    {
+        return Action::make('changeSeat')
+            ->label(__('delegate_seat_widget.seat_holder.action'))
+            ->link()
+            ->requiresConfirmation()
+            ->modalHeading(__('delegate_seat_widget.seat_holder.action'))
+            ->modalDescription(__('delegate_seat_widget.seat_holder.replacement_notice'))
+            ->modalSubmitActionLabel(__('delegate_seat_widget.seat_holder.continue'))
+            ->visible(fn (): bool => auth()->user()->canRequestDelegateSeat())
+            ->action(fn () => $this->redirect(RequestDelegateSeat::getUrl()));
+    }
+
     public function terminateSeatAction(): Action
     {
         return Action::make('terminateSeat')

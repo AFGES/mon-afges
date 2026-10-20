@@ -97,10 +97,19 @@ it('shows the seat-holder state to a user holding a seat', function () {
     livewire(DelegateSeatWidget::class)
         ->assertSee(__('delegate_seat_widget.seat_holder.heading'))
         ->assertSee(__('profile.manage_delegates.seat_label', ['number' => $delegate->seat->seat_number]))
-        ->assertSee(__('delegate_seat_widget.seat_holder.replacement_notice'))
-        ->assertSee(__('delegate_seat_widget.seat_holder.action'))
-        ->assertSee(RequestDelegateSeat::getUrl())
+        ->assertActionVisible('changeSeat')
         ->assertDontSee(__('delegate_seat_widget.heading'));
+});
+
+it('warns a seat holder about the replacement before opening the request page', function () {
+    [$user] = seatHolderWidgetUser();
+    actingAs($user);
+
+    livewire(DelegateSeatWidget::class)
+        ->mountAction('changeSeat')
+        ->assertMountedActionModalSee(__('delegate_seat_widget.seat_holder.replacement_notice'))
+        ->callMountedAction()
+        ->assertRedirect(RequestDelegateSeat::getUrl());
 });
 
 it('hides the request link from a seat holder with a pending request', function () {
@@ -110,7 +119,7 @@ it('hides the request link from a seat holder with a pending request', function 
 
     livewire(DelegateSeatWidget::class)
         ->assertSee(trans_choice('delegate_seat_widget.pending', 1, ['count' => 1]))
-        ->assertDontSee(RequestDelegateSeat::getUrl());
+        ->assertActionHidden('changeSeat');
 });
 
 it('shows only the pending note to a user without a seat who has a pending request', function () {

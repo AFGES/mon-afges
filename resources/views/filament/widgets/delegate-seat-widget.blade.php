@@ -39,16 +39,16 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     {{ trans_choice('delegate_seat_widget.pending', $pendingCount, ['count' => $pendingCount]) }}
                 </p>
-            @elseif ($isSeatHolder)
-                <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                    {{ __('delegate_seat_widget.seat_holder.replacement_notice') }}
-                </p>
             @endif
 
             @if ($canRequest)
-                <x-filament::button tag="a" :href="$requestUrl">
-                    {{ $isSeatHolder ? __('delegate_seat_widget.seat_holder.action') : __('delegate_seat_widget.action') }}
-                </x-filament::button>
+                @if ($isSeatHolder)
+                    {{ $this->changeSeatAction }}
+                @else
+                    <x-filament::button tag="a" :href="$requestUrl">
+                        {{ __('delegate_seat_widget.action') }}
+                    </x-filament::button>
+                @endif
             @endif
         </x-filament::section>
     @endif

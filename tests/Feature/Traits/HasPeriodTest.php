@@ -38,15 +38,46 @@ test('is currently active when today is within its period', function (string $mo
         ->hasEnded()->toBeFalse();
 })->with('period models');
 
-test('is currently active on its end date', function (string $model) {
+test('is currently active until later on its end day', function (string $model) {
+    $record = $model::factory()->create([
+        'started_at' => now()->subDays(5),
+        'ended_at' => now()->addHour(),
+    ]);
+
+    expect($record)
+        ->isCurrentlyActive()->toBeTrue()
+        ->hasEnded()->toBeFalse();
+})->with('period models');
+
+test('is not active after its end instant on the same day', function (string $model) {
+    $record = $model::factory()->create([
+        'started_at' => now()->subDays(5),
+        'ended_at' => now()->subHour(),
+    ]);
+
+    expect($record)
+        ->isCurrentlyActive()->toBeFalse()
+        ->hasEnded()->toBeTrue();
+})->with('period models');
+
+test('is not active at its exact end instant because periods are half-open', function (string $model) {
     $record = $model::factory()->create([
         'started_at' => now()->subDays(5),
         'ended_at' => now(),
     ]);
 
     expect($record)
-        ->isCurrentlyActive()->toBeTrue()
-        ->hasEnded()->toBeFalse();
+        ->isCurrentlyActive()->toBeFalse()
+        ->hasEnded()->toBeTrue();
+})->with('period models');
+
+test('is active at its exact start instant', function (string $model) {
+    $record = $model::factory()->create([
+        'started_at' => now(),
+        'ended_at' => now()->addDay(),
+    ]);
+
+    expect($record->isCurrentlyActive())->toBeTrue();
 })->with('period models');
 
 test('is not active when its start date is in the future', function (string $model) {
@@ -105,11 +136,11 @@ test('does not end a record that has already ended', function (string $model) {
         ->and($record->refresh()->ended_at->toDateString())->toBe('2026-03-10');
 })->with('period models');
 
-test('reads delegate dates without time but volunteer dates with time', function () {
+test('keeps the time of delegate and volunteer dates', function () {
     $delegate = Delegate::factory()->create(['started_at' => '2026-03-01 15:30:00', 'ended_at' => null]);
     $volunteer = Volunteer::factory()->create(['started_at' => '2026-03-01 15:30:00']);
 
-    expect($delegate->refresh()->started_at->toDateTimeString())->toBe('2026-03-01 00:00:00')
+    expect($delegate->refresh()->started_at->toDateTimeString())->toBe('2026-03-01 15:30:00')
         ->and($volunteer->refresh()->started_at->toDateTimeString())->toBe('2026-03-01 15:30:00');
 });
 
@@ -122,7 +153,11 @@ test('returns records that have started and have not ended when filtering curren
         'started_at' => now()->subDays(5),
         'ended_at' => now()->addDays(5),
     ]);
-    $endingToday = Volunteer::factory()->create([
+    $endingLaterToday = Volunteer::factory()->create([
+        'started_at' => now()->subDays(5),
+        'ended_at' => now()->addHour(),
+    ]);
+    Volunteer::factory()->create([
         'started_at' => now()->subDays(5),
         'ended_at' => now(),
     ]);
@@ -138,10 +173,10 @@ test('returns records that have started and have not ended when filtering curren
     $results = Volunteer::withoutGlobalScopes()->currentlyActive()->get();
 
     expect($results->pluck('id')->all())
-        ->toEqualCanonicalizing([$noEndDate->id, $withinPeriod->id, $endingToday->id]);
+        ->toEqualCanonicalizing([$noEndDate->id, $withinPeriod->id, $endingLaterToday->id]);
 });
 
-test('returns only records whose end date is before today when filtering ended', function () {
+test('returns only records whose end instant is not after now when filtering ended', function () {
     $endedYesterday = Volunteer::factory()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => now()->subDay(),
@@ -150,7 +185,7 @@ test('returns only records whose end date is before today when filtering ended',
         'started_at' => now()->subDays(20),
         'ended_at' => now()->subDays(5),
     ]);
-    Volunteer::factory()->create([
+    $endedNow = Volunteer::factory()->create([
         'started_at' => now()->subDays(5),
         'ended_at' => now(),
     ]);
@@ -166,7 +201,7 @@ test('returns only records whose end date is before today when filtering ended',
     $results = Volunteer::withoutGlobalScopes()->ended()->get();
 
     expect($results->pluck('id')->all())
-        ->toEqualCanonicalizing([$endedYesterday->id, $endedLongAgo->id]);
+        ->toEqualCanonicalizing([$endedYesterday->id, $endedLongAgo->id, $endedNow->id]);
 });
 
 test('returns only records starting after now when filtering not started', function () {
@@ -213,13 +248,13 @@ test('returns records started on or before the given date when filtering started
     expect($results->pluck('id')->all())->toEqualCanonicalizing([$before->id, $onDate->id]);
 });
 
-test('returns records ended on or after the given date when filtering ended after a date', function () {
+test('returns records ending strictly after the given instant when filtering ended after a date', function () {
     $targetDate = now()->subDays(5);
     Volunteer::factory()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => $targetDate->copy()->subDays(2),
     ]);
-    $onDate = Volunteer::factory()->create([
+    Volunteer::factory()->create([
         'started_at' => now()->subDays(10),
         'ended_at' => $targetDate,
     ]);
@@ -234,7 +269,7 @@ test('returns records ended on or after the given date when filtering ended afte
 
     $results = Volunteer::withoutGlobalScopes()->endedAfter($targetDate)->get();
 
-    expect($results->pluck('id')->all())->toEqualCanonicalizing([$onDate->id, $after->id]);
+    expect($results->pluck('id')->all())->toEqualCanonicalizing([$after->id]);
 });
 
 test('returns only records matching every period filter when period filters are chained', function () {

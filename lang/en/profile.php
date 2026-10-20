@@ -19,7 +19,7 @@ return [
             'required' => 'The seat is required when applying as a delegate.',
         ],
         'started_at' => [
-            'label' => 'Start Date',
+            'label' => 'Start date and time',
             'required' => 'The start date is required.',
         ],
         'position_title' => [

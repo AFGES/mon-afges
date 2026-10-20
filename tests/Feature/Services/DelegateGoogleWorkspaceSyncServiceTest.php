@@ -36,8 +36,8 @@ describe('shouldSync', function () {
         expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeFalse();
     });
 
-    it('accepts a delegate whose mandate ends today', function () {
-        $delegate = Delegate::factory()->approved()->verified()->make(['started_at' => now()->subYear(), 'ended_at' => now()]);
+    it('accepts a delegate whose mandate ends later today', function () {
+        $delegate = Delegate::factory()->approved()->verified()->make(['started_at' => now()->subYear(), 'ended_at' => now()->addHour()]);
 
         expect(syncServiceWith(mockGoogleWorkspaceService())->shouldSync($delegate))->toBeTrue();
     });

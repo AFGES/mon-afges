@@ -19,7 +19,7 @@ return [
             'required' => 'Le siège est requis lors de la demande pour devenir délégué-e.',
         ],
         'started_at' => [
-            'label' => 'Date de début',
+            'label' => 'Date et heure de début',
             'required' => 'La date de début est requise.',
         ],
         'position_title' => [

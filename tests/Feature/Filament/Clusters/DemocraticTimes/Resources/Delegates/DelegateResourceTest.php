@@ -436,7 +436,7 @@ describe('EditDelegate', function () {
         ])
             ->assertOk()
             ->assertSchemaStateSet([
-                'started_at' => $delegate->started_at->format('Y-m-d'),
+                'started_at' => $delegate->started_at->format('Y-m-d H:i'),
                 'user_id' => $delegate->user_id,
                 'email' => $delegate->email,
                 'organization_id' => $delegate->organization_id,

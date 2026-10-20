@@ -12,7 +12,7 @@ use App\Rules\SeatBelongsToOrganization;
 use BackedEnum;
 use Closure;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -147,13 +147,14 @@ final class RequestDelegateSeat extends Page
                                     ]),
                                 fn (): ?string => auth()->user()?->email,
                             ),
-                            DatePicker::make('started_at')
+                            DateTimePicker::make('started_at')
                                 ->label(__('delegate_form.fields.started_at'))
                                 ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                 ->required()
                                 ->maxDate(now())
                                 ->native(false)
-                                ->displayFormat('d/m/Y')
+                                ->displayFormat('d/m/Y H:i')
+                                ->seconds(false)
                                 ->validationMessages([
                                     'required' => __('profile.form.started_at.required'),
                                 ]),
@@ -257,7 +258,7 @@ final class RequestDelegateSeat extends Page
             ...Arr::only($user->attributesToArray(), SubmitDelegateSeatRequest::USER_FIELDS),
             'birth_date' => $user->birth_date?->toDateString(),
             'email' => $user->email,
-            'started_at' => now()->toDateString(),
+            'started_at' => now(),
             'organization_id' => count($eligibleOrganizations) === 1 ? array_key_first($eligibleOrganizations) : null,
             'seat_id' => null,
         ];

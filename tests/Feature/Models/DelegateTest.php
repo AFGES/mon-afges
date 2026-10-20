@@ -73,13 +73,13 @@ test('only returns the delegates that are currently active', function () {
     expect($delegates->pluck('id')->all())->toBe([$activeDelegate->id]);
 });
 
-test('reads its dates without time', function () {
+test('keeps the time of its dates', function () {
     $delegate = Delegate::factory()->create([
         'started_at' => '2026-03-01 15:30:00',
         'ended_at' => '2026-12-31 18:00:00',
     ]);
 
     expect($delegate->refresh())
-        ->started_at->toDateTimeString()->toBe('2026-03-01 00:00:00')
-        ->ended_at->toDateTimeString()->toBe('2026-12-31 00:00:00');
+        ->started_at->toDateTimeString()->toBe('2026-03-01 15:30:00')
+        ->ended_at->toDateTimeString()->toBe('2026-12-31 18:00:00');
 });

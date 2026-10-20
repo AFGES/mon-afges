@@ -12,6 +12,7 @@ return [
     'submit' => 'Submit my form',
 
     'request_locked' => 'You already have a request awaiting validation. You can submit another one once it has been processed.',
+    'organization_not_eligible' => 'You are not eligible to request a seat for this organization.',
 
     'confirm_replacement' => [
         'heading' => 'Replace your current seat',
@@ -39,7 +40,7 @@ return [
         'last_name' => 'Last name',
         'first_name' => 'First name',
         'email' => 'Email address',
-        'started_at' => 'Mandate start date',
+        'started_at' => 'Mandate start date and time',
         'submitted_at' => 'Form of :date',
     ],
 ];

@@ -12,6 +12,7 @@ return [
     'submit' => 'Envoyer ma fiche',
 
     'request_locked' => 'Vous avez déjà une demande en attente de validation. Vous pourrez en faire une autre une fois celle-ci traitée.',
+    'organization_not_eligible' => "Vous n'êtes pas éligible à une demande de siège pour cette association.",
 
     'confirm_replacement' => [
         'heading' => 'Remplacement de votre siège actuel',
@@ -39,7 +40,7 @@ return [
         'last_name' => 'Nom',
         'first_name' => 'Prénom',
         'email' => 'Adresse mail',
-        'started_at' => 'Date de prise de mandat',
+        'started_at' => 'Date et heure de prise de mandat',
         'submitted_at' => 'Fiche du :date',
     ],
 ];

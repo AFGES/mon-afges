@@ -14,7 +14,7 @@ use App\Models\User;
 use App\Rules\SeatBelongsToOrganization;
 use App\Services\SeatCapacityCalculator;
 use Closure;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -39,20 +39,22 @@ final class DelegateForm
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                DatePicker::make('started_at')
+                                DateTimePicker::make('started_at')
                                     ->label(__('delegate.started_at'))
                                     ->prefixIcon(Heroicon::OutlinedCalendarDays)
-                                    ->default(today())
+                                    ->default(now())
                                     ->native(false)
-                                    ->displayFormat('d/m/Y')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->seconds(false)
                                     ->live()
                                     ->afterStateUpdated(self::refreshTerminatedDelegates(...))
                                     ->required(),
-                                DatePicker::make('ended_at')
+                                DateTimePicker::make('ended_at')
                                     ->label(__('delegate.ended_at'))
                                     ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->native(false)
-                                    ->displayFormat('d/m/Y')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->seconds(false)
                                     ->live()
                                     ->afterStateUpdated(self::refreshTerminatedDelegates(...))
                                     ->after('started_at'),
@@ -158,8 +160,8 @@ final class DelegateForm
         $end = blank($endedAt) ? null : Carbon::parse($endedAt);
 
         $isUnchanged = $record->seat_id === $seatId
-            && $record->started_at?->isSameDay($start)
-            && ($record->ended_at === null ? $end === null : $end?->isSameDay($record->ended_at) === true);
+            && $record->started_at?->eq($start)
+            && ($record->ended_at === null ? $end === null : $end?->eq($record->ended_at) === true);
 
         if ($isUnchanged) {
             return 0;

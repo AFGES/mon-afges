@@ -210,14 +210,14 @@ describe('ApproveDelegateAction', function () {
         Notification::fake();
         $seat = Seat::factory()->create();
         $current = Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
-        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->subDay()->startOfDay()]);
+        $record = Delegate::factory()->pending()->create(['seat_id' => $seat->id, 'started_at' => now()->subDay()->setTime(8, 30)]);
 
         livewire(ListDelegates::class)
             ->callTableAction('approve', $record, ['terminated_delegate_ids' => [$current->id]])
             ->assertNotified(__('approval.notifications.approved.title'));
 
         expect($record->refresh()->isApproved())->toBeTrue()
-            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateString())->toBe(now()->subDay()->toDateString());
+            ->and(Delegate::withoutGlobalScopes()->find($current->id)->ended_at->toDateTimeString())->toBe($record->started_at->toDateTimeString());
     });
 
     it('keeps current delegates when none is selected and the seat has room', function () {

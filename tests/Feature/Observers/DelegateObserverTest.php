@@ -155,12 +155,12 @@ describe('Google Workspace group sync', function () {
         $delegate->update(['ended_at' => now()->addMonth()]);
     });
 
-    it('keeps the delegate when the mandate ends today', function () {
+    it('keeps the delegate when the mandate ends later today', function () {
         $delegate = eligibleDelegate();
         $google = googleWorkspaceForObserver();
         $google->shouldNotReceive('removeFromGroup');
 
-        $delegate->update(['ended_at' => now()]);
+        $delegate->update(['ended_at' => now()->addHour()]);
     });
 
     it('keeps the delegate when an unrelated attribute is updated', function () {

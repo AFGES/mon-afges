@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Filament\Pages\RequestDelegateSeat;
+use App\Filament\Widgets\DelegateSeatWidget;
 use App\Livewire\Profile\ManageVolunteers;
+use App\Models\CollegeOrganization;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\Volunteer;
@@ -100,6 +103,34 @@ test('terminates the approved volunteer mandate of the user', function () {
         ->assertNotified(__('profile.manage_volunteers.terminate.success_title'));
 
     expect($volunteer->refresh()->ended_at->toDateTimeString())->toBe('2026-03-15 12:00:00');
+});
+
+test('removes the delegate seat request eligibility as soon as the volunteer mandate is terminated', function () {
+    $user = User::factory()->create(['email' => 'member@afges.org']);
+    $collegeOrganization = CollegeOrganization::factory()->withSeats(1)->create();
+    $volunteer = Volunteer::factory()->approved()->create([
+        'user_id' => $user->id,
+        'organization_id' => $collegeOrganization->organization_id,
+        'ended_at' => null,
+    ]);
+
+    actingAs($user);
+
+    livewire(ManageVolunteers::class)
+        ->call('terminateVolunteer', $volunteer->id)
+        ->assertNotified(__('profile.manage_volunteers.terminate.success_title'));
+
+    $freshUser = User::query()->findOrFail($user->id);
+    actingAs($freshUser);
+
+    expect($freshUser->canRequestDelegateSeat())->toBeFalse();
+
+    expect(RequestDelegateSeat::canAccess())->toBeFalse();
+
+    $this->get(RequestDelegateSeat::getUrl())->assertRedirect();
+
+    livewire(DelegateSeatWidget::class)
+        ->assertDontSee(RequestDelegateSeat::getUrl());
 });
 
 test('refuses to terminate the volunteer mandate of another user', function () {

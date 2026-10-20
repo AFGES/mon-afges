@@ -64,7 +64,7 @@ final class ApprovalRequestedNotification extends Notification implements Should
                 'applicant_name' => $this->approvable->user->name,
                 'organization' => $this->approvable->organization->short_name,
                 ...$this->detailToken(),
-                'started_at' => $this->approvable->started_at->format('d/m/Y'),
+                'started_at' => $this->approvable->started_at->format('d/m/Y H:i'),
                 'approve_url' => URL::temporarySignedRoute("{$routePrefix}.approve", $expiry, $routeParameters),
                 'reject_url' => URL::temporarySignedRoute("{$routePrefix}.reject", $expiry, $routeParameters),
                 'details_url' => Filament::getModelResource($this->approvable)::getUrl('edit', ['record' => $this->approvable]),

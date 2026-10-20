@@ -101,10 +101,10 @@ final class DelegateApprovalService
     }
 
     /**
-     * A user holds a single seat at a time: the other approved seats of the user, current or upcoming, end on the start date of the approved delegate.
+     * A user holds a single seat at a time: the other approved seats of the user, current or upcoming, end at the start instant of the approved delegate.
      *
-     * The user row is locked meanwhile so concurrent approvals for the same user queue up. Seats already ending on or before
-     * the start date are left untouched, and a seat starting later ends on its own start date.
+     * The user row is locked meanwhile so concurrent approvals for the same user queue up. Seats already ending at or before
+     * the start instant are left untouched, and a seat starting later ends at its own start (zero-length).
      *
      * Runs before the capacity check so the ended seats free their place on the seat being approved.
      *
@@ -134,8 +134,8 @@ final class DelegateApprovalService
     /**
      * Ends the selected delegates of the seat so a delegate fits over the given period.
      *
-     * A terminated delegate ends on the new delegate's start date, or on its own start date when that is later,
-     * so an end date is never before the matching start date.
+     * A terminated delegate ends at the new delegate's start instant, or at its own start when that is later,
+     * so an end is never before the matching start (half-open periods never overlap).
      *
      * @param  list<string>  $terminatedDelegateIds
      *

@@ -12,7 +12,8 @@ final class TerminateDelegate
     /**
      * End the delegate's mandate when the actor is allowed to.
      *
-     * A mandate that has not started yet ends on its start date, since the end date is inclusive.
+     * The mandate ends now. A mandate that has not started yet ends at its start instant: it
+     * becomes zero-length, so it is never active (periods are half-open).
      *
      * @return bool Whether the mandate was ended.
      */
@@ -22,6 +23,6 @@ final class TerminateDelegate
             return false;
         }
 
-        return $delegate->end($delegate->started_at->isFuture() ? $delegate->started_at : null);
+        return $delegate->end($delegate->started_at->isFuture() ? $delegate->started_at : now());
     }
 }

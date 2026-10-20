@@ -117,7 +117,8 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     }
 
     /**
-     * Approved seats of the user, current or starting later, that have no end date or end after the given date.
+     * Approved seats of the user, current or starting later, that have no end or end after the given instant.
+     * Zero-length seats (ended_at = started_at) are never active and are excluded.
      *
      * @return EloquentCollection<int, Delegate>
      */
@@ -128,25 +129,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
 
     public function hasCurrentOrUpcomingDelegateSeat(): bool
     {
-        return $this->upcomingDelegateSeatsQuery(today())->exists();
-    }
-
-    /**
-     * Approved seats of the user that have no end date or end after today, whether current or starting later.
-     *
-     * @return Builder<Delegate>
-     */
-    public function activeDelegateSeatsQuery(): Builder
-    {
-        return Delegate::query()
-            ->withoutGlobalScope(CurrentlyScope::class)
-            ->whereBelongsTo($this)
-            ->where(fn (Builder $query): Builder => $query->whereNull('ended_at')->orWhereDate('ended_at', '>', today()));
-    }
-
-    public function hasActiveDelegateSeat(): bool
-    {
-        return $this->activeDelegateSeatsQuery()->exists();
+        return $this->upcomingDelegateSeatsQuery(now())->exists();
     }
 
     public function hasPendingDelegateSeatRequest(): bool
@@ -278,7 +261,8 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
         return Delegate::query()
             ->withoutGlobalScope(CurrentlyScope::class)
             ->whereBelongsTo($this)
-            ->where(fn (Builder $query): Builder => $query->whereNull('ended_at')->orWhere('ended_at', '>', $from))
+            ->where(fn (Builder $query): Builder => $query->whereNull('ended_at')
+                ->orWhere(fn (Builder $query): Builder => $query->where('ended_at', '>', $from)->whereColumn('ended_at', '>', 'started_at')))
             ->when($exceptDelegateId !== null, fn (Builder $query): Builder => $query->whereKeyNot($exceptDelegateId));
     }
 }

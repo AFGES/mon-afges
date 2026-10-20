@@ -11,6 +11,7 @@ use App\Services\SeatCapacityCalculator;
 use Illuminate\Validation\ValidationException;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 
 beforeEach(function () {
     mockGoogleWorkspaceService()->shouldIgnoreMissing();
@@ -272,4 +273,23 @@ it('rolls back the ended seats of the user when another delegate still fills the
     expect(Delegate::withoutGlobalScopes()->find($previous->id)->ended_at)->toBeNull()
         ->and($pending->refresh()->isPending())->toBeTrue()
         ->and(Delegate::withoutGlobalScopes()->find($other->id)->ended_at)->toBeNull();
+});
+
+it('never leaves the old and the new seat of a user active at the same instant', function () {
+    travelTo('2026-03-15 12:00:00');
+    $user = User::factory()->create();
+    $previous = Delegate::factory()->approved()->create(['user_id' => $user->id, 'seat_id' => seatWithCapacityForApprovalService(1)->id, 'started_at' => now()->subYear(), 'ended_at' => null]);
+    $pending = Delegate::factory()->pending()->create(['user_id' => $user->id, 'seat_id' => seatWithCapacityForApprovalService(1)->id, 'started_at' => '2026-03-20 08:30:00']);
+
+    approvalService()->approve($pending, null, []);
+
+    expect(Delegate::withoutGlobalScopes()->find($previous->id)->ended_at->toDateTimeString())->toBe('2026-03-20 08:30:00');
+
+    foreach (['2026-03-20 08:29:59' => [true, false], '2026-03-20 08:30:00' => [false, true]] as $instant => [$previousActive, $newActive]) {
+        travelTo($instant);
+
+        expect(Delegate::withoutGlobalScopes()->find($previous->id)->isCurrentlyActive())->toBe($previousActive)
+            ->and($pending->refresh()->isCurrentlyActive())->toBe($newActive)
+            ->and($user->delegates()->count())->toBe(1);
+    }
 });

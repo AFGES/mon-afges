@@ -20,12 +20,12 @@
                                 <br>
                                 <span class="text-xs text-gray-600 dark:text-gray-400">
                                     @if ($seat->started_at->isFuture())
-                                        {{ __('delegate_seat_widget.seat_holder.starts_on', ['date' => $seat->started_at->format('d/m/Y')]) }}
+                                        {{ __('delegate_seat_widget.seat_holder.starts_on', ['date' => $seat->started_at->format('d/m/Y H:i')]) }}
                                     @else
-                                        {{ __('delegate_seat_widget.seat_holder.since', ['date' => $seat->started_at->format('d/m/Y')]) }}
+                                        {{ __('delegate_seat_widget.seat_holder.since', ['date' => $seat->started_at->format('d/m/Y H:i')]) }}
                                     @endif
                                     @if ($seat->ended_at)
-                                        - {{ __('delegate_seat_widget.seat_holder.ends_on', ['date' => $seat->ended_at->format('d/m/Y')]) }}
+                                        - {{ __('delegate_seat_widget.seat_holder.ends_on', ['date' => $seat->ended_at->format('d/m/Y H:i')]) }}
                                     @endif
                                 </span>
                             </span>

@@ -34,15 +34,33 @@ test('returns only delegates that have started and not ended', function () {
         ->toEqualCanonicalizing([$noEndDate->id, $withFutureEndDate->id]);
 });
 
-test('includes delegates that end today', function () {
+test('includes delegates that end later today', function () {
     $delegate = Delegate::factory()->approved()->create([
         'started_at' => now()->subDays(5),
-        'ended_at' => now(),
+        'ended_at' => now()->addHour(),
     ]);
 
     $currentDelegates = Delegate::all();
 
     expect($currentDelegates->pluck('id')->all())->toBe([$delegate->id]);
+});
+
+test('excludes delegates that ended earlier today', function () {
+    Delegate::factory()->approved()->create([
+        'started_at' => now()->subDays(5),
+        'ended_at' => now()->subHour(),
+    ]);
+
+    expect(Delegate::all())->toBeEmpty();
+});
+
+test('excludes zero-length delegates', function () {
+    Delegate::factory()->approved()->create([
+        'started_at' => now(),
+        'ended_at' => now(),
+    ]);
+
+    expect(Delegate::all())->toBeEmpty();
 });
 
 test('excludes delegates that ended yesterday', function () {

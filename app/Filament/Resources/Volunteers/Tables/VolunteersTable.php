@@ -43,7 +43,7 @@ final class VolunteersTable
                     ->sortable(),
                 TextColumn::make('started_at')
                     ->label(__('volunteer.fields.started_at'))
-                    ->date()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 TextColumn::make('approved_at')
                     ->label(__('volunteer.fields.approved_at'))
@@ -56,7 +56,7 @@ final class VolunteersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('ended_at')
                     ->label(__('volunteer.fields.ended_at'))
-                    ->date()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')

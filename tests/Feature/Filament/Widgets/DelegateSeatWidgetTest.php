@@ -157,17 +157,24 @@ it('does not let a user end the mandate of another delegate', function () {
     expect($delegate->refresh()->ended_at)->toBeNull();
 });
 
-it('ends an upcoming seat on its start date', function () {
+it('turns an upcoming seat into a zero-length seat that is no longer listed when terminated', function () {
     travelTo('2026-03-15 12:00:00');
     [$user, $delegate] = seatHolderWidgetUser();
-    $delegate->update(['started_at' => '2026-04-01']);
+    $delegate->update(['started_at' => '2026-04-01 09:00:00']);
     actingAs($user);
 
     livewire(DelegateSeatWidget::class)
         ->assertSee(__('delegate_seat_widget.seat_holder.starts_on', ['date' => '01/04/2026']))
-        ->callAction(TestAction::make('terminateSeat')->arguments(['delegate' => $delegate->id]));
+        ->callAction(TestAction::make('terminateSeat')->arguments(['delegate' => $delegate->id]))
+        ->assertDontSee(__('delegate_seat_widget.seat_holder.starts_on', ['date' => '01/04/2026']));
 
-    expect($delegate->refresh()->ended_at->toDateString())->toBe('2026-04-01');
+    expect($delegate->refresh())
+        ->ended_at->toDateTimeString()->toBe('2026-04-01 09:00:00')
+        ->and($user->hasCurrentOrUpcomingDelegateSeat())->toBeFalse();
+
+    travelTo('2026-04-01 09:00:00');
+
+    expect($delegate->refresh()->isCurrentlyActive())->toBeFalse();
 });
 
 it('shows the end date of a seat that already has one, without a terminate action', function () {

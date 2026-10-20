@@ -12,26 +12,31 @@ trait HasPeriod
     /**
      * Scope a query to only include currently active records.
      *
+     * A period is half-open: [started_at, ended_at). It is active when it has
+     * started and its end is either unset or strictly after now.
+     *
      * @param  Builder<static>  $query
      */
     public function scopeCurrentlyActive(Builder $query): void
     {
-        $query->whereTodayOrBefore('started_at')
-            ->where(function (Builder $query): void {
+        $now = now();
+
+        $query->where('started_at', '<=', $now)
+            ->where(function (Builder $query) use ($now): void {
                 $query->whereNull('ended_at')
-                    ->orWhereTodayOrAfter('ended_at');
+                    ->orWhere('ended_at', '>', $now);
             });
     }
 
     /**
-     * Scope a query to only include records that have ended.
+     * Scope a query to only include records that have ended (ended_at <= now).
      *
      * @param  Builder<static>  $query
      */
     public function scopeEnded(Builder $query): void
     {
         $query->whereNotNull('ended_at')
-            ->where('ended_at', '<', now()->startOfDay());
+            ->where('ended_at', '<=', now());
     }
 
     /**
@@ -45,7 +50,7 @@ trait HasPeriod
     }
 
     /**
-     * Scope a query to only include records that started on or before a given date.
+     * Scope a query to only include records that started at or before an instant.
      *
      * @param  Builder<static>  $query
      */
@@ -55,16 +60,20 @@ trait HasPeriod
     }
 
     /**
-     * Scope a query to only include records that ended on or after a given date.
+     * Scope a query to only include records that end strictly after an instant
+     * (the end instant itself is excluded, as periods are half-open).
      *
      * @param  Builder<static>  $query
      */
     public function scopeEndedAfter(Builder $query, Carbon|string $date): void
     {
         $query->whereNotNull('ended_at')
-            ->where('ended_at', '>=', $date);
+            ->where('ended_at', '>', $date);
     }
 
+    /**
+     * Whether the period is active now: started_at <= now < ended_at (open end allowed).
+     */
     public function isCurrentlyActive(): bool
     {
         $now = now();
@@ -81,9 +90,12 @@ trait HasPeriod
 
         $ended = $this->ended_at instanceof Carbon ? $this->ended_at : Carbon::parse($this->ended_at);
 
-        return $ended->isAfter($now) || $ended->isSameDay($now);
+        return $ended->isAfter($now);
     }
 
+    /**
+     * Whether the period has ended: ended_at <= now.
+     */
     public function hasEnded(): bool
     {
         if ($this->ended_at === null) {
@@ -92,7 +104,7 @@ trait HasPeriod
 
         $ended = $this->ended_at instanceof Carbon ? $this->ended_at : Carbon::parse($this->ended_at);
 
-        return $ended->isBefore(now()) && ! $ended->isSameDay(now());
+        return $ended->lte(now());
     }
 
     public function end(?Carbon $date = null): bool

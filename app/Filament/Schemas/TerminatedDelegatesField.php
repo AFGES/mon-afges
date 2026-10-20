@@ -20,7 +20,7 @@ final class TerminatedDelegatesField
      *
      * @param  Closure(): (string|null)  $seatId  Resolves the seat being filled.
      * @param  Closure(): (string|null)|null  $exceptDelegateId  Resolves the delegate to leave out, when it already exists.
-     * @param  Closure(): mixed|null  $startedAt  Resolves the start of the new mandate (defaults to today).
+     * @param  Closure(): mixed|null  $startedAt  Resolves the start of the new mandate (defaults to now).
      * @param  Closure(): mixed|null  $endedAt  Resolves the end of the new mandate (open-ended when empty).
      */
     public static function make(Closure $seatId, ?Closure $exceptDelegateId = null, ?Closure $startedAt = null, ?Closure $endedAt = null): CheckboxList
@@ -45,7 +45,7 @@ final class TerminatedDelegatesField
             $startDate = $start();
             $endDate = $end();
 
-            return $memo[implode('|', [$seatId, $exceptId, $startDate?->toDateString(), $endDate?->toDateString()])]
+            return $memo[implode('|', [$seatId, $exceptId, $startDate?->toDateTimeString(), $endDate?->toDateTimeString()])]
                 ??= self::resolveOccupancy($seatId, $exceptId, $startDate, $endDate);
         };
 
@@ -58,7 +58,7 @@ final class TerminatedDelegatesField
             ])
             ->options(fn (): array => ($occupancy()['delegates'] ?? collect())
                 ->mapWithKeys(fn (Delegate $delegate): array => [
-                    $delegate->getKey() => sprintf('%s (%s)', $delegate->user->name, $delegate->started_at?->format('d/m/Y')),
+                    $delegate->getKey() => sprintf('%s (%s)', $delegate->user->name, $delegate->started_at?->format('d/m/Y H:i')),
                 ])
                 ->all())
             ->hidden(fn (): bool => ($occupancy()['delegates'] ?? collect())->isEmpty());

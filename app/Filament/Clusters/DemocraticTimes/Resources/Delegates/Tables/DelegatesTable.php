@@ -48,11 +48,11 @@ final class DelegatesTable
                     ->sortable(),
                 TextColumn::make('started_at')
                     ->label(__('delegate.started_at'))
-                    ->date()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 TextColumn::make('ended_at')
                     ->label(__('delegate.ended_at'))
-                    ->date()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 TextColumn::make('approved_at')
                     ->label(__('delegate.fields.approved_at'))

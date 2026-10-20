@@ -33,7 +33,7 @@ final class SubmitDelegateSeatRequest
      *
      * @param  array<string, mixed>  $data  Validated form data.
      *
-     * @throws ValidationException When the user already has a pending request.
+     * @throws ValidationException When the user already has a pending request or is not eligible for the organization.
      */
     public function handle(User $user, array $data): Delegate
     {
@@ -43,6 +43,12 @@ final class SubmitDelegateSeatRequest
             if ($user->hasPendingDelegateSeatRequest()) {
                 throw ValidationException::withMessages([
                     'seat_id' => __('delegate_form.request_locked'),
+                ]);
+            }
+
+            if (! $user->delegateEligibleOrganizations()->whereKey($data['organization_id'])->exists()) {
+                throw ValidationException::withMessages([
+                    'organization_id' => __('delegate_form.organization_not_eligible'),
                 ]);
             }
 

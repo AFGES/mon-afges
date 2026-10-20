@@ -50,7 +50,7 @@
                                 </x-filament::badge>
                                 @if($delegate->ended_at)
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                                        ({{ __('profile.manage_delegates.ended_on', ['date' => $delegate->ended_at->format('d/m/Y')]) }})
+                                        ({{ __('profile.manage_delegates.ended_on', ['date' => $delegate->ended_at->format('d/m/Y H:i')]) }})
                                     </span>
                                 @endif
                             </span>

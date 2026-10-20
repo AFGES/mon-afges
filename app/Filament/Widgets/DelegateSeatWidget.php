@@ -36,7 +36,7 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
         return $user !== null && (
             $user->delegateEligibleOrganizations()->exists()
             || $user->hasPendingDelegateSeatRequest()
-            || $user->hasActiveDelegateSeat()
+            || $user->hasCurrentOrUpcomingDelegateSeat()
         );
     }
 
@@ -88,9 +88,8 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
         return [
             'pendingCount' => $pendingCount,
             'requestUrl' => RequestDelegateSeat::getUrl(),
-            'seats' => $user->activeDelegateSeatsQuery()
-                ->with(['organization', 'seat.collegeOrganization.college'])
-                ->get(),
+            'seats' => $user->upcomingDelegateSeats(now())
+                ->load(['organization', 'seat.collegeOrganization.college']),
             'canRequest' => $pendingCount === 0 && $user->delegateEligibleOrganizations()->exists(),
         ];
     }

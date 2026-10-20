@@ -80,8 +80,6 @@ final class Delegate extends Model implements Approvable, MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'started_at' => 'date',
-            'ended_at' => 'date',
             'approved_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'approval_status' => ApprovalStatus::class,

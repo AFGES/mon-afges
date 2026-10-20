@@ -5,8 +5,8 @@ declare(strict_types=1);
 return [
     'label' => 'delegate',
     'plural' => 'delegates',
-    'started_at' => 'Started at',
-    'ended_at' => 'Ended at',
+    'started_at' => 'Start date and time',
+    'ended_at' => 'End date and time',
 
     'fields' => [
         'seat' => 'Seat',

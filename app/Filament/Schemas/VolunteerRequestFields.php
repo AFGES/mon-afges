@@ -6,7 +6,7 @@ namespace App\Filament\Schemas;
 
 use App\Models\Volunteer;
 use Closure;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
@@ -47,16 +47,17 @@ final class VolunteerRequestFields
             ]);
     }
 
-    public static function startedAt(): DatePicker
+    public static function startedAt(): DateTimePicker
     {
-        return DatePicker::make('started_at')
+        return DateTimePicker::make('started_at')
             ->label(__('profile.form.started_at.label'))
             ->prefixIcon(Heroicon::OutlinedCalendarDays)
             ->default(now())
             ->required()
             ->maxDate(now())
             ->native(false)
-            ->displayFormat('d/m/Y')
+            ->displayFormat('d/m/Y H:i')
+            ->seconds(false)
             ->validationMessages([
                 'required' => __('profile.form.started_at.required'),
             ]);

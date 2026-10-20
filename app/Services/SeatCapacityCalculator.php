@@ -47,7 +47,7 @@ final class SeatCapacityCalculator
 
     /**
      * How many approved delegates of the seat must be ended so one more delegate fits within the seat capacity
-     * over the given period (defaults to today, open-ended).
+     * over the given period (defaults to now, open-ended).
      */
     public function minimumTerminationsForSeat(string $seatId, ?string $exceptDelegateId = null, ?Carbon $startedAt = null, ?Carbon $endedAt = null): int
     {
@@ -83,15 +83,15 @@ final class SeatCapacityCalculator
     }
 
     /**
-     * Approved delegates of the seat whose mandate overlaps the given period (defaults to today, open-ended),
+     * Approved delegates of the seat whose mandate overlaps the given period (defaults to now, open-ended),
      * so current and future ones, oldest first, optionally excluding one delegate.
      *
      * @return Collection<int, Delegate>
      */
     public function currentDelegatesOfSeatId(string $seatId, ?string $exceptDelegateId = null, ?Carbon $startedAt = null, ?Carbon $endedAt = null): Collection
     {
-        $start = ($startedAt ?? now())->copy()->startOfDay();
-        $end = $endedAt?->copy()->startOfDay();
+        $start = $startedAt ?? now();
+        $end = $endedAt;
 
         return Delegate::query()
             ->withoutGlobalScope(CurrentlyScope::class)
@@ -100,32 +100,32 @@ final class SeatCapacityCalculator
             ->when($exceptDelegateId !== null, fn (Builder $query): Builder => $query->whereKeyNot($exceptDelegateId))
             ->oldest('started_at')
             ->get()
-            ->filter(fn (Delegate $other): bool => ($end === null || $other->started_at->copy()->startOfDay()->lte($end))
-                && ($other->ended_at === null || $other->ended_at->copy()->startOfDay()->gte($start)))
+            ->filter(fn (Delegate $other): bool => ($end === null || $other->started_at->lt($end))
+                && ($other->ended_at === null || $other->ended_at->gt($start)))
             ->values();
     }
 
     /**
-     * Number of delegates over capacity at the busiest moment from the start date on once the new delegate is added.
+     * Number of delegates over capacity at the busiest instant from the start on (periods are half-open: start <= t < end) once the new delegate is added.
      *
      * @param  Collection<int, Delegate>  $delegates  Approved delegates overlapping the period.
      * @param  list<string>  $excludedDelegateIds  Delegates ignored because they will be ended.
      */
     public function peakViolation(Collection $delegates, Carbon $startedAt, int $capacity, array $excludedDelegateIds): int
     {
-        $start = $startedAt->copy()->startOfDay();
+        $start = $startedAt;
         $kept = $delegates->whereNotIn('id', $excludedDelegateIds);
 
         $checkpoints = $kept
-            ->map(fn (Delegate $delegate): Carbon => $delegate->started_at->copy()->startOfDay())
+            ->map(fn (Delegate $delegate): Carbon => $delegate->started_at)
             ->push($start)
-            ->filter(fn (Carbon $date): bool => $date->gte($start))
-            ->unique(fn (Carbon $date): string => $date->toDateString());
+            ->filter(fn (Carbon $instant): bool => $instant->gte($start))
+            ->unique(fn (Carbon $instant): string => $instant->toDateTimeString());
 
         $peak = $checkpoints
-            ->map(fn (Carbon $date): int => $kept->filter(
-                fn (Delegate $delegate): bool => $delegate->started_at->copy()->startOfDay()->lte($date)
-                    && ($delegate->ended_at === null || $delegate->ended_at->copy()->startOfDay()->gte($date))
+            ->map(fn (Carbon $instant): int => $kept->filter(
+                fn (Delegate $delegate): bool => $delegate->started_at->lte($instant)
+                    && ($delegate->ended_at === null || $delegate->ended_at->gt($instant))
             )->count())
             ->max() ?? 0;
 

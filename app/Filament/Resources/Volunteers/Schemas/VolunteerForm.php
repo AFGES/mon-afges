@@ -7,7 +7,7 @@ namespace App\Filament\Resources\Volunteers\Schemas;
 use App\Filament\Resources\Organizations\RelationManagers\VolunteersRelationManager as OrganizationsVolunteersRelationManager;
 use App\Filament\Resources\Users\RelationManagers\VolunteersRelationManager as UsersVolunteersRelationManager;
 use App\Filament\Schemas\Components\ApprovalField;
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -46,17 +46,19 @@ final class VolunteerForm
                             ->maxLength(255),
                         Grid::make(2)
                             ->schema([
-                                DatePicker::make('started_at')
+                                DateTimePicker::make('started_at')
                                     ->label(__('volunteer.fields.started_at'))
                                     ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->native(false)
-                                    ->displayFormat('d/m/Y')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->seconds(false)
                                     ->required(),
-                                DatePicker::make('ended_at')
+                                DateTimePicker::make('ended_at')
                                     ->label(__('volunteer.fields.ended_at'))
                                     ->prefixIcon(Heroicon::OutlinedCalendarDays)
                                     ->native(false)
-                                    ->displayFormat('d/m/Y')
+                                    ->displayFormat('d/m/Y H:i')
+                                    ->seconds(false)
                                     ->after('started_at'),
                             ]),
                     ]),

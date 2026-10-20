@@ -79,4 +79,27 @@ describe('capacity over the whole period', function () {
 
         expect($violation)->toBe(1);
     });
+
+    it('lets a mandate start at the very instant another one ends', function () {
+        $seat = seatWithCapacityForCalculator(1);
+        $handoff = now()->addMonth()->setTime(9, 30);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => now()->subYear(), 'ended_at' => $handoff]);
+
+        $service = new SeatCapacityCalculator;
+
+        expect($service->capacityViolation($seat->id, $handoff, null))->toBe(0)
+            ->and($service->capacityViolation($seat->id, $handoff->copy()->subMinute(), null))->toBe(1)
+            ->and($service->currentDelegatesOfSeatId($seat->id, null, $handoff, null))->toBeEmpty();
+    });
+
+    it('compares starts and ends down to the second on the same day', function () {
+        $seat = seatWithCapacityForCalculator(1);
+        $morning = now()->addMonth()->setTime(8, 0);
+        Delegate::factory()->approved()->create(['seat_id' => $seat->id, 'started_at' => $morning->copy()->addHours(4), 'ended_at' => null]);
+
+        $service = new SeatCapacityCalculator;
+
+        expect($service->capacityViolation($seat->id, $morning, $morning->copy()->addHours(4)))->toBe(0)
+            ->and($service->capacityViolation($seat->id, $morning, $morning->copy()->addHours(4)->addSecond()))->toBe(1);
+    });
 });

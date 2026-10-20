@@ -30,6 +30,7 @@ test('terminates the approved delegate mandate of the user', function () {
     $user = User::factory()->create();
     $delegate = Delegate::factory()->approved()->create([
         'user_id' => $user->id,
+        'started_at' => '2026-01-10',
         'ended_at' => null,
     ]);
 
@@ -40,6 +41,30 @@ test('terminates the approved delegate mandate of the user', function () {
         ->assertNotified(__('profile.manage_delegates.terminate.success_title'));
 
     expect($delegate->refresh()->ended_at->toDateString())->toBe('2026-03-15');
+});
+
+test('ends an upcoming delegate mandate on its start date', function () {
+    travelTo('2026-03-15 12:00:00');
+    $user = User::factory()->create();
+    $delegate = Delegate::factory()->approved()->create([
+        'user_id' => $user->id,
+        'started_at' => '2026-04-01',
+        'ended_at' => null,
+    ]);
+
+    actingAs($user);
+
+    livewire(ManageDelegates::class)->call('terminateDelegate', $delegate->id);
+
+    expect($delegate->refresh()->ended_at->toDateString())->toBe('2026-04-01');
+});
+
+test('does not throw when terminating an unknown delegate mandate', function () {
+    actingAs(User::factory()->create());
+
+    livewire(ManageDelegates::class)
+        ->call('terminateDelegate', '00000000-0000-0000-0000-000000000000')
+        ->assertNotified(__('profile.manage_delegates.terminate.not_authorized_title'));
 });
 
 test('refuses to terminate the delegate mandate of another user', function () {

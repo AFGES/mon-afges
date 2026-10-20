@@ -15,5 +15,6 @@ return [
         'action' => 'Demander un changement de siège',
         'since' => 'Depuis le :date',
         'starts_on' => 'Débute le :date',
+        'ends_on' => 'Se termine le :date',
     ],
 ];

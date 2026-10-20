@@ -15,5 +15,6 @@ return [
         'action' => 'Request a seat change',
         'since' => 'Since :date',
         'starts_on' => 'Starts on :date',
+        'ends_on' => 'Ends on :date',
     ],
 ];

@@ -12,6 +12,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Pages\Dashboard;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 
 function eligibleSeatWidgetUser(string $email = 'member@afges.org'): User
@@ -154,4 +155,72 @@ it('does not let a user end the mandate of another delegate', function () {
         ->assertActionHidden(TestAction::make('terminateSeat')->arguments(['delegate' => $delegate->id]));
 
     expect($delegate->refresh()->ended_at)->toBeNull();
+});
+
+it('ends an upcoming seat on its start date', function () {
+    travelTo('2026-03-15 12:00:00');
+    [$user, $delegate] = seatHolderWidgetUser();
+    $delegate->update(['started_at' => '2026-04-01']);
+    actingAs($user);
+
+    livewire(DelegateSeatWidget::class)
+        ->assertSee(__('delegate_seat_widget.seat_holder.starts_on', ['date' => '01/04/2026']))
+        ->callAction(TestAction::make('terminateSeat')->arguments(['delegate' => $delegate->id]));
+
+    expect($delegate->refresh()->ended_at->toDateString())->toBe('2026-04-01');
+});
+
+it('shows the end date of a seat that already has one, without a terminate action', function () {
+    travelTo('2026-03-15 12:00:00');
+    [$user, $delegate] = seatHolderWidgetUser();
+    $delegate->update(['ended_at' => '2026-06-30']);
+    actingAs($user);
+
+    livewire(DelegateSeatWidget::class)
+        ->assertSee(__('delegate_seat_widget.seat_holder.ends_on', ['date' => '30/06/2026']))
+        ->assertActionHidden(TestAction::make('terminateSeat')->arguments(['delegate' => $delegate->id]));
+});
+
+it('no longer shows the default state to a former volunteer who ended their last seat', function () {
+    $user = User::factory()->create();
+    $delegate = Delegate::factory()->approved()->create(['user_id' => $user->id, 'started_at' => now()->subMonth(), 'ended_at' => null]);
+    actingAs($user);
+
+    livewire(DelegateSeatWidget::class)
+        ->callAction(TestAction::make('terminateSeat')->arguments(['delegate' => $delegate->id]))
+        ->assertDontSee(__('delegate_seat_widget.heading'))
+        ->assertDontSee(__('delegate_seat_widget.seat_holder.heading'));
+
+    expect(DelegateSeatWidget::canView())->toBeFalse();
+});
+
+it('hides the terminate action without throwing when the delegate argument is missing or unknown', function (array $arguments) {
+    actingAs(seatHolderWidgetUser()[0]);
+
+    livewire(DelegateSeatWidget::class)
+        ->assertActionHidden(TestAction::make('terminateSeat')->arguments($arguments));
+})->with([
+    'missing' => [[]],
+    'unknown' => [['delegate' => '00000000-0000-0000-0000-000000000000']],
+]);
+
+it('does not end the mandate of another delegate when the action is forced', function () {
+    [, $delegate] = seatHolderWidgetUser();
+    actingAs(eligibleSeatWidgetUser('other@afges.org'));
+
+    livewire(DelegateSeatWidget::class)
+        ->call('mountAction', 'terminateSeat', ['delegate' => $delegate->id])
+        ->call('callMountedAction');
+
+    expect($delegate->refresh()->ended_at)->toBeNull();
+});
+
+it('renders a seat holder whose seat was removed', function () {
+    [$user, $delegate] = seatHolderWidgetUser();
+    $delegate->update(['seat_id' => null]);
+    actingAs($user);
+
+    livewire(DelegateSeatWidget::class)
+        ->assertOk()
+        ->assertSee(__('delegate_seat_widget.seat_holder.heading'));
 });

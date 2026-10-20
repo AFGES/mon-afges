@@ -131,6 +131,24 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
         return $this->upcomingDelegateSeatsQuery(today())->exists();
     }
 
+    /**
+     * Approved seats of the user that have no end date or end after today, whether current or starting later.
+     *
+     * @return Builder<Delegate>
+     */
+    public function activeDelegateSeatsQuery(): Builder
+    {
+        return Delegate::query()
+            ->withoutGlobalScope(CurrentlyScope::class)
+            ->whereBelongsTo($this)
+            ->where(fn (Builder $query): Builder => $query->whereNull('ended_at')->orWhereDate('ended_at', '>', today()));
+    }
+
+    public function hasActiveDelegateSeat(): bool
+    {
+        return $this->activeDelegateSeatsQuery()->exists();
+    }
+
     public function hasPendingDelegateSeatRequest(): bool
     {
         return $this->delegates()

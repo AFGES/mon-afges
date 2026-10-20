@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
+use App\Actions\TerminateDelegate;
 use App\Filament\Pages\RequestDelegateSeat;
 use App\Models\Delegate;
 use App\Models\Scopes\ApprovedScope;
@@ -35,7 +36,7 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
         return $user !== null && (
             $user->delegateEligibleOrganizations()->exists()
             || $user->hasPendingDelegateSeatRequest()
-            || $user->hasCurrentOrUpcomingDelegateSeat()
+            || $user->hasActiveDelegateSeat()
         );
     }
 
@@ -48,11 +49,13 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
             ->link()
             ->requiresConfirmation()
             ->modalDescription(__('profile.manage_delegates.terminate.confirm'))
-            ->visible(fn (array $arguments): bool => auth()->user()?->can('terminate', $this->resolveDelegate($arguments)) ?? false)
-            ->action(function (array $arguments): void {
-                $delegate = $this->resolveDelegate($arguments);
+            ->visible(function (array $arguments): bool {
+                $delegate = $this->findDelegate($arguments);
 
-                if (! auth()->user()?->can('terminate', $delegate)) {
+                return $delegate !== null && auth()->user()->can('terminate', $delegate);
+            })
+            ->action(function (array $arguments, TerminateDelegate $terminateDelegate): void {
+                if (! $terminateDelegate->handle(auth()->user(), $this->findDelegate($arguments))) {
                     Notification::make()
                         ->title(__('profile.manage_delegates.terminate.not_authorized_title'))
                         ->body(__('profile.manage_delegates.terminate.not_authorized_body'))
@@ -61,8 +64,6 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
 
                     return;
                 }
-
-                $delegate->end();
 
                 Notification::make()
                     ->title(__('profile.manage_delegates.terminate.success_title'))
@@ -79,25 +80,32 @@ final class DelegateSeatWidget extends Widget implements HasActions, HasSchemas
     {
         $user = auth()->user();
 
+        $pendingCount = $user->delegates()
+            ->withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
+            ->pending()
+            ->count();
+
         return [
-            'pendingCount' => Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
-                ->pending()
-                ->where('user_id', auth()->id())
-                ->count(),
+            'pendingCount' => $pendingCount,
             'requestUrl' => RequestDelegateSeat::getUrl(),
-            'seats' => $user->upcomingDelegateSeats(today())
-                ->reject(fn (Delegate $seat): bool => $seat->ended_at !== null && ! $seat->ended_at->isFuture())
-                ->load(['organization', 'seat.collegeOrganization.college']),
-            'canRequest' => $user->canRequestDelegateSeat(),
+            'seats' => $user->activeDelegateSeatsQuery()
+                ->with(['organization', 'seat.collegeOrganization.college'])
+                ->get(),
+            'canRequest' => $pendingCount === 0 && $user->delegateEligibleOrganizations()->exists(),
         ];
     }
 
     /**
      * @param  array<string, mixed>  $arguments
      */
-    private function resolveDelegate(array $arguments): Delegate
+    private function findDelegate(array $arguments): ?Delegate
     {
-        return Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
-            ->findOrFail($arguments['delegate'] ?? null);
+        $delegateId = $arguments['delegate'] ?? null;
+
+        if (! is_string($delegateId)) {
+            return null;
+        }
+
+        return Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])->find($delegateId);
     }
 }

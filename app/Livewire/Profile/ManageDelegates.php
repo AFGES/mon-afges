@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Profile;
 
+use App\Actions\TerminateDelegate;
 use App\Models\Delegate;
 use App\Models\Scopes\ApprovedScope;
 use App\Models\Scopes\CurrentlyScope;
@@ -32,13 +33,11 @@ final class ManageDelegates extends MyProfileComponent
             ->get();
     }
 
-    public function terminateDelegate(string $delegateId): void
+    public function terminateDelegate(string $delegateId, TerminateDelegate $terminateDelegate): void
     {
-        $delegate = Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])
-            ->where('id', $delegateId)
-            ->firstOrFail();
+        $delegate = Delegate::withoutGlobalScopes([ApprovedScope::class, CurrentlyScope::class])->find($delegateId);
 
-        if (! auth()->user()->can('terminate', $delegate)) {
+        if (! $terminateDelegate->handle(auth()->user(), $delegate)) {
             Notification::make()
                 ->title(__('profile.manage_delegates.terminate.not_authorized_title'))
                 ->body(__('profile.manage_delegates.terminate.not_authorized_body'))
@@ -47,8 +46,6 @@ final class ManageDelegates extends MyProfileComponent
 
             return;
         }
-
-        $delegate->end();
 
         Notification::make()
             ->title(__('profile.manage_delegates.terminate.success_title'))

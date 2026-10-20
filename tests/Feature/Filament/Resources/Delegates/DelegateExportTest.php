@@ -70,8 +70,19 @@ it('exports rows that the importer accepts unchanged', function () {
         ->user_id->toBe($original->user_id)
         ->seat_id->toBe($original->seat_id)
         ->started_at->toDateString()->toBe('2025-09-01')
-        ->ended_at->toDateString()->toBe('2026-08-31')
+        ->ended_at->toDateTimeString()->toBe('2026-09-01 00:00:00')
         ->and(Delegate::query()->withoutGlobalScopes([CurrentlyScope::class, ApprovedScope::class])->count())->toBe(1);
+});
+
+it('exports the last active day of a mandate ending during the day', function () {
+    $delegate = Delegate::factory()->approved()->create([
+        'started_at' => '2025-09-01 00:00:00',
+        'ended_at' => '2026-03-10 14:30:00',
+    ]);
+
+    $row = DelegateExporter::test(columnMap: ['ended_at' => 'ended_at'])->export($delegate);
+
+    expect($row)->toBe(['2026-03-10']);
 });
 
 it('does not select the approval columns by default', function () {

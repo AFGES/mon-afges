@@ -61,7 +61,7 @@ it('imports a legacy row with French dates as an approved delegate', function ()
 
     expect($delegate)
         ->started_at->toDateString()->toBe('2025-09-01')
-        ->ended_at->toDateString()->toBe('2026-08-31')
+        ->ended_at->toDateTimeString()->toBe('2026-09-01 00:00:00')
         ->approved_by->toBe($user->id);
 });
 

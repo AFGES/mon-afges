@@ -56,7 +56,7 @@ final class DelegateExporter extends Exporter
                 ->state(fn (Delegate $record): string => $record->started_at->format('Y-m-d')),
             ExportColumn::make('ended_at')
                 ->label('ended_at')
-                ->state(fn (Delegate $record): ?string => $record->ended_at?->format('Y-m-d')),
+                ->state(fn (Delegate $record): ?string => $record->ended_at?->copy()->subSecond()->max($record->started_at)->format('Y-m-d')),
             ExportColumn::make('approval_status')
                 ->label('approval_status')
                 ->enabledByDefault(false)

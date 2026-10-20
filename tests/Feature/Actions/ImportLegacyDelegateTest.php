@@ -119,7 +119,7 @@ it('creates an approved delegate approved by the importing user', function () {
         ->email->toBe('camille.durand@example.org')
         ->seat_id->toBe($this->collegeOrganization->seatRecords()->where('seat_number', 1)->value('id'))
         ->started_at->toDateString()->toBe('2024-09-01')
-        ->ended_at->toDateString()->toBe('2025-08-31');
+        ->ended_at->toDateTimeString()->toBe('2025-09-01 00:00:00');
 });
 
 it('fails the row when the seat capacity is exceeded', function () {

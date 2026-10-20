@@ -46,6 +46,7 @@ final class ImportLegacyDelegate
      *
      * The whole row runs in a transaction, so a created user is rolled back when the delegate cannot be created.
      * A delegate already imported for the same user, seat and start date is returned untouched.
+     * The legacy end date is the last day of the mandate, so it is stored as the start of the following day (periods are half-open).
      *
      * @param  array{email: string, first_name?: ?string, last_name?: ?string, phone?: ?string, birth_date?: ?string, study_program?: ?string, organization: string, college: string, seat_number: int|string, started_at: string, ended_at?: ?string}  $data
      *
@@ -75,7 +76,7 @@ final class ImportLegacyDelegate
                 'seat_id' => $seat->getKey(),
                 'email' => $user->email,
                 'started_at' => $startedAt,
-                'ended_at' => filled($data['ended_at'] ?? null) ? Carbon::parse($data['ended_at']) : null,
+                'ended_at' => filled($data['ended_at'] ?? null) ? Carbon::parse($data['ended_at'])->startOfDay()->addDay() : null,
             ], $approvedBy->getAuthIdentifier());
         });
     }

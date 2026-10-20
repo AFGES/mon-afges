@@ -11,13 +11,6 @@ return [
     'navigation' => 'Fiche Délégué-e',
     'submit' => 'Envoyer ma fiche',
 
-    'widget' => [
-        'heading' => 'Devenir délégué-e',
-        'description' => 'Remplissez votre fiche pour demander un siège de délégué-e au nom de votre association.',
-        'action' => 'Remplir ma fiche',
-        'pending' => '{1} Vous avez :count demande en attente de validation.|[2,*] Vous avez :count demandes en attente de validation.',
-    ],
-
     'request_locked' => 'Vous avez déjà une demande en attente de validation. Vous pourrez en faire une autre une fois celle-ci traitée.',
 
     'confirm_replacement' => [

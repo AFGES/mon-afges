@@ -11,13 +11,6 @@ return [
     'navigation' => 'Delegate form',
     'submit' => 'Submit my form',
 
-    'widget' => [
-        'heading' => 'Become a delegate',
-        'description' => 'Fill in your form to request a delegate seat on behalf of your association.',
-        'action' => 'Fill in my form',
-        'pending' => '{1} You have :count request awaiting approval.|[2,*] You have :count requests awaiting approval.',
-    ],
-
     'request_locked' => 'You already have a request awaiting validation. You can submit another one once it has been processed.',
 
     'confirm_replacement' => [

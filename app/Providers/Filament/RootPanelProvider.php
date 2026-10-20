@@ -10,7 +10,7 @@ use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use App\Filament\Pages\JoinOrganization;
 use App\Filament\Resources\Volunteers\Widgets\PendingVolunteerStats;
-use App\Filament\Widgets\DelegateRequestWidget;
+use App\Filament\Widgets\DelegateSeatWidget;
 use App\Http\Middleware\EnsureHasVolunteerOrganization;
 use App\Livewire\Profile\ManageDelegates;
 use App\Livewire\Profile\ManagePasskeys;
@@ -65,7 +65,7 @@ final class RootPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                DelegateRequestWidget::class,
+                DelegateSeatWidget::class,
                 PendingVolunteerStats::class,
                 AccountWidget::class,
             ])

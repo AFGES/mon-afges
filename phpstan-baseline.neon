@@ -193,28 +193,10 @@ parameters:
 			path: app/Models/Volunteer.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$ended_at\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Models/Volunteer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$started_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Volunteer.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Proxy\:\:\$approval_status\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Observers/ProxyObserver.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Volunteer\:\:\$ended_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Policies/VolunteerPolicy.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:after\(\)\.$#'
